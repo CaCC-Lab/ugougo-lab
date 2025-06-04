@@ -1,0 +1,19 @@
+# 依存関係
+node_modules/
+pnpm-lock.yaml
+
+# ビルド出力
+dist/
+build/
+
+# 環境設定
+.env*
+!.env.example
+
+# キャッシュ
+.cache/
+.temp/
+
+# その他
+coverage/
+*.log
