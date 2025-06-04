@@ -5,7 +5,7 @@ import { Button } from './components/common/Button';
 import { GradeSelector } from './components/common/GradeSelector';
 import { Typography, Box, Grid, Dialog, DialogContent, IconButton } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import { GradeLevel, Material } from './types/material';
+import type { GradeLevel, Material } from './types';
 import { useTheme } from './hooks/useTheme';
 import { NumberBlocks } from './materials/elementary/grade1/math';
 

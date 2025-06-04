@@ -8,7 +8,7 @@ import {
   Chip,
   Box
 } from '@mui/material';
-import { GradeLevel } from '../../../types/material';
+import type { GradeLevel } from '../../../types';
 import { GRADE_LEVEL_LABELS } from '../../../utils/constants';
 
 // なぜこのコンポーネントが必要か：

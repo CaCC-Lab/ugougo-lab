@@ -3,7 +3,7 @@ import { Theme } from '@mui/material/styles';
 import elementaryTheme from '../styles/themes/elementary';
 import juniorHighTheme from '../styles/themes/juniorHigh';
 import highSchoolTheme from '../styles/themes/highSchool';
-import { GradeLevel } from '../types/material';
+import type { GradeLevel } from '../types';
 import { STORAGE_KEYS } from '../utils/constants';
 
 // なぜこのフックが必要か：

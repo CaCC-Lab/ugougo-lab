@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { Box, Typography, Chip } from '@mui/material';
 import { MaterialBase } from '../../../../../components/educational/MaterialBase';
 import { KonvaCanvas, DraggableObject } from '../../../../../components/educational';
-import { MaterialComponentProps } from '../../../../../types/material';
+import type { MaterialComponentProps } from '../../../../../types';
 
 // なぜこの教材が必要か：
 // 1. 小学1年生の「10までの数の合成・分解」を視覚的に学習
