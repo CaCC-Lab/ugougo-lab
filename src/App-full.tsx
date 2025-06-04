@@ -45,6 +45,7 @@ import UnitConversionTool from './components/UnitConversionTool';
 import MagnetExperiment from './components/MagnetExperiment';
 import AreaCalculator from './components/AreaCalculator';
 import AlgebraicExpressionTool from './components/AlgebraicExpressionTool';
+import WaterStateAnimation from './components/WaterStateAnimation';
 
 // 学年別テーマ
 const themes = {
@@ -307,6 +308,14 @@ function AppFull() {
       description: '図形の頂点をドラッグして面積を計算！正方形、長方形、三角形、平行四辺形の面積を視覚的に学べます。',
       grade: '小学4年生',
       subject: '算数',
+      available: true,
+    },
+    {
+      id: 'water-state',
+      title: '水の三態変化アニメーション',
+      description: '温度による水の状態変化を観察！氷・水・水蒸気の分子の動きをアニメーションで学習できます。',
+      grade: '小学4年生',
+      subject: '理科',
       available: true,
     },
     {
@@ -574,6 +583,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'area-calculator' && (
             <AreaCalculator onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'water-state' && (
+            <WaterStateAnimation onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
