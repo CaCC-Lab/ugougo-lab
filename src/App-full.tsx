@@ -43,6 +43,7 @@ import ChemicalReactionSimulator from './components/ChemicalReactionSimulator';
 import ClockLearningTool from './components/ClockLearningTool';
 import UnitConversionTool from './components/UnitConversionTool';
 import MagnetExperiment from './components/MagnetExperiment';
+import AreaCalculator from './components/AreaCalculator';
 
 // 学年別テーマ
 const themes = {
@@ -300,6 +301,14 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'area-calculator',
+      title: '面積計算ツール',
+      description: '図形の頂点をドラッグして面積を計算！正方形、長方形、三角形、平行四辺形の面積を視覚的に学べます。',
+      grade: '小学4年生',
+      subject: '算数',
+      available: true,
+    },
+    {
       id: 'electric-circuit',
       title: '電気回路シミュレーター',
       description: '電池、豆電球、スイッチを使って電気回路を作ろう！直列回路と並列回路の違いを学べます。',
@@ -550,6 +559,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'magnet-experiment' && (
             <MagnetExperiment onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'area-calculator' && (
+            <AreaCalculator onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
