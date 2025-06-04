@@ -60,6 +60,8 @@ export const MaterialBase = ({
     if (progress >= 100 && !isPreview) {
       onComplete?.({
         materialId: material.id,
+        userId: '', // TODO: 実際のユーザーIDを設定
+        startedAt: new Date(startTime),
         completedAt: new Date(),
         score: progress,
         timeSpent: Math.floor((Date.now() - startTime) / 1000),

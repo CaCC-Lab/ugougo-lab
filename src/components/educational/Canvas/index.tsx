@@ -17,7 +17,7 @@ interface CanvasProps extends Omit<BoxProps, 'ref'> {
   backgroundColor?: string;
 }
 
-export const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(({
+export const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(function Canvas({
   width,
   height,
   onCanvasReady,
@@ -25,7 +25,7 @@ export const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(({
   backgroundColor = '#FFFFFF',
   sx,
   ...boxProps
-}, ref) => {
+}, ref) {
   const internalRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   

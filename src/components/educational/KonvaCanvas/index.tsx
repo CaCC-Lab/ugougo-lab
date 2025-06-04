@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { Stage, Layer } from 'react-konva';
 import { Box, BoxProps } from '@mui/material';
 import Konva from 'konva';
@@ -34,7 +34,7 @@ export const KonvaCanvas = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // ステージの参照を親に通知
-  const handleStageMount = useCallback(() => {
+  useEffect(() => {
     if (stageRef.current) {
       onStageReady?.(stageRef.current);
     }
@@ -90,7 +90,7 @@ export const KonvaCanvas = ({
         scaleY={scaleY}
         offsetX={-offsetX / scaleX}
         offsetY={-offsetY / scaleY}
-        onMount={handleStageMount}
+        ref={stageRef}
       >
         <Layer>
           {children}
