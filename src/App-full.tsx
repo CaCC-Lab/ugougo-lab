@@ -42,6 +42,7 @@ import LightRefractionExperiment from './components/LightRefractionExperiment';
 import ChemicalReactionSimulator from './components/ChemicalReactionSimulator';
 import ClockLearningTool from './components/ClockLearningTool';
 import UnitConversionTool from './components/UnitConversionTool';
+import MagnetExperiment from './components/MagnetExperiment';
 
 // 学年別テーマ
 const themes = {
@@ -291,6 +292,14 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'magnet-experiment',
+      title: '磁石の実験シミュレーター',
+      description: '磁石の性質を体験！N極とS極の働きや、鉄・アルミ・プラスチックへの影響を観察しよう。',
+      grade: '小学3年生',
+      subject: '理科',
+      available: true,
+    },
+    {
       id: 'electric-circuit',
       title: '電気回路シミュレーター',
       description: '電池、豆電球、スイッチを使って電気回路を作ろう！直列回路と並列回路の違いを学べます。',
@@ -535,6 +544,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'fraction-pizza' && (
             <FractionPizzaCutter onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'magnet-experiment' && (
+            <MagnetExperiment onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
