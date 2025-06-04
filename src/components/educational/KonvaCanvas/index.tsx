@@ -90,7 +90,6 @@ export const KonvaCanvas = ({
         scaleY={scaleY}
         offsetX={-offsetX / scaleX}
         offsetY={-offsetY / scaleY}
-        ref={stageRef}
       >
         <Layer>
           {children}
