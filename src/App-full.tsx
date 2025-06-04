@@ -39,6 +39,7 @@ import FractionPizzaCutter from './components/FractionPizzaCutter';
 import ElectricCircuitSimulator from './components/ElectricCircuitSimulator';
 import LinearFunctionGrapher from './components/LinearFunctionGrapher';
 import LightRefractionExperiment from './components/LightRefractionExperiment';
+import ChemicalReactionSimulator from './components/ChemicalReactionSimulator';
 
 // 学年別テーマ
 const themes = {
@@ -312,6 +313,14 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'chemical-reaction',
+      title: '化学反応シミュレーター',
+      description: '化学反応を分子モデルで観察！質量保存の法則を確認しながら、燃焼・中和・酸化・化合反応を学べます。',
+      grade: '中学2年生',
+      subject: '理科',
+      available: true,
+    },
+    {
       id: 'sorting-algorithm',
       title: 'ソートアルゴリズム可視化',
       description: '様々なソートアルゴリズムの動作を視覚的に理解しよう！プログラミング思考を身につけます。',
@@ -526,6 +535,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'atom-molecule' && (
             <AtomMoleculeSimulation onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'chemical-reaction' && (
+            <ChemicalReactionSimulator onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
