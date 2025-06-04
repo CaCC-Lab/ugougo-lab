@@ -44,6 +44,7 @@ import ClockLearningTool from './components/ClockLearningTool';
 import UnitConversionTool from './components/UnitConversionTool';
 import MagnetExperiment from './components/MagnetExperiment';
 import AreaCalculator from './components/AreaCalculator';
+import AlgebraicExpressionTool from './components/AlgebraicExpressionTool';
 
 // 学年別テーマ
 const themes = {
@@ -325,6 +326,14 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'algebraic-expression',
+      title: '文字式変形ツール',
+      description: '文字式の展開、因数分解、同類項の整理をステップごとに学習！計算過程が見える化されます。',
+      grade: '中学1年生',
+      subject: '数学',
+      available: true,
+    },
+    {
       id: 'light-refraction',
       title: '光の屈折実験器',
       description: '光の屈折現象を観察しよう！入射角を変えて、スネルの法則を確認できます。',
@@ -577,6 +586,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'number-line' && (
             <NumberLineIntegers onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'algebraic-expression' && (
+            <AlgebraicExpressionTool onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
