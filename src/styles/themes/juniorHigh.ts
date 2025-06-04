@@ -1,8 +1,8 @@
-import { createTheme, ThemeOptions } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
 // 中学生向けテーマ設定
 // バランスの取れた色使い、適度な文字サイズ
-const juniorHighTheme: ThemeOptions = {
+const juniorHighThemeConfig = {
   palette: {
     mode: 'light',
     primary: {
@@ -85,4 +85,4 @@ const juniorHighTheme: ThemeOptions = {
   },
 };
 
-export default createTheme(juniorHighTheme);
+export default createTheme(juniorHighThemeConfig);

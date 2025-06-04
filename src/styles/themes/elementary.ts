@@ -1,8 +1,8 @@
-import { createTheme, ThemeOptions } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
 // 小学生向けテーマ設定
 // 大きな文字、明るい色、わかりやすいコントラスト
-const elementaryTheme: ThemeOptions = {
+const elementaryThemeConfig = {
   palette: {
     mode: 'light',
     primary: {
@@ -82,4 +82,4 @@ const elementaryTheme: ThemeOptions = {
   },
 };
 
-export default createTheme(elementaryTheme);
+export default createTheme(elementaryThemeConfig);

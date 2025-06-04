@@ -1,8 +1,8 @@
-import { createTheme, ThemeOptions } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
 // 高校生向けテーマ設定
 // より洗練された色使い、コンパクトなレイアウト
-const highSchoolTheme: ThemeOptions = {
+const highSchoolThemeConfig = {
   palette: {
     mode: 'light',
     primary: {
@@ -97,4 +97,4 @@ const highSchoolTheme: ThemeOptions = {
   },
 };
 
-export default createTheme(highSchoolTheme);
+export default createTheme(highSchoolThemeConfig);
