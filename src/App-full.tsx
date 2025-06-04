@@ -9,7 +9,7 @@ import {
   Card, 
   CardContent, 
   Box,
-  Grid,
+  Grid2 as Grid,
   Chip,
   LinearProgress,
   Dialog,
@@ -24,6 +24,14 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material';
 import MultiplicationVisualization from './components/MultiplicationVisualization';
 import NumberLineIntegers from './components/NumberLineIntegers';
+import FractionVisualization from './components/FractionVisualization';
+import AtomMoleculeSimulation from './components/AtomMoleculeSimulation';
+import FunctionGraphTool from './components/FunctionGraphTool';
+import SortingVisualization from './components/SortingVisualization';
+import MovingPointP from './components/MovingPointP';
+import ElementPuzzleGame from './components/ElementPuzzleGame';
+import InertiaSimulation from './components/InertiaSimulation';
+import TypingPuyoGame from './components/TypingPuyoGame';
 
 // 学年別テーマ
 const themes = {
@@ -121,12 +129,12 @@ function NumberBlocksMaterial({ onClose }: { onClose: () => void }) {
         <Chip 
           label={`目標: ${target}`} 
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`現在: ${currentSum}`} 
           color={currentSum === target ? 'success' : 'default'} 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`成功回数: ${successCount}`} 
@@ -203,7 +211,7 @@ function AppFull() {
     {
       id: 'number-blocks',
       title: '数の合成・分解ブロック',
-      description: '10までの数を、ブロックを使って楽しく学ぼう！ドラッグ&ドロップで数の概念を理解できます。',
+      description: '10までの数を、ブロックを使って楽しく学ぼう！数字をクリックして目標の数を作ってください。',
       grade: '小学1年生',
       subject: '算数',
       available: true,
@@ -217,11 +225,75 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'fraction-visualization',
+      title: '分数の視覚化',
+      description: '分数を円グラフや棒グラフで視覚的に理解しよう！練習モードとクイズモードがあります。',
+      grade: '小学3年生',
+      subject: '算数',
+      available: true,
+    },
+    {
       id: 'number-line',
       title: '正負の数の数直線',
       description: '数直線を使って、マイナスの数も理解しよう！正負の数の計算をマスターできます。',
       grade: '中学1年生',
       subject: '数学',
+      available: true,
+    },
+    {
+      id: 'atom-molecule',
+      title: '原子・分子構造シミュレーション',
+      description: '原子の結合や電子の動きを視覚的に理解しよう！化学の基礎をマスターできます。',
+      grade: '中学2年生',
+      subject: '理科',
+      available: true,
+    },
+    {
+      id: 'sorting-algorithm',
+      title: 'ソートアルゴリズム可視化',
+      description: '様々なソートアルゴリズムの動作を視覚的に理解しよう！プログラミング思考を身につけます。',
+      grade: '中学3年生',
+      subject: '情報',
+      available: true,
+    },
+    {
+      id: 'function-graph',
+      title: '関数グラフ動的描画ツール',
+      description: '様々な関数のグラフを動的に描画！パラメータの変化による影響を学習できます。',
+      grade: '高校1年生',
+      subject: '数学',
+      available: true,
+    },
+    {
+      id: 'moving-point-p',
+      title: '動く点P - 三角形の面積変化',
+      description: '四角形上を動く点Pによって作られる三角形の面積変化を観察しよう！ドラッグ操作とアニメーションで直感的に理解できます。',
+      grade: '中学1年生',
+      subject: '数学',
+      available: true,
+    },
+    {
+      id: 'element-puzzle',
+      title: '元素記号パズルゲーム',
+      description: '元素記号と元素名をペアで揃えて消そう！パズルボブル風ゲームで楽しく暗記できます。',
+      grade: '中学2年生',
+      subject: '理科',
+      available: true,
+    },
+    {
+      id: 'inertia-simulation',
+      title: '慣性の法則シミュレーション',
+      description: '電車の中で起こる慣性現象をマリオ風の視覚化で理解しよう！視点を切り替えて物理現象を体験できます。',
+      grade: '中学3年生',
+      subject: '理科',
+      available: true,
+    },
+    {
+      id: 'typing-puyo',
+      title: 'ぷよぷよ風タイピングゲーム',
+      description: '落ちてくるブロックのアルファベットをタイピングして、連鎖で高得点を狙おう！楽しみながらタイピングスキルを向上できます。',
+      grade: '高校1年生',
+      subject: '情報',
       available: true,
     },
   ];
@@ -241,7 +313,7 @@ function AppFull() {
             <InputLabel sx={{ color: 'white' }}>学年</InputLabel>
             <Select
               value={currentTheme}
-              onChange={(e) => setCurrentTheme(e.target.value as any)}
+              onChange={(e) => setCurrentTheme(e.target.value as 'elementary' | 'juniorHigh' | 'highSchool')}
               sx={{ color: 'white', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.3)' } }}
             >
               <MenuItem value="elementary">小学生</MenuItem>
@@ -335,8 +407,56 @@ function AppFull() {
               setSelectedMaterial('');
             }} />
           )}
+          {selectedMaterial === 'fraction-visualization' && (
+            <FractionVisualization onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
           {selectedMaterial === 'number-line' && (
             <NumberLineIntegers onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'atom-molecule' && (
+            <AtomMoleculeSimulation onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'sorting-algorithm' && (
+            <SortingVisualization onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'function-graph' && (
+            <FunctionGraphTool onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'moving-point-p' && (
+            <MovingPointP onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'element-puzzle' && (
+            <ElementPuzzleGame onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'inertia-simulation' && (
+            <InertiaSimulation onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'typing-puyo' && (
+            <TypingPuyoGame onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
