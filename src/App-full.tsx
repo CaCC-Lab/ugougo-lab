@@ -40,6 +40,7 @@ import ElectricCircuitSimulator from './components/ElectricCircuitSimulator';
 import LinearFunctionGrapher from './components/LinearFunctionGrapher';
 import LightRefractionExperiment from './components/LightRefractionExperiment';
 import ChemicalReactionSimulator from './components/ChemicalReactionSimulator';
+import ClockLearningTool from './components/ClockLearningTool';
 
 // 学年別テーマ
 const themes = {
@@ -230,6 +231,14 @@ function AppFull() {
       description: 'ひらがなの正しい書き順を覚えよう！アニメーションを見て、なぞり書きで練習できます。',
       grade: '小学1年生',
       subject: '国語',
+      available: true,
+    },
+    {
+      id: 'clock-learning',
+      title: '時計の読み方学習ツール',
+      description: '時計の針をドラッグして動かしてみよう！デジタル表示と連動して、時計の読み方をマスターできます。',
+      grade: '小学1年生',
+      subject: '算数',
       available: true,
     },
     {
@@ -475,6 +484,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'hiragana-stroke' && (
             <HiraganaStrokeOrder onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'clock-learning' && (
+            <ClockLearningTool onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
