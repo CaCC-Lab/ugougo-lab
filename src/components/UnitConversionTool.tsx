@@ -14,7 +14,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { styled } from '@mui/system';
+import { styled } from '@mui/material/styles';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import LocalDrinkIcon from '@mui/icons-material/LocalDrink';
 
