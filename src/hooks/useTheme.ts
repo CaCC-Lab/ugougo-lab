@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Theme } from '@mui/material/styles';
-import elementaryTheme from '@/styles/themes/elementary';
-import juniorHighTheme from '@/styles/themes/juniorHigh';
-import highSchoolTheme from '@/styles/themes/highSchool';
-import { GradeLevel } from '@/types/material';
-import { STORAGE_KEYS } from '@/utils/constants';
+import elementaryTheme from '../styles/themes/elementary';
+import juniorHighTheme from '../styles/themes/juniorHigh';
+import highSchoolTheme from '../styles/themes/highSchool';
+import { GradeLevel } from '../types/material';
+import { STORAGE_KEYS } from '../utils/constants';
 
 // なぜこのフックが必要か：
 // 学年に応じて最適なテーマを自動的に選択し、

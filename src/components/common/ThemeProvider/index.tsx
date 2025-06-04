@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from '../../../hooks/useTheme';
 
 // なぜこのコンポーネントが必要か：
 // MUIのThemeProviderをラップし、学年別テーマの切り替えロジックを

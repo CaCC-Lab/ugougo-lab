@@ -1,8 +1,8 @@
 import { AppBar, Toolbar, Typography, Box, IconButton } from '@mui/material';
 import { Menu as MenuIcon, School as SchoolIcon } from '@mui/icons-material';
-import { GradeSelector } from '@/components/common/GradeSelector';
-import { Button } from '@/components/common/Button';
-import { GradeLevel } from '@/types/material';
+import { GradeSelector } from '../../common/GradeSelector';
+import { Button } from '../../common/Button';
+import { GradeLevel } from '../../../types/material';
 
 // なぜこのコンポーネントが必要か：
 // 1. アプリケーション全体で統一的なナビゲーションを提供

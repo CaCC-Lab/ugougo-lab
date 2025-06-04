@@ -8,8 +8,8 @@ import {
   Chip,
   Box
 } from '@mui/material';
-import { GradeLevel } from '@/types/material';
-import { GRADE_LEVEL_LABELS } from '@/utils/constants';
+import { GradeLevel } from '../../../types/material';
+import { GRADE_LEVEL_LABELS } from '../../../utils/constants';
 
 // なぜこのコンポーネントが必要か：
 // 1. 学年選択を統一的なUIで提供

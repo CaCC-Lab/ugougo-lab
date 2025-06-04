@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { Box, Container, Drawer, useTheme, useMediaQuery } from '@mui/material';
-import { Header } from '@/components/layout/Header';
-import { GradeLevel } from '@/types/material';
+import { Header } from '../Header';
+import { GradeLevel } from '../../../types/material';
 
 // なぜこのコンポーネントが必要か：
 // 1. アプリケーション全体の一貫したレイアウトを提供
