@@ -38,6 +38,7 @@ import PlantGrowthSimulator from './components/PlantGrowthSimulator';
 import FractionPizzaCutter from './components/FractionPizzaCutter';
 import ElectricCircuitSimulator from './components/ElectricCircuitSimulator';
 import LinearFunctionGrapher from './components/LinearFunctionGrapher';
+import LightRefractionExperiment from './components/LightRefractionExperiment';
 
 // 学年別テーマ
 const themes = {
@@ -287,6 +288,14 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'light-refraction',
+      title: '光の屈折実験器',
+      description: '光の屈折現象を観察しよう！入射角を変えて、スネルの法則を確認できます。',
+      grade: '中学1年生',
+      subject: '理科',
+      available: true,
+    },
+    {
       id: 'linear-function',
       title: '一次関数グラフ描画ツール',
       description: '一次関数y=ax+bのグラフを自在に操作！傾きと切片を調整して、グラフの変化を観察しよう。',
@@ -499,6 +508,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'number-line' && (
             <NumberLineIntegers onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'light-refraction' && (
+            <LightRefractionExperiment onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
