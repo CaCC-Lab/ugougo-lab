@@ -9,7 +9,7 @@ import {
   Card, 
   CardContent, 
   Box,
-  Grid2 as Grid,
+  Grid,
   Chip,
   LinearProgress,
   Dialog,
@@ -32,6 +32,12 @@ import MovingPointP from './components/MovingPointP';
 import ElementPuzzleGame from './components/ElementPuzzleGame';
 import InertiaSimulation from './components/InertiaSimulation';
 import TypingPuyoGame from './components/TypingPuyoGame';
+import AdditionSubtractionVisualizer from './components/AdditionSubtractionVisualizer';
+import HiraganaStrokeOrder from './components/HiraganaStrokeOrder';
+import PlantGrowthSimulator from './components/PlantGrowthSimulator';
+import FractionPizzaCutter from './components/FractionPizzaCutter';
+import ElectricCircuitSimulator from './components/ElectricCircuitSimulator';
+import LinearFunctionGrapher from './components/LinearFunctionGrapher';
 
 // 学年別テーマ
 const themes = {
@@ -209,6 +215,22 @@ function AppFull() {
 
   const materials = [
     {
+      id: 'addition-subtraction',
+      title: 'たし算・ひき算ビジュアライザー',
+      description: 'リンゴを使って、たし算とひき算を楽しく学ぼう！数えながら答えを見つけてね。',
+      grade: '小学1年生',
+      subject: '算数',
+      available: true,
+    },
+    {
+      id: 'hiragana-stroke',
+      title: 'ひらがな書き順アニメーション',
+      description: 'ひらがなの正しい書き順を覚えよう！アニメーションを見て、なぞり書きで練習できます。',
+      grade: '小学1年生',
+      subject: '国語',
+      available: true,
+    },
+    {
       id: 'number-blocks',
       title: '数の合成・分解ブロック',
       description: '10までの数を、ブロックを使って楽しく学ぼう！数字をクリックして目標の数を作ってください。',
@@ -225,6 +247,14 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'plant-growth',
+      title: '植物の成長シミュレーター',
+      description: '植物を育てて、成長の様子を観察しよう！水やりと日光の管理が大切です。',
+      grade: '小学2年生',
+      subject: '生活科',
+      available: true,
+    },
+    {
       id: 'fraction-visualization',
       title: '分数の視覚化',
       description: '分数を円グラフや棒グラフで視覚的に理解しよう！練習モードとクイズモードがあります。',
@@ -233,10 +263,34 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'fraction-pizza',
+      title: '分数ピザカッター',
+      description: 'ピザを切って分数を学ぼう！ピースをクリックして選択できます。',
+      grade: '小学3年生',
+      subject: '算数',
+      available: true,
+    },
+    {
+      id: 'electric-circuit',
+      title: '電気回路シミュレーター',
+      description: '電池、豆電球、スイッチを使って電気回路を作ろう！直列回路と並列回路の違いを学べます。',
+      grade: '小学4年生',
+      subject: '理科',
+      available: true,
+    },
+    {
       id: 'number-line',
       title: '正負の数の数直線',
       description: '数直線を使って、マイナスの数も理解しよう！正負の数の計算をマスターできます。',
       grade: '中学1年生',
+      subject: '数学',
+      available: true,
+    },
+    {
+      id: 'linear-function',
+      title: '一次関数グラフ描画ツール',
+      description: '一次関数y=ax+bのグラフを自在に操作！傾きと切片を調整して、グラフの変化を観察しよう。',
+      grade: '中学2年生',
       subject: '数学',
       available: true,
     },
@@ -395,6 +449,18 @@ function AppFull() {
         sx={{ '& .MuiDialog-paper': { height: '90vh' } }}
       >
         <DialogContent sx={{ p: 0 }}>
+          {selectedMaterial === 'addition-subtraction' && (
+            <AdditionSubtractionVisualizer onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'hiragana-stroke' && (
+            <HiraganaStrokeOrder onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
           {selectedMaterial === 'number-blocks' && (
             <NumberBlocksMaterial onClose={() => {
               setMaterialOpen(false);
@@ -407,14 +473,38 @@ function AppFull() {
               setSelectedMaterial('');
             }} />
           )}
+          {selectedMaterial === 'plant-growth' && (
+            <PlantGrowthSimulator onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
           {selectedMaterial === 'fraction-visualization' && (
             <FractionVisualization onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
           )}
+          {selectedMaterial === 'fraction-pizza' && (
+            <FractionPizzaCutter onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'electric-circuit' && (
+            <ElectricCircuitSimulator onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
           {selectedMaterial === 'number-line' && (
             <NumberLineIntegers onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'linear-function' && (
+            <LinearFunctionGrapher onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
