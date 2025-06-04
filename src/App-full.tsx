@@ -41,6 +41,7 @@ import LinearFunctionGrapher from './components/LinearFunctionGrapher';
 import LightRefractionExperiment from './components/LightRefractionExperiment';
 import ChemicalReactionSimulator from './components/ChemicalReactionSimulator';
 import ClockLearningTool from './components/ClockLearningTool';
+import UnitConversionTool from './components/UnitConversionTool';
 
 // 学年別テーマ
 const themes = {
@@ -253,6 +254,14 @@ function AppFull() {
       id: 'multiplication',
       title: 'かけ算九九の視覚化',
       description: 'アニメーションでかけ算の仕組みがよくわかる！視覚的にかけ算を理解できます。',
+      grade: '小学2年生',
+      subject: '算数',
+      available: true,
+    },
+    {
+      id: 'unit-conversion',
+      title: '長さ・かさの単位変換ツール',
+      description: 'cm、m、mm、mL、dL、Lの単位変換を視覚的に学べます。スライダーで数値を変えてみよう！',
       grade: '小学2年生',
       subject: '算数',
       available: true,
@@ -502,6 +511,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'multiplication' && (
             <MultiplicationVisualization onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'unit-conversion' && (
+            <UnitConversionTool onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
