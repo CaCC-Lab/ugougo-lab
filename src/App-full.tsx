@@ -53,6 +53,7 @@ import LeverPrincipleExperiment from './components/LeverPrincipleExperiment';
 import QuadraticFunctionGraph from './components/QuadraticFunctionGraph';
 import CelestialMotionSimulator from './components/CelestialMotionSimulator';
 import TrigonometricFunctionGraph from './components/TrigonometricFunctionGraph';
+import CalculusVisualizer from './components/CalculusVisualizer';
 
 // 学年別テーマ
 const themes = {
@@ -485,6 +486,14 @@ function AppFull() {
       subject: '数学',
       available: true,
     },
+    {
+      id: 'calculus-visualizer',
+      title: '微分積分ビジュアライザー',
+      description: '接線の傾きで微分を、面積で積分を視覚的に理解！極値・変曲点も自動検出します。',
+      grade: '高校2年生',
+      subject: '数学',
+      available: true,
+    },
   ];
 
   return (
@@ -772,6 +781,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'trigonometric-function' && (
             <TrigonometricFunctionGraph onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'calculus-visualizer' && (
+            <CalculusVisualizer onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
