@@ -47,6 +47,7 @@ import AreaCalculator from './components/AreaCalculator';
 import AlgebraicExpressionTool from './components/AlgebraicExpressionTool';
 import WaterStateAnimation from './components/WaterStateAnimation';
 import SpeedTimeDistanceSimulator from './components/SpeedTimeDistanceSimulator';
+import PendulumExperiment from './components/PendulumExperiment';
 
 // 学年別テーマ
 const themes = {
@@ -431,6 +432,14 @@ function AppFull() {
       subject: '算数',
       available: true,
     },
+    {
+      id: 'pendulum-experiment',
+      title: '振り子の実験装置',
+      description: '振り子の長さや重さを変えて周期を測定！ガリレオの法則を実験で確認できます。',
+      grade: '小学5年生',
+      subject: '理科',
+      available: true,
+    },
   ];
 
   return (
@@ -682,6 +691,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'speed-time-distance' && (
             <SpeedTimeDistanceSimulator onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'pendulum-experiment' && (
+            <PendulumExperiment onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
