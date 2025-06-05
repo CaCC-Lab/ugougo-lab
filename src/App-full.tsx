@@ -46,6 +46,7 @@ import MagnetExperiment from './components/MagnetExperiment';
 import AreaCalculator from './components/AreaCalculator';
 import AlgebraicExpressionTool from './components/AlgebraicExpressionTool';
 import WaterStateAnimation from './components/WaterStateAnimation';
+import SpeedTimeDistanceSimulator from './components/SpeedTimeDistanceSimulator';
 
 // 学年別テーマ
 const themes = {
@@ -422,6 +423,14 @@ function AppFull() {
       subject: '情報',
       available: true,
     },
+    {
+      id: 'speed-time-distance',
+      title: '速さ・時間・距離の関係シミュレーター',
+      description: '車・自転車・徒歩の動きをアニメーションで観察！追いつき問題も視覚的に理解できます。',
+      grade: '小学5年生',
+      subject: '算数',
+      available: true,
+    },
   ];
 
   return (
@@ -667,6 +676,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'typing-puyo' && (
             <TypingPuyoGame onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'speed-time-distance' && (
+            <SpeedTimeDistanceSimulator onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
