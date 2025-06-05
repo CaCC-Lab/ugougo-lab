@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Theme } from '@mui/material/styles';
+import type { Theme } from '@mui/material/styles';
 import elementaryTheme from '../styles/themes/elementary';
 import juniorHighTheme from '../styles/themes/juniorHigh';
 import highSchoolTheme from '../styles/themes/highSchool';

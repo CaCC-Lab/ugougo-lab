@@ -1,6 +1,6 @@
 // ユーザーに関する型定義
 
-import { GradeLevel } from './material';
+import type { GradeLevel } from './material';
 
 // ユーザーロール
 export type UserRole = 'student' | 'parent' | 'teacher' | 'admin';

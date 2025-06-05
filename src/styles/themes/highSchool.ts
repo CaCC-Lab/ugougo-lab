@@ -4,7 +4,7 @@ import { createTheme } from '@mui/material/styles';
 // より洗練された色使い、コンパクトなレイアウト
 const highSchoolThemeConfig = {
   palette: {
-    mode: 'light',
+    mode: 'light' as const,
     primary: {
       main: '#1976D2', // プロフェッショナルな青
       light: '#42A5F5',
@@ -58,7 +58,7 @@ const highSchoolThemeConfig = {
     button: {
       fontSize: '0.875rem',
       fontWeight: 500,
-      textTransform: 'none',
+      textTransform: 'none' as const,
     },
   },
   shape: {
@@ -91,7 +91,7 @@ const highSchoolThemeConfig = {
     },
     MuiTextField: {
       defaultProps: {
-        size: 'small',
+        size: 'small' as const,
       },
     },
   },

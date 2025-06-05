@@ -4,7 +4,7 @@ import { createTheme } from '@mui/material/styles';
 // 大きな文字、明るい色、わかりやすいコントラスト
 const elementaryThemeConfig = {
   palette: {
-    mode: 'light',
+    mode: 'light' as const,
     primary: {
       main: '#FF6B6B', // 明るい赤
       light: '#FF9F9F',
@@ -48,7 +48,7 @@ const elementaryThemeConfig = {
     button: {
       fontSize: '1.25rem',
       fontWeight: 600,
-      textTransform: 'none', // 大文字変換を無効化
+      textTransform: 'none' as const, // 大文字変換を無効化
     },
   },
   shape: {

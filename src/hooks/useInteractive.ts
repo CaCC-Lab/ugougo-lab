@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState } from 'react';
 
 // なぜこのフックが必要か：
 // 1. ドラッグ&ドロップなどのインタラクションロジックを再利用可能にする

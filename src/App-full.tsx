@@ -543,11 +543,22 @@ function AppFull() {
         </Typography>
 
         <Typography variant="h4" component="h2" gutterBottom sx={{ mt: 4 }}>
-          おすすめの教材
+          {currentTheme === 'elementary' ? '小学生' : currentTheme === 'juniorHigh' ? '中学生' : '高校生'}向けの教材
         </Typography>
         
         <Grid container spacing={3}>
-          {materials.map((material) => (
+          {materials
+            .filter((material) => {
+              if (currentTheme === 'elementary') {
+                return material.grade.includes('小学');
+              } else if (currentTheme === 'juniorHigh') {
+                return material.grade.includes('中学');
+              } else if (currentTheme === 'highSchool') {
+                return material.grade.includes('高校');
+              }
+              return true;
+            })
+            .map((material) => (
             <Grid item xs={12} sm={6} md={4} key={material.id}>
               <Card 
                 sx={{ 

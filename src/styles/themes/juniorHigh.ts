@@ -4,7 +4,7 @@ import { createTheme } from '@mui/material/styles';
 // バランスの取れた色使い、適度な文字サイズ
 const juniorHighThemeConfig = {
   palette: {
-    mode: 'light',
+    mode: 'light' as const,
     primary: {
       main: '#3F51B5', // 標準的な青
       light: '#7986CB',
@@ -51,7 +51,7 @@ const juniorHighThemeConfig = {
     button: {
       fontSize: '1rem',
       fontWeight: 500,
-      textTransform: 'none',
+      textTransform: 'none' as const,
     },
   },
   shape: {
