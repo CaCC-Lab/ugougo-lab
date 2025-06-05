@@ -1,0 +1,1 @@
+export { default as InsectMetamorphosisSimulator } from './InsectMetamorphosisSimulator';

@@ -9,6 +9,7 @@ import type { GradeLevel, Material } from './types';
 import { useTheme } from './hooks/useTheme';
 import { NumberBlocks } from './materials/elementary/grade1/math';
 import { TownExplorationMap } from './materials/elementary/grade2/life';
+import { InsectMetamorphosisSimulator } from './materials/elementary/grade3/science';
 
 // 実装済み教材データ
 const materials: Material[] = [
@@ -56,6 +57,17 @@ const materials: Material[] = [
     estimatedTime: 25,
     isPremium: false,
   },
+  {
+    id: 'insect-metamorphosis-3',
+    title: 'こんちゅうの変態シミュレーター',
+    description: '完全変態と不完全変態の違いをアニメーションで学ぼう！',
+    gradeLevel: 'elementary3',
+    subject: 'science',
+    tags: ['昆虫', '変態', '成長', '生物'],
+    difficulty: 'easy',
+    estimatedTime: 15,
+    isPremium: false,
+  },
 ];
 
 function App() {
@@ -81,7 +93,7 @@ function App() {
 
   // 教材を開く処理
   const handleOpenMaterial = (material: Material) => {
-    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2') {
+    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3') {
       setSelectedMaterial(material);
       setMaterialDialogOpen(true);
     } else {
@@ -162,7 +174,7 @@ function App() {
                   py: 0.5,
                   borderRadius: 1,
                 }}>
-                  {material.subject === 'math' ? '算数・数学' : material.subject === 'life' ? '生活科' : material.subject}
+                  {material.subject === 'math' ? '算数・数学' : material.subject === 'life' ? '生活科' : material.subject === 'science' ? '理科' : material.subject}
                 </Typography>
                 <Typography variant="caption" sx={{ 
                   backgroundColor: 'secondary.main',
@@ -173,7 +185,7 @@ function App() {
                 }}>
                   {material.estimatedTime}分
                 </Typography>
-                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2') ? (
+                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3') ? (
                   <Typography variant="caption" sx={{ 
                     backgroundColor: 'success.main',
                     color: 'success.contrastText',
@@ -250,6 +262,9 @@ function App() {
           )}
           {selectedMaterial && selectedMaterial.id === 'town-exploration-map-2' && (
             <TownExplorationMap />
+          )}
+          {selectedMaterial && selectedMaterial.id === 'insect-metamorphosis-3' && (
+            <InsectMetamorphosisSimulator />
           )}
         </DialogContent>
       </Dialog>
