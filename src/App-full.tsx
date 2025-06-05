@@ -49,6 +49,7 @@ import WaterStateAnimation from './components/WaterStateAnimation';
 import SpeedTimeDistanceSimulator from './components/SpeedTimeDistanceSimulator';
 import PendulumExperiment from './components/PendulumExperiment';
 import ProportionGraphTool from './components/ProportionGraphTool';
+import LeverPrincipleExperiment from './components/LeverPrincipleExperiment';
 
 // 学年別テーマ
 const themes = {
@@ -449,6 +450,14 @@ function AppFull() {
       subject: '算数',
       available: true,
     },
+    {
+      id: 'lever-principle',
+      title: 'てこの原理実験器',
+      description: 'てこのつり合いを体験！支点・力点・作用点を調整して、力のモーメントの法則を発見しよう。',
+      grade: '小学6年生',
+      subject: '理科',
+      available: true,
+    },
   ];
 
   return (
@@ -712,6 +721,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'proportion-graph' && (
             <ProportionGraphTool onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'lever-principle' && (
+            <LeverPrincipleExperiment onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
