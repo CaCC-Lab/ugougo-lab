@@ -52,6 +52,7 @@ import ProportionGraphTool from './components/ProportionGraphTool';
 import LeverPrincipleExperiment from './components/LeverPrincipleExperiment';
 import QuadraticFunctionGraph from './components/QuadraticFunctionGraph';
 import CelestialMotionSimulator from './components/CelestialMotionSimulator';
+import TrigonometricFunctionGraph from './components/TrigonometricFunctionGraph';
 
 // 学年別テーマ
 const themes = {
@@ -476,6 +477,14 @@ function AppFull() {
       subject: '理科',
       available: true,
     },
+    {
+      id: 'trigonometric-function',
+      title: '三角関数グラフ描画ツール',
+      description: '振幅・周期・位相を自由に調整！単位円との対応をアニメーションで理解できます。',
+      grade: '高校1年生',
+      subject: '数学',
+      available: true,
+    },
   ];
 
   return (
@@ -757,6 +766,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'celestial-motion' && (
             <CelestialMotionSimulator onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'trigonometric-function' && (
+            <TrigonometricFunctionGraph onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
