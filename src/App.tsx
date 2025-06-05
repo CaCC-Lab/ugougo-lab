@@ -8,6 +8,7 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import type { GradeLevel, Material } from './types';
 import { useTheme } from './hooks/useTheme';
 import { NumberBlocks } from './materials/elementary/grade1/math';
+import { TownExplorationMap } from './materials/elementary/grade2/life';
 
 // 実装済み教材データ
 const materials: Material[] = [
@@ -31,6 +32,17 @@ const materials: Material[] = [
     tags: ['かけ算', '九九', 'アニメーション'],
     difficulty: 'normal',
     estimatedTime: 20,
+    isPremium: false,
+  },
+  {
+    id: 'town-exploration-map-2',
+    title: '町たんけんマップ',
+    description: 'まちのいろいろな場所をたんけんして、それぞれの役割を学ぼう！',
+    gradeLevel: 'elementary2',
+    subject: 'life',
+    tags: ['地域', '施設', '探検', 'マップ'],
+    difficulty: 'easy',
+    estimatedTime: 15,
     isPremium: false,
   },
   {
@@ -69,7 +81,7 @@ function App() {
 
   // 教材を開く処理
   const handleOpenMaterial = (material: Material) => {
-    if (material.id === 'number-blocks-1') {
+    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2') {
       setSelectedMaterial(material);
       setMaterialDialogOpen(true);
     } else {
@@ -150,7 +162,7 @@ function App() {
                   py: 0.5,
                   borderRadius: 1,
                 }}>
-                  {material.subject === 'math' ? '算数・数学' : material.subject}
+                  {material.subject === 'math' ? '算数・数学' : material.subject === 'life' ? '生活科' : material.subject}
                 </Typography>
                 <Typography variant="caption" sx={{ 
                   backgroundColor: 'secondary.main',
@@ -161,7 +173,7 @@ function App() {
                 }}>
                   {material.estimatedTime}分
                 </Typography>
-                {material.id === 'number-blocks-1' ? (
+                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2') ? (
                   <Typography variant="caption" sx={{ 
                     backgroundColor: 'success.main',
                     color: 'success.contrastText',
@@ -235,6 +247,9 @@ function App() {
               onComplete={handleMaterialComplete}
               onProgress={handleMaterialProgress}
             />
+          )}
+          {selectedMaterial && selectedMaterial.id === 'town-exploration-map-2' && (
+            <TownExplorationMap />
           )}
         </DialogContent>
       </Dialog>
