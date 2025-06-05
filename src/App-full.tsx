@@ -54,6 +54,7 @@ import QuadraticFunctionGraph from './components/QuadraticFunctionGraph';
 import CelestialMotionSimulator from './components/CelestialMotionSimulator';
 import TrigonometricFunctionGraph from './components/TrigonometricFunctionGraph';
 import CalculusVisualizer from './components/CalculusVisualizer';
+import PictureWordMatching from './components/PictureWordMatching';
 
 // 学年別テーマ
 const themes = {
@@ -242,6 +243,14 @@ function AppFull() {
       id: 'hiragana-stroke',
       title: 'ひらがな書き順アニメーション',
       description: 'ひらがなの正しい書き順を覚えよう！アニメーションを見て、なぞり書きで練習できます。',
+      grade: '小学1年生',
+      subject: '国語',
+      available: true,
+    },
+    {
+      id: 'picture-word-matching',
+      title: '絵と言葉のマッチングゲーム',
+      description: '絵を見て正しい言葉を選ぼう！動物・果物・乗り物・食べ物から選べます。10問連続正解でごほうびがもらえるよ！',
       grade: '小学1年生',
       subject: '国語',
       available: true,
@@ -601,6 +610,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'hiragana-stroke' && (
             <HiraganaStrokeOrder onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'picture-word-matching' && (
+            <PictureWordMatching onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
