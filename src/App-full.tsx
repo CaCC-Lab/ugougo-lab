@@ -56,6 +56,18 @@ import TrigonometricFunctionGraph from './components/TrigonometricFunctionGraph'
 import CalculusVisualizer from './components/CalculusVisualizer';
 import PictureWordMatching from './components/PictureWordMatching';
 
+// 新しい教材のインポート（materials配下から）
+import { NumberBlocks } from './materials/elementary/grade1/math';
+import { TownExplorationMap } from './materials/elementary/grade2/life';
+import { InsectMetamorphosisSimulator } from './materials/elementary/grade3/science';
+import { CompassSimulator } from './materials/elementary/grade3/social';
+import { AngleMeasurementTool } from './materials/elementary/grade4/math';
+import { PrefecturePuzzle } from './materials/elementary/grade4/social';
+import { WeatherChangeSimulator } from './materials/elementary/grade5/science';
+import { IndustrialZoneMap } from './materials/elementary/grade5/social';
+import { CombinationSimulator } from './materials/elementary/grade6/math';
+import { HumanBodyAnimation } from './materials/elementary/grade6/science';
+
 // 学年別テーマ
 const themes = {
   elementary: createTheme({
@@ -89,140 +101,6 @@ const themes = {
     },
   }),
 };
-
-// 数の合成・分解教材
-function NumberBlocksMaterial({ onClose }: { onClose: () => void }) {
-  const [target, setTarget] = useState(10);
-  const [currentSum, setCurrentSum] = useState(0);
-  const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
-  const [progress, setProgress] = useState(0);
-  const [successCount, setSuccessCount] = useState(0);
-
-  const numbers = Array.from({ length: 10 }, (_, i) => i + 1);
-
-  const handleNumberClick = (num: number) => {
-    if (selectedNumbers.includes(num)) {
-      const newSelected = selectedNumbers.filter(n => n !== num);
-      setSelectedNumbers(newSelected);
-      setCurrentSum(newSelected.reduce((sum, n) => sum + n, 0));
-    } else {
-      const newSelected = [...selectedNumbers, num];
-      setSelectedNumbers(newSelected);
-      const newSum = newSelected.reduce((sum, n) => sum + n, 0);
-      setCurrentSum(newSum);
-      
-      if (newSum === target) {
-        setSuccessCount(prev => prev + 1);
-        setProgress(Math.min((successCount + 1) * 20, 100));
-        setTimeout(() => {
-          setTarget(Math.floor(Math.random() * 10) + 1);
-          setSelectedNumbers([]);
-          setCurrentSum(0);
-        }, 1500);
-      }
-    }
-  };
-
-  const handleReset = () => {
-    setSelectedNumbers([]);
-    setCurrentSum(0);
-    setProgress(0);
-    setSuccessCount(0);
-    setTarget(10);
-  };
-
-  return (
-    <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* ヘッダー */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" component="h1">
-          数の合成・分解ブロック
-        </Typography>
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        10までの数を、ブロックを使って楽しく学ぼう！数字をクリックして目標の数を作ってください。
-      </Typography>
-
-      {/* 状況表示 */}
-      <Box sx={{ mb: 3, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-        <Chip 
-          label={`目標: ${target}`} 
-          color="primary" 
-          size="medium"
-        />
-        <Chip 
-          label={`現在: ${currentSum}`} 
-          color={currentSum === target ? 'success' : 'default'} 
-          size="medium"
-        />
-        <Chip 
-          label={`成功回数: ${successCount}`} 
-          color="secondary" 
-          size="medium"
-        />
-      </Box>
-
-      {/* 進捗バー */}
-      {progress > 0 && (
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption">進捗</Typography>
-            <Typography variant="caption">{progress}%</Typography>
-          </Box>
-          <LinearProgress variant="determinate" value={progress} sx={{ height: 8, borderRadius: 4 }} />
-        </Box>
-      )}
-
-      {/* 数字ブロック */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <Grid container spacing={2} justifyContent="center">
-          {numbers.map((num) => (
-            <Grid item key={num}>
-              <Button
-                variant={selectedNumbers.includes(num) ? 'contained' : 'outlined'}
-                onClick={() => handleNumberClick(num)}
-                sx={{ 
-                  minWidth: 80, 
-                  minHeight: 80,
-                  fontSize: '2rem',
-                  fontWeight: 'bold',
-                  borderRadius: 2,
-                  boxShadow: selectedNumbers.includes(num) ? '0 4px 8px rgba(0,0,0,0.2)' : 'none',
-                  transform: selectedNumbers.includes(num) ? 'translateY(-2px)' : 'none',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {num}
-              </Button>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* 正解メッセージ */}
-        {currentSum === target && (
-          <Typography 
-            variant="h5" 
-            color="success.main" 
-            sx={{ mt: 3, textAlign: 'center', fontWeight: 'bold' }}
-          >
-            🎉 すばらしい！ {target} ができました！
-          </Typography>
-        )}
-      </Box>
-
-      {/* フッター */}
-      <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-        <Button variant="outlined" onClick={handleReset} size="large">
-          リセット
-        </Button>
-      </Box>
-    </Box>
-  );
-}
 
 // メインアプリ
 function AppFull() {
@@ -503,6 +381,78 @@ function AppFull() {
       subject: '数学',
       available: true,
     },
+    {
+      id: 'town-exploration-map',
+      title: '町たんけんマップ',
+      description: 'まちのいろいろな場所をたんけんして、それぞれの役割を学ぼう！インタラクティブな地図で楽しく探検できます。',
+      grade: '小学2年生',
+      subject: '生活科',
+      available: true,
+    },
+    {
+      id: 'insect-metamorphosis',
+      title: 'こんちゅうの変態シミュレーター',
+      description: '完全変態と不完全変態の違いをアニメーションで学ぼう！昆虫の成長過程を詳しく観察できます。',
+      grade: '小学3年生',
+      subject: '理科',
+      available: true,
+    },
+    {
+      id: 'compass-simulator',
+      title: 'ほういじしんシミュレーター',
+      description: '8つの方位を方位磁針で学ぼう！まちの目印も確認できるよ。',
+      grade: '小学3年生',
+      subject: '社会',
+      available: true,
+    },
+    {
+      id: 'angle-measurement',
+      title: 'かくど そくてい器',
+      description: '分度器を使わずに角度を測る練習ができるよ！インタラクティブな角度測定ツール。',
+      grade: '小学4年生',
+      subject: '算数',
+      available: true,
+    },
+    {
+      id: 'prefecture-puzzle',
+      title: 'とどうふけんパズル',
+      description: '日本地図のピースをドラッグして都道府県を覚えよう！楽しく地理を学べます。',
+      grade: '小学4年生',
+      subject: '社会',
+      available: true,
+    },
+    {
+      id: 'weather-change-simulator',
+      title: '天気の変化シミュレーター',
+      description: '気圧配置と前線の動きから天気の変化を学ぼう！雲の形成や降水の仕組みもわかる。',
+      grade: '小学5年生',
+      subject: '理科',
+      available: true,
+    },
+    {
+      id: 'industrial-zone-map',
+      title: '工業地帯マップ',
+      description: '日本の主要な工業地帯の位置と特徴を学ぼう！各地域の生産品や産業の違いがわかる。',
+      grade: '小学5年生',
+      subject: '社会',
+      available: true,
+    },
+    {
+      id: 'combination-simulator',
+      title: '場合の数シミュレーター',
+      description: '順列と組み合わせを視覚的に理解しよう！樹形図やアニメーションで数え方の基本がわかる。',
+      grade: '小学6年生',
+      subject: '算数',
+      available: true,
+    },
+    {
+      id: 'human-body-animation',
+      title: '人体の仕組みアニメーション',
+      description: '心臓の動きや血液の流れ、呼吸、消化の仕組みをアニメーションで学ぼう！',
+      grade: '小学6年生',
+      subject: '理科',
+      available: true,
+    },
   ];
 
   return (
@@ -638,10 +588,7 @@ function AppFull() {
             }} />
           )}
           {selectedMaterial === 'number-blocks' && (
-            <NumberBlocksMaterial onClose={() => {
-              setMaterialOpen(false);
-              setSelectedMaterial('');
-            }} />
+            <NumberBlocks />
           )}
           {selectedMaterial === 'multiplication' && (
             <MultiplicationVisualization onClose={() => {
@@ -816,6 +763,34 @@ function AppFull() {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
+          )}
+          {/* 新しい教材 */}
+          {selectedMaterial === 'town-exploration-map' && (
+            <TownExplorationMap />
+          )}
+          {selectedMaterial === 'insect-metamorphosis' && (
+            <InsectMetamorphosisSimulator />
+          )}
+          {selectedMaterial === 'compass-simulator' && (
+            <CompassSimulator />
+          )}
+          {selectedMaterial === 'angle-measurement' && (
+            <AngleMeasurementTool />
+          )}
+          {selectedMaterial === 'prefecture-puzzle' && (
+            <PrefecturePuzzle />
+          )}
+          {selectedMaterial === 'weather-change-simulator' && (
+            <WeatherChangeSimulator />
+          )}
+          {selectedMaterial === 'industrial-zone-map' && (
+            <IndustrialZoneMap />
+          )}
+          {selectedMaterial === 'combination-simulator' && (
+            <CombinationSimulator />
+          )}
+          {selectedMaterial === 'human-body-animation' && (
+            <HumanBodyAnimation />
           )}
         </DialogContent>
       </Dialog>
