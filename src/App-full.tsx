@@ -50,6 +50,7 @@ import SpeedTimeDistanceSimulator from './components/SpeedTimeDistanceSimulator'
 import PendulumExperiment from './components/PendulumExperiment';
 import ProportionGraphTool from './components/ProportionGraphTool';
 import LeverPrincipleExperiment from './components/LeverPrincipleExperiment';
+import QuadraticFunctionGraph from './components/QuadraticFunctionGraph';
 
 // 学年別テーマ
 const themes = {
@@ -458,6 +459,14 @@ function AppFull() {
       subject: '理科',
       available: true,
     },
+    {
+      id: 'quadratic-function',
+      title: '二次関数グラフ変形ツール',
+      description: '係数を変えて放物線の変化を観察！頂点・軸・判別式の関係を視覚的に理解できます。',
+      grade: '中学3年生',
+      subject: '数学',
+      available: true,
+    },
   ];
 
   return (
@@ -727,6 +736,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'lever-principle' && (
             <LeverPrincipleExperiment onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'quadratic-function' && (
+            <QuadraticFunctionGraph onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
