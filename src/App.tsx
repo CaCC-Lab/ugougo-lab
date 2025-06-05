@@ -16,6 +16,7 @@ import { PrefecturePuzzle } from './materials/elementary/grade4/social';
 import { WeatherChangeSimulator } from './materials/elementary/grade5/science';
 import { IndustrialZoneMap } from './materials/elementary/grade5/social';
 import { CombinationSimulator } from './materials/elementary/grade6/math';
+import { HumanBodyAnimation } from './materials/elementary/grade6/science';
 
 // 実装済み教材データ
 const materials: Material[] = [
@@ -140,6 +141,17 @@ const materials: Material[] = [
     estimatedTime: 20,
     isPremium: false,
   },
+  {
+    id: 'human-body-animation-6',
+    title: '人体の仕組みアニメーション',
+    description: '心臓の動きや血液の流れ、呼吸、消化の仕組みをアニメーションで学ぼう！',
+    gradeLevel: 'elementary6',
+    subject: 'science',
+    tags: ['人体', '循環器', '呼吸器', '消化器', 'アニメーション'],
+    difficulty: 'normal',
+    estimatedTime: 25,
+    isPremium: false,
+  },
 ];
 
 function App() {
@@ -165,7 +177,7 @@ function App() {
 
   // 教材を開く処理
   const handleOpenMaterial = (material: Material) => {
-    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5' || material.id === 'combination-simulator-6') {
+    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5' || material.id === 'combination-simulator-6' || material.id === 'human-body-animation-6') {
       setSelectedMaterial(material);
       setMaterialDialogOpen(true);
     } else {
@@ -257,7 +269,7 @@ function App() {
                 }}>
                   {material.estimatedTime}分
                 </Typography>
-                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5' || material.id === 'combination-simulator-6') ? (
+                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5' || material.id === 'combination-simulator-6' || material.id === 'human-body-animation-6') ? (
                   <Typography variant="caption" sx={{ 
                     backgroundColor: 'success.main',
                     color: 'success.contrastText',
@@ -355,6 +367,9 @@ function App() {
           )}
           {selectedMaterial && selectedMaterial.id === 'combination-simulator-6' && (
             <CombinationSimulator />
+          )}
+          {selectedMaterial && selectedMaterial.id === 'human-body-animation-6' && (
+            <HumanBodyAnimation />
           )}
         </DialogContent>
       </Dialog>
