@@ -1,2 +1,1 @@
-// 小学3年生社会教材のエクスポート
-export {};
+export { default as CompassSimulator } from './CompassSimulator';

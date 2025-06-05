@@ -10,6 +10,7 @@ import { useTheme } from './hooks/useTheme';
 import { NumberBlocks } from './materials/elementary/grade1/math';
 import { TownExplorationMap } from './materials/elementary/grade2/life';
 import { InsectMetamorphosisSimulator } from './materials/elementary/grade3/science';
+import { CompassSimulator } from './materials/elementary/grade3/social';
 
 // 実装済み教材データ
 const materials: Material[] = [
@@ -68,6 +69,17 @@ const materials: Material[] = [
     estimatedTime: 15,
     isPremium: false,
   },
+  {
+    id: 'compass-simulator-3',
+    title: 'ほういじしんシミュレーター',
+    description: '8つの方位を方位磁針で学ぼう！まちの目印も確認できるよ。',
+    gradeLevel: 'elementary3',
+    subject: 'social',
+    tags: ['方位', '方位磁針', '地図', '社会'],
+    difficulty: 'easy',
+    estimatedTime: 15,
+    isPremium: false,
+  },
 ];
 
 function App() {
@@ -93,7 +105,7 @@ function App() {
 
   // 教材を開く処理
   const handleOpenMaterial = (material: Material) => {
-    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3') {
+    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3') {
       setSelectedMaterial(material);
       setMaterialDialogOpen(true);
     } else {
@@ -174,7 +186,7 @@ function App() {
                   py: 0.5,
                   borderRadius: 1,
                 }}>
-                  {material.subject === 'math' ? '算数・数学' : material.subject === 'life' ? '生活科' : material.subject === 'science' ? '理科' : material.subject}
+                  {material.subject === 'math' ? '算数・数学' : material.subject === 'life' ? '生活科' : material.subject === 'science' ? '理科' : material.subject === 'social' ? '社会' : material.subject}
                 </Typography>
                 <Typography variant="caption" sx={{ 
                   backgroundColor: 'secondary.main',
@@ -185,7 +197,7 @@ function App() {
                 }}>
                   {material.estimatedTime}分
                 </Typography>
-                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3') ? (
+                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3') ? (
                   <Typography variant="caption" sx={{ 
                     backgroundColor: 'success.main',
                     color: 'success.contrastText',
@@ -265,6 +277,9 @@ function App() {
           )}
           {selectedMaterial && selectedMaterial.id === 'insect-metamorphosis-3' && (
             <InsectMetamorphosisSimulator />
+          )}
+          {selectedMaterial && selectedMaterial.id === 'compass-simulator-3' && (
+            <CompassSimulator />
           )}
         </DialogContent>
       </Dialog>
