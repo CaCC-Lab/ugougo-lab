@@ -51,6 +51,7 @@ import PendulumExperiment from './components/PendulumExperiment';
 import ProportionGraphTool from './components/ProportionGraphTool';
 import LeverPrincipleExperiment from './components/LeverPrincipleExperiment';
 import QuadraticFunctionGraph from './components/QuadraticFunctionGraph';
+import CelestialMotionSimulator from './components/CelestialMotionSimulator';
 
 // 学年別テーマ
 const themes = {
@@ -467,6 +468,14 @@ function AppFull() {
       subject: '数学',
       available: true,
     },
+    {
+      id: 'celestial-motion',
+      title: '天体の動きシミュレーター',
+      description: '地球・月・太陽の位置関係を3Dで観察！日食・月食の条件や月の満ち欠けを体験できます。',
+      grade: '中学3年生',
+      subject: '理科',
+      available: true,
+    },
   ];
 
   return (
@@ -742,6 +751,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'quadratic-function' && (
             <QuadraticFunctionGraph onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'celestial-motion' && (
+            <CelestialMotionSimulator onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
