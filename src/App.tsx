@@ -11,6 +11,7 @@ import { NumberBlocks } from './materials/elementary/grade1/math';
 import { TownExplorationMap } from './materials/elementary/grade2/life';
 import { InsectMetamorphosisSimulator } from './materials/elementary/grade3/science';
 import { CompassSimulator } from './materials/elementary/grade3/social';
+import { AngleMeasurementTool } from './materials/elementary/grade4/math';
 
 // 実装済み教材データ
 const materials: Material[] = [
@@ -80,6 +81,17 @@ const materials: Material[] = [
     estimatedTime: 15,
     isPremium: false,
   },
+  {
+    id: 'angle-measurement-4',
+    title: 'かくど そくてい器',
+    description: '分度器を使わずに角度を測る練習ができるよ！',
+    gradeLevel: 'elementary4',
+    subject: 'math',
+    tags: ['角度', '鋭角', '直角', '鈍角'],
+    difficulty: 'normal',
+    estimatedTime: 20,
+    isPremium: false,
+  },
 ];
 
 function App() {
@@ -105,7 +117,7 @@ function App() {
 
   // 教材を開く処理
   const handleOpenMaterial = (material: Material) => {
-    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3') {
+    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4') {
       setSelectedMaterial(material);
       setMaterialDialogOpen(true);
     } else {
@@ -197,7 +209,7 @@ function App() {
                 }}>
                   {material.estimatedTime}分
                 </Typography>
-                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3') ? (
+                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4') ? (
                   <Typography variant="caption" sx={{ 
                     backgroundColor: 'success.main',
                     color: 'success.contrastText',
@@ -280,6 +292,9 @@ function App() {
           )}
           {selectedMaterial && selectedMaterial.id === 'compass-simulator-3' && (
             <CompassSimulator />
+          )}
+          {selectedMaterial && selectedMaterial.id === 'angle-measurement-4' && (
+            <AngleMeasurementTool />
           )}
         </DialogContent>
       </Dialog>
