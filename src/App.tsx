@@ -12,6 +12,8 @@ import { TownExplorationMap } from './materials/elementary/grade2/life';
 import { InsectMetamorphosisSimulator } from './materials/elementary/grade3/science';
 import { CompassSimulator } from './materials/elementary/grade3/social';
 import { AngleMeasurementTool } from './materials/elementary/grade4/math';
+import { PrefecturePuzzle } from './materials/elementary/grade4/social';
+import { WeatherChangeSimulator } from './materials/elementary/grade5/science';
 
 // 実装済み教材データ
 const materials: Material[] = [
@@ -92,6 +94,28 @@ const materials: Material[] = [
     estimatedTime: 20,
     isPremium: false,
   },
+  {
+    id: 'prefecture-puzzle-4',
+    title: 'とどうふけんパズル',
+    description: '日本地図のピースをドラッグして都道府県を覚えよう！',
+    gradeLevel: 'elementary4',
+    subject: 'social',
+    tags: ['都道府県', '地図', 'パズル', '日本'],
+    difficulty: 'normal',
+    estimatedTime: 20,
+    isPremium: false,
+  },
+  {
+    id: 'weather-change-simulator-5',
+    title: '天気の変化シミュレーター',
+    description: '気圧配置と前線の動きから天気の変化を学ぼう！雲の形成や降水の仕組みもわかる！',
+    gradeLevel: 'elementary5',
+    subject: 'science',
+    tags: ['天気', '気圧', '前線', '雲', '降水'],
+    difficulty: 'normal',
+    estimatedTime: 20,
+    isPremium: false,
+  },
 ];
 
 function App() {
@@ -117,7 +141,7 @@ function App() {
 
   // 教材を開く処理
   const handleOpenMaterial = (material: Material) => {
-    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4') {
+    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5') {
       setSelectedMaterial(material);
       setMaterialDialogOpen(true);
     } else {
@@ -209,7 +233,7 @@ function App() {
                 }}>
                   {material.estimatedTime}分
                 </Typography>
-                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4') ? (
+                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5') ? (
                   <Typography variant="caption" sx={{ 
                     backgroundColor: 'success.main',
                     color: 'success.contrastText',
@@ -295,6 +319,12 @@ function App() {
           )}
           {selectedMaterial && selectedMaterial.id === 'angle-measurement-4' && (
             <AngleMeasurementTool />
+          )}
+          {selectedMaterial && selectedMaterial.id === 'prefecture-puzzle-4' && (
+            <PrefecturePuzzle />
+          )}
+          {selectedMaterial && selectedMaterial.id === 'weather-change-simulator-5' && (
+            <WeatherChangeSimulator />
           )}
         </DialogContent>
       </Dialog>

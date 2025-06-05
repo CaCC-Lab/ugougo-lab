@@ -1,0 +1,1 @@
+export { default as WeatherChangeSimulator } from './WeatherChangeSimulator';

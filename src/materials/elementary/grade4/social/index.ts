@@ -1,2 +1,1 @@
-// 小学4年生社会教材のエクスポート
-export {};
+export { default as PrefecturePuzzle } from './PrefecturePuzzle';
