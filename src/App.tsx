@@ -14,6 +14,7 @@ import { CompassSimulator } from './materials/elementary/grade3/social';
 import { AngleMeasurementTool } from './materials/elementary/grade4/math';
 import { PrefecturePuzzle } from './materials/elementary/grade4/social';
 import { WeatherChangeSimulator } from './materials/elementary/grade5/science';
+import { IndustrialZoneMap } from './materials/elementary/grade5/social';
 
 // 実装済み教材データ
 const materials: Material[] = [
@@ -116,6 +117,17 @@ const materials: Material[] = [
     estimatedTime: 20,
     isPremium: false,
   },
+  {
+    id: 'industrial-zone-map-5',
+    title: '工業地帯マップ',
+    description: '日本の主要な工業地帯の位置と特徴を学ぼう！各地域の生産品や産業の違いがわかる！',
+    gradeLevel: 'elementary5',
+    subject: 'social',
+    tags: ['工業地帯', '産業', '地図', '生産額'],
+    difficulty: 'normal',
+    estimatedTime: 20,
+    isPremium: false,
+  },
 ];
 
 function App() {
@@ -141,7 +153,7 @@ function App() {
 
   // 教材を開く処理
   const handleOpenMaterial = (material: Material) => {
-    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5') {
+    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5') {
       setSelectedMaterial(material);
       setMaterialDialogOpen(true);
     } else {
@@ -233,7 +245,7 @@ function App() {
                 }}>
                   {material.estimatedTime}分
                 </Typography>
-                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5') ? (
+                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5') ? (
                   <Typography variant="caption" sx={{ 
                     backgroundColor: 'success.main',
                     color: 'success.contrastText',
@@ -325,6 +337,9 @@ function App() {
           )}
           {selectedMaterial && selectedMaterial.id === 'weather-change-simulator-5' && (
             <WeatherChangeSimulator />
+          )}
+          {selectedMaterial && selectedMaterial.id === 'industrial-zone-map-5' && (
+            <IndustrialZoneMap />
           )}
         </DialogContent>
       </Dialog>
