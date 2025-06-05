@@ -15,6 +15,7 @@ import { AngleMeasurementTool } from './materials/elementary/grade4/math';
 import { PrefecturePuzzle } from './materials/elementary/grade4/social';
 import { WeatherChangeSimulator } from './materials/elementary/grade5/science';
 import { IndustrialZoneMap } from './materials/elementary/grade5/social';
+import { CombinationSimulator } from './materials/elementary/grade6/math';
 
 // 実装済み教材データ
 const materials: Material[] = [
@@ -128,6 +129,17 @@ const materials: Material[] = [
     estimatedTime: 20,
     isPremium: false,
   },
+  {
+    id: 'combination-simulator-6',
+    title: '場合の数シミュレーター',
+    description: '順列と組み合わせを視覚的に理解しよう！樹形図やアニメーションで数え方の基本がわかる！',
+    gradeLevel: 'elementary6',
+    subject: 'math',
+    tags: ['場合の数', '順列', '組み合わせ', '樹形図'],
+    difficulty: 'normal',
+    estimatedTime: 20,
+    isPremium: false,
+  },
 ];
 
 function App() {
@@ -153,7 +165,7 @@ function App() {
 
   // 教材を開く処理
   const handleOpenMaterial = (material: Material) => {
-    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5') {
+    if (material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5' || material.id === 'combination-simulator-6') {
       setSelectedMaterial(material);
       setMaterialDialogOpen(true);
     } else {
@@ -245,7 +257,7 @@ function App() {
                 }}>
                   {material.estimatedTime}分
                 </Typography>
-                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5') ? (
+                {(material.id === 'number-blocks-1' || material.id === 'town-exploration-map-2' || material.id === 'insect-metamorphosis-3' || material.id === 'compass-simulator-3' || material.id === 'angle-measurement-4' || material.id === 'prefecture-puzzle-4' || material.id === 'weather-change-simulator-5' || material.id === 'industrial-zone-map-5' || material.id === 'combination-simulator-6') ? (
                   <Typography variant="caption" sx={{ 
                     backgroundColor: 'success.main',
                     color: 'success.contrastText',
@@ -340,6 +352,9 @@ function App() {
           )}
           {selectedMaterial && selectedMaterial.id === 'industrial-zone-map-5' && (
             <IndustrialZoneMap />
+          )}
+          {selectedMaterial && selectedMaterial.id === 'combination-simulator-6' && (
+            <CombinationSimulator />
           )}
         </DialogContent>
       </Dialog>
