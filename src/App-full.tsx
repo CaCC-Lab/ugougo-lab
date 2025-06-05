@@ -48,6 +48,7 @@ import AlgebraicExpressionTool from './components/AlgebraicExpressionTool';
 import WaterStateAnimation from './components/WaterStateAnimation';
 import SpeedTimeDistanceSimulator from './components/SpeedTimeDistanceSimulator';
 import PendulumExperiment from './components/PendulumExperiment';
+import ProportionGraphTool from './components/ProportionGraphTool';
 
 // 学年別テーマ
 const themes = {
@@ -440,6 +441,14 @@ function AppFull() {
       subject: '理科',
       available: true,
     },
+    {
+      id: 'proportion-graph',
+      title: '比例・反比例グラフツール',
+      description: 'リアルタイムでグラフが変化！速さと時間、値段と個数など、実生活の例で比例・反比例を学べます。',
+      grade: '小学6年生',
+      subject: '算数',
+      available: true,
+    },
   ];
 
   return (
@@ -697,6 +706,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'pendulum-experiment' && (
             <PendulumExperiment onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'proportion-graph' && (
+            <ProportionGraphTool onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
