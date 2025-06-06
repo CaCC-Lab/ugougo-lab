@@ -1,5 +1,7 @@
-import { Button as MuiButton, ButtonProps as MuiButtonProps } from '@mui/material';
-import { motion, HTMLMotionProps } from 'framer-motion';
+import { Button as MuiButton } from '@mui/material';
+import type { ButtonProps as MuiButtonProps } from '@mui/material';
+import { motion } from 'framer-motion';
+import type { HTMLMotionProps } from 'framer-motion';
 
 // なぜ独自のButtonコンポーネントを作るか：
 // 1. アニメーション効果を統一的に追加

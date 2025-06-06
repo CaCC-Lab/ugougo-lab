@@ -4,10 +4,10 @@ import {
   InputLabel, 
   Select, 
   MenuItem, 
-  SelectChangeEvent,
   Chip,
   Box
 } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import type { GradeLevel } from '../../../types';
 import { GRADE_LEVEL_LABELS } from '../../../utils/constants';
 

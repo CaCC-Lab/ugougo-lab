@@ -1,5 +1,7 @@
-import { Card as MuiCard, CardProps as MuiCardProps, CardContent, CardActions } from '@mui/material';
-import { motion, HTMLMotionProps } from 'framer-motion';
+import { Card as MuiCard, CardContent, CardActions } from '@mui/material';
+import type { CardProps as MuiCardProps } from '@mui/material';
+import { motion } from 'framer-motion';
+import type { HTMLMotionProps } from 'framer-motion';
 import { ReactNode } from 'react';
 
 // なぜ独自のCardコンポーネントを作るか：

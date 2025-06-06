@@ -66,6 +66,11 @@ import CombinationSimulator from './components/CombinationSimulator';
 import HumanBodyAnimation from './components/HumanBodyAnimation';
 
 // 新しい教材のインポート（materials配下から）
+import { AbstractThinkingBridge } from './materials/elementary/grade4/integrated/AbstractThinkingBridge';
+import { FractionMasterTool } from './materials/elementary/grade3/math/FractionMasterTool';
+import { EnglishSpeakingPractice } from './materials/junior-high/grade1/english/EnglishSpeakingPractice';
+import { AlgebraIntroductionSystem } from './materials/junior-high/grade1/math/AlgebraIntroductionSystem';
+
 // TODO: MaterialComponentPropsの問題を解決後に有効化
 // import { NumberBlocks } from './materials/elementary/grade1/math';
 // import { TownExplorationMap } from './materials/elementary/grade2/life';
@@ -598,6 +603,38 @@ function AppFull() {
       subject: '理科',
       available: true,
     },
+    {
+      id: 'abstract-thinking-bridge',
+      title: '抽象的思考への橋',
+      description: '10歳の壁を越えよう！具体的な考え方から抽象的な考え方へ、段階的に理解を深める総合学習ツール。比例・面積・電気など複数教科を横断的に学習。',
+      grade: '小学4年生',
+      subject: '総合',
+      available: true,
+    },
+    {
+      id: 'fraction-master',
+      title: '分数マスターツール',
+      description: '分数の概念を視覚的に理解！ピザやケーキを使った分かりやすい表現で、大小比較・通分・四則演算をマスターしよう。',
+      grade: '小学3年生',
+      subject: '算数',
+      available: true,
+    },
+    {
+      id: 'english-speaking-practice',
+      title: '英語スピーキング練習',
+      description: '対話形式で英会話を練習しよう！選択式・並び替え式の問題で、正しい語順と発音を身につけます。日常会話・自己紹介・買い物など実践的なシナリオで学習。',
+      grade: '中学1年生',
+      subject: '英語',
+      available: true,
+    },
+    {
+      id: 'algebra-introduction',
+      title: '代数入門システム',
+      description: '算数から数学へ！具体的な数から文字式へ、天秤メタファーで方程式を理解。3段階の学習ステップで代数的思考を身につけます。',
+      grade: '中学1年生',
+      subject: '数学',
+      available: true,
+    },
   ];
 
   return (
@@ -966,6 +1003,18 @@ function AppFull() {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
+          )}
+          {selectedMaterial === 'abstract-thinking-bridge' && (
+            <AbstractThinkingBridge />
+          )}
+          {selectedMaterial === 'fraction-master' && (
+            <FractionMasterTool />
+          )}
+          {selectedMaterial === 'english-speaking-practice' && (
+            <EnglishSpeakingPractice />
+          )}
+          {selectedMaterial === 'algebra-introduction' && (
+            <AlgebraIntroductionSystem />
           )}
           {/* 新しい教材 - TODO: MaterialComponentPropsの問題を解決後に有効化 */}
           {/* {selectedMaterial === 'town-exploration-map' && (

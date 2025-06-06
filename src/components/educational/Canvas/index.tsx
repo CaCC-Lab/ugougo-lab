@@ -1,5 +1,6 @@
 import { useRef, useEffect, forwardRef } from 'react';
-import { Box, BoxProps } from '@mui/material';
+import { Box } from '@mui/material';
+import type { BoxProps } from '@mui/material';
 
 // なぜこのコンポーネントが必要か：
 // 1. 教材で共通して使用するCanvas要素のラッパー

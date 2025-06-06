@@ -38,6 +38,8 @@ import { useLearningStore } from '../../../stores/learningStore';
 import {
   generateEncouragement,
   analyzeErrorPattern,
+} from '../../../utils/learningSupport';
+import type {
   LearningHint,
   ConceptExplanation,
 } from '../../../utils/learningSupport';

@@ -1,6 +1,7 @@
 import { useRef, useCallback, useEffect } from 'react';
 import { Stage, Layer } from 'react-konva';
-import { Box, BoxProps } from '@mui/material';
+import { Box } from '@mui/material';
+import type { BoxProps } from '@mui/material';
 import Konva from 'konva';
 
 // なぜKonvaCanvasが必要か：

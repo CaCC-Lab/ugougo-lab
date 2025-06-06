@@ -23,6 +23,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import * as THREE from 'three';
+// @ts-ignore
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 interface CelestialMotionSimulatorProps {
@@ -113,8 +114,7 @@ const CelestialMotionSimulator: React.FC<CelestialMotionSimulatorProps> = ({ onC
     // 太陽
     const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
     const sunMaterial = new THREE.MeshBasicMaterial({ 
-      color: 0xffff00,
-      emissive: 0xffff00,
+      color: 0xffff00
     });
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
     scene.add(sun);
