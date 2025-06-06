@@ -1,1 +1,0 @@
-export { useWeatherSimulation } from './useWeatherSimulation';

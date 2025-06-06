@@ -1,1 +1,0 @@
-export { default as AngleMeasurementTool } from './AngleMeasurementTool';

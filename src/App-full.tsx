@@ -55,6 +55,15 @@ import CelestialMotionSimulator from './components/CelestialMotionSimulator';
 import TrigonometricFunctionGraph from './components/TrigonometricFunctionGraph';
 import CalculusVisualizer from './components/CalculusVisualizer';
 import PictureWordMatching from './components/PictureWordMatching';
+import TownExplorationMap from './components/TownExplorationMap';
+import InsectMetamorphosisSimulator from './components/InsectMetamorphosisSimulator';
+import CompassSimulator from './components/CompassSimulator';
+import AngleMeasurementTool from './components/AngleMeasurementTool';
+import PrefecturePuzzle from './components/PrefecturePuzzle';
+import WeatherChangeSimulator from './components/WeatherChangeSimulator';
+import IndustrialZoneMap from './components/IndustrialZoneMap';
+import CombinationSimulator from './components/CombinationSimulator';
+import HumanBodyAnimation from './components/HumanBodyAnimation';
 
 // 新しい教材のインポート（materials配下から）
 // TODO: MaterialComponentPropsの問題を解決後に有効化
@@ -516,6 +525,79 @@ function AppFull() {
       subject: '数学',
       available: true,
     },
+    // 新しい教材（0から作成）
+    {
+      id: 'town-exploration-map',
+      title: '町探検マップ',
+      description: '町のいろいろな場所をクリックして、どんな場所か調べてみよう！探検モードとクイズモードで楽しく学習できます。',
+      grade: '小学2年生',
+      subject: '生活科',
+      available: true,
+    },
+    {
+      id: 'insect-metamorphosis',
+      title: '昆虫の変態シミュレーター',
+      description: '昆虫の成長過程を観察しよう！完全変態と不完全変態の違いを、アニメーションで理解できます。',
+      grade: '小学3年生',
+      subject: '理科',
+      available: true,
+    },
+    {
+      id: 'compass-simulator',
+      title: 'コンパスシミュレーター',
+      description: '方位磁針の使い方を学習！地図と組み合わせて、方角の理解を深めよう。',
+      grade: '小学3年生',
+      subject: '社会',
+      available: true,
+    },
+    {
+      id: 'angle-measurement',
+      title: '角度測定器',
+      description: '分度器の使い方と角度測定を練習！インタラクティブな分度器で、正確な角度の測り方をマスターしよう。',
+      grade: '小学4年生',
+      subject: '算数',
+      available: true,
+    },
+    {
+      id: 'prefecture-puzzle',
+      title: '都道府県パズル',
+      description: '日本の都道府県を楽しく学習！パズルゲームで位置関係を覚えよう。県庁所在地や特産品も学べます。',
+      grade: '小学4年生',
+      subject: '社会',
+      available: true,
+    },
+    {
+      id: 'weather-change-simulator',
+      title: '天気の変化シミュレーター',
+      description: '気象の変化を観察！前線の動きや気圧配置から、天気の変化を予測してみよう。',
+      grade: '小学5年生',
+      subject: '理科',
+      available: true,
+    },
+    {
+      id: 'industrial-zone-map',
+      title: '工業地帯マップ',
+      description: '日本の工業地帯を学習！各地域の特色や主要な工業製品を、インタラクティブな地図で確認しよう。',
+      grade: '小学5年生',
+      subject: '社会',
+      available: true,
+    },
+    {
+      id: 'combination-simulator',
+      title: '場合の数シミュレーター',
+      description: '順列と組み合わせを視覚的に学習！樹形図や実例を通して、場合の数の考え方をマスターしよう。',
+      grade: '小学6年生',
+      subject: '算数',
+      available: true,
+    },
+    {
+      id: 'human-body-animation',
+      title: '人体の仕組みアニメーション',
+      description: '人体の器官と働きを学習！消化器系・呼吸器系・循環器系の動きをアニメーションで理解しよう。',
+      grade: '小学6年生',
+      subject: '理科',
+      available: true,
+    },
   ];
 
   return (
@@ -826,6 +908,61 @@ function AppFull() {
           )}
           {selectedMaterial === 'calculus-visualizer' && (
             <CalculusVisualizer onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {/* 新しい教材（0から作成） */}
+          {selectedMaterial === 'town-exploration-map' && (
+            <TownExplorationMap onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'insect-metamorphosis' && (
+            <InsectMetamorphosisSimulator onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'compass-simulator' && (
+            <CompassSimulator onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'angle-measurement' && (
+            <AngleMeasurementTool onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'prefecture-puzzle' && (
+            <PrefecturePuzzle onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'weather-change-simulator' && (
+            <WeatherChangeSimulator onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'industrial-zone-map' && (
+            <IndustrialZoneMap onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'combination-simulator' && (
+            <CombinationSimulator onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
+          )}
+          {selectedMaterial === 'human-body-animation' && (
+            <HumanBodyAnimation onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
