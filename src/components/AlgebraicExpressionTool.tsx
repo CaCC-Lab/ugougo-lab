@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -10,12 +10,9 @@ import {
   Paper,
   Grid,
   Divider,
-  Chip,
-  Alert,
   List,
   ListItem,
   ListItemText,
-  IconButton,
   ToggleButton,
   ToggleButtonGroup,
   useTheme,
@@ -28,6 +25,10 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { LearningAssistant } from './common/LearningAssistant';
+import { LearningMetrics } from './common/LearningMetrics';
+import { useLearningStore } from '../stores/learningStore';
+import { algebraicExpressionConcepts } from '../utils/learningSupport';
 
 // 式表示のスタイル
 const ExpressionBox = styled(Paper)(({ theme }) => ({
@@ -70,6 +71,12 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
   const [steps, setSteps] = useState<Step[]>([]);
   const [showSteps, setShowSteps] = useState(false);
   const [error, setError] = useState('');
+  
+  // 学習支援機能
+  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const [mistakes] = useState<{ problem: string; userAnswer: string; correctAnswer: string }[]>([]);
+  const { addRecord } = useLearningStore();
   
   // サンプル問題
   const sampleProblems = {
@@ -291,11 +298,33 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
     return steps;
   };
   
+  // 学習記録の保存
+  useEffect(() => {
+    // コンポーネントがアンマウントされる時に記録を保存
+    return () => {
+      if (steps.length > 0) {
+        const duration = Math.floor((Date.now() - startTime) / 1000);
+        const score = steps.some(s => s.explanation.includes('正しく')) ? 100 : 50;
+        
+        addRecord({
+          materialId: 'algebraic-expression',
+          timestamp: Date.now(),
+          duration,
+          score,
+          mistakes,
+          hintsUsed,
+          completed: true,
+        });
+      }
+    };
+  }, [steps, startTime, mistakes, hintsUsed, addRecord]);
+  
   // 式の処理
   const processExpression = () => {
     setError('');
     setSteps([]);
     setShowSteps(false);
+    setStartTime(Date.now()); // 計測開始
     
     if (!expression.trim()) {
       setError('式を入力してください');
@@ -528,6 +557,22 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
           </Grid>
         </CardContent>
       </Card>
+      {/* 学習支援コンポーネント */}
+      <LearningAssistant
+        materialId="algebraic-expression"
+        concept={operation === 'simplify' ? '同類項' : operation === 'expand' ? '分配法則' : '因数分解'}
+        currentProblem={expression}
+        concepts={algebraicExpressionConcepts}
+        onHintRequest={() => {
+          setHintsUsed((prev) => prev + 1);
+          // ヒントを表示する処理
+        }}
+      />
+      
+      {/* 学習指標表示 */}
+      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+        <LearningMetrics materialId="algebraic-expression" />
+      </Box>
     </Container>
   );
 };

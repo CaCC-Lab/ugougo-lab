@@ -6,3 +6,5 @@ export { Button } from './Button';
 export { Card } from './Card';
 export { GradeSelector } from './GradeSelector';
 export { AppThemeProvider } from './ThemeProvider';
+export { LearningAssistant } from './LearningAssistant';
+export { LearningMetrics } from './LearningMetrics';
