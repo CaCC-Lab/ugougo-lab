@@ -68,7 +68,7 @@ import HumanBodyAnimation from './components/HumanBodyAnimation';
 // 新しい教材のインポート（materials配下から）
 import { AbstractThinkingBridge } from './materials/elementary/grade4/integrated/AbstractThinkingBridge';
 import { FractionMasterTool } from './materials/elementary/grade3/math/FractionMasterTool';
-import { EnglishSpeakingPractice } from './materials/junior-high/grade1/english/EnglishSpeakingPractice';
+import { EnglishSpeakingPractice, PronunciationPractice } from './materials/junior-high/grade1/english';
 import { AlgebraIntroductionSystem } from './materials/junior-high/grade1/math/AlgebraIntroductionSystem';
 
 // TODO: MaterialComponentPropsの問題を解決後に有効化
@@ -628,6 +628,14 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'pronunciation-practice',
+      title: '発音練習ツール',
+      description: '英語の音素（母音・子音）から単語まで段階的に発音を練習！音声認識AIがあなたの発音を評価。日本人が苦手な音を重点的に学習できます。',
+      grade: '中学1年生',
+      subject: '英語',
+      available: true,
+    },
+    {
       id: 'algebra-introduction',
       title: '代数入門システム',
       description: '算数から数学へ！具体的な数から文字式へ、天秤メタファーで方程式を理解。3段階の学習ステップで代数的思考を身につけます。',
@@ -1012,6 +1020,9 @@ function AppFull() {
           )}
           {selectedMaterial === 'english-speaking-practice' && (
             <EnglishSpeakingPractice />
+          )}
+          {selectedMaterial === 'pronunciation-practice' && (
+            <PronunciationPractice />
           )}
           {selectedMaterial === 'algebra-introduction' && (
             <AlgebraIntroductionSystem />
