@@ -11,12 +11,12 @@ import {
   Tab,
   FormControl,
   Select,
-  MenuItem,
-  SelectChangeEvent
+  MenuItem
 } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import { motion } from 'framer-motion';
 import { phonemeData, getPhonemesByDifficulty, getPhonemesByType } from '../data/phonemeData';
-import { Phoneme } from '../data/phonemeData';
+import type { Phoneme } from '../data/phonemeData';
 
 interface PhonemeSelectorProps {
   onSelectPhoneme: (phoneme: Phoneme) => void;

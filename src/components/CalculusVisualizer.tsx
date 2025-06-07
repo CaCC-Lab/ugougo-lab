@@ -78,7 +78,7 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
     return (x: number): number => {
       try {
         // 簡単な関数パーサー
-        let processedExpr = expr
+        const processedExpr = expr
           .replace(/\^/g, '**')
           .replace(/sin/g, 'Math.sin')
           .replace(/cos/g, 'Math.cos')

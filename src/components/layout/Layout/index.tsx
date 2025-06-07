@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Box, Container, Drawer, useTheme, useMediaQuery } from '@mui/material';
 import { Header } from '../Header';
 import type { GradeLevel } from '../../../types';

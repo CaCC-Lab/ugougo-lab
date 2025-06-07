@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { phonemeData, Phoneme } from '../data/phonemeData';
+import { phonemeData } from '../data/phonemeData';
+import type { Phoneme } from '../data/phonemeData';
 
 export interface PracticeResult {
   phonemeId: string;

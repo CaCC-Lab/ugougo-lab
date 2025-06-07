@@ -2,7 +2,7 @@ import { Card as MuiCard, CardContent, CardActions } from '@mui/material';
 import type { CardProps as MuiCardProps } from '@mui/material';
 import { motion } from 'framer-motion';
 import type { HTMLMotionProps } from 'framer-motion';
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 // なぜ独自のCardコンポーネントを作るか：
 // 1. 教材カードとして統一的なデザインを提供

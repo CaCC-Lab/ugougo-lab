@@ -2,6 +2,21 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ 重要な開発ルール
+
+### TypeScriptインターフェースのインポート【必須】
+**必ず `import type` を使用してください！**
+
+```typescript
+// ✅ 正しい
+import type { SomeInterface } from './module';
+
+// ❌ 間違い - ランタイムエラーを引き起こす
+import { SomeInterface } from './module';
+```
+
+詳細は `DEVELOPMENT_RULES.md` を参照。
+
 ## プロジェクト概要
 
 「動く教材」 - 小学生から高校生向けのインタラクティブな学習教材プラットフォーム。視覚的・動的な表現で抽象的な概念の理解を促進する教育ツール。

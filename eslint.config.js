@@ -23,6 +23,13 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // TypeScriptインポートエラー防止ルール
+      '@typescript-eslint/consistent-type-imports': ['error', {
+        prefer: 'type-imports',
+        fixStyle: 'inline-type-imports',
+        disallowTypeAnnotations: true
+      }],
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 )

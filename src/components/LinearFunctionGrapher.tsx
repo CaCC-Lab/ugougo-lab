@@ -218,8 +218,8 @@ function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
     // 実際の値を使用（実生活モードの場合）
     let actualA1 = a1;
     let actualB1 = b1;
-    let actualA2 = a2;
-    let actualB2 = b2;
+    const actualA2 = a2;
+    const actualB2 = b2;
     
     if (mode === 'realLife') {
       const example = realLifeExamples[realLifeExample];

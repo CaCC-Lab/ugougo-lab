@@ -25,7 +25,7 @@ import {
   Info as InfoIcon
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phoneme } from '../data/phonemeData';
+import type { Phoneme } from '../data/phonemeData';
 
 interface PracticeInterfaceProps {
   phoneme: Phoneme;

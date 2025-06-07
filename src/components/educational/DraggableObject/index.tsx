@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 import { Group, Rect, Text, Circle } from 'react-konva';
-import Konva from 'konva';
+import type Konva from 'konva';
 
 // なぜDraggableObjectが必要か：
 // 1. 教材で頻繁に使用されるドラッグ可能オブジェクトの共通実装

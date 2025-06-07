@@ -2,7 +2,7 @@ import { useRef, useCallback, useEffect } from 'react';
 import { Stage, Layer } from 'react-konva';
 import { Box } from '@mui/material';
 import type { BoxProps } from '@mui/material';
-import Konva from 'konva';
+import type Konva from 'konva';
 
 // なぜKonvaCanvasが必要か：
 // 1. 複雑なアニメーションとインタラクションを効率的に処理

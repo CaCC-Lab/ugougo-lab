@@ -304,6 +304,14 @@
 ### 2025年6月5日 - 優先度高の教材実装
 ### 2025年6月6日 - 「10歳の壁」対策教材実装完了
 ### 2025年6月6日 - 学習困難領域対応教材の実装
+### 2025年6月7日 - TypeScriptインポートエラー対策の実装
+- [x] 発音練習ツール（中学1年英語）の実装完了
+- [x] TypeScriptインポートエラーの根本対策実施
+  - [x] IMPORT_ERROR_PREVENTION.md 作成
+  - [x] DEVELOPMENT_RULES.md 更新
+  - [x] ESLint設定でconsistent-type-importsルール追加
+  - [x] tsconfig.jsonでisolatedModules設定
+  - [x] 全プロジェクトファイルの型インポート修正
 - [x] 分数マスターツール（小学生の最大躓きポイント対応）
 - [x] 英語スピーキング練習システム（正答率12.4%の課題に対応）
 - [x] 代数入門システム（算数から数学への転換支援）
@@ -384,3 +392,32 @@
 - 各タスクの完了時は、レビューとテストを必須とする
 - 新しいタスクは適切な優先度に配置する
 - 定期的にこのリストを見直し、優先順位を調整する
+
+## 🚨 重要な開発上の注意事項
+
+### TypeScriptインターフェースのインポートエラー対策（2025/06/06記録）
+
+#### 問題
+- 頻発するエラー: `Uncaught SyntaxError: The requested module does not provide an export named 'InterfaceName'`
+- 原因: TypeScriptのインターフェースは型定義のみで、実行時には存在しない
+- Viteが型のインポートを値のインポートと混同してランタイムエラーが発生
+
+#### 解決策
+```typescript
+// ❌ 間違い - ランタイムエラーを引き起こす
+import { SomeInterface, someFunction } from './module';
+
+// ✅ 正しい - 型と値を分けてインポート
+import { someFunction } from './module';
+import type { SomeInterface } from './module';
+```
+
+#### 対策実施済み
+1. **DEVELOPMENT_RULES.md** - 型インポートルールの文書化
+2. **CLAUDE.md** - 重要な開発ルールとして最優先記載
+3. 全プロジェクトで `import type` の使用を必須化
+
+#### 今後の開発で必ず守ること
+- 新しいコンポーネント作成時は型に `import type` を使用
+- PRレビュー時に型インポートを必ずチェック
+- ブラウザコンソールでエラー確認を徹底

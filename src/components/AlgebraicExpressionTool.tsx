@@ -103,7 +103,7 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
   // 式の簡略化（同類項の整理）
   const simplifyExpression = (expr: string): Step[] => {
     const steps: Step[] = [];
-    let current = expr.replace(/\s/g, '');
+    const current = expr.replace(/\s/g, '');
     
     // ステップ1: 元の式
     steps.push({
