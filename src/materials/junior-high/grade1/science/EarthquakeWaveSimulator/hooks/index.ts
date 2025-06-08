@@ -1,0 +1,1 @@
+export { useEarthquakeSimulation } from './useEarthquakeSimulation';

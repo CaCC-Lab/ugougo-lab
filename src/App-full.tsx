@@ -70,6 +70,10 @@ import { AbstractThinkingBridge } from './materials/elementary/grade4/integrated
 import { FractionMasterTool } from './materials/elementary/grade3/math/FractionMasterTool';
 import { EnglishSpeakingPractice, PronunciationPractice } from './materials/junior-high/grade1/english';
 import { AlgebraIntroductionSystem } from './materials/junior-high/grade1/math/AlgebraIntroductionSystem';
+import { EarthquakeWaveSimulator } from './materials/junior-high/grade1/science';
+import { TimeZoneCalculator } from './materials/junior-high/grade1/social';
+import { ProofStepBuilder } from './materials/junior-high/grade2/math';
+import { ElectricityExperiment } from './materials/junior-high/grade2/science';
 
 // TODO: MaterialComponentPropsの問題を解決後に有効化
 // import { NumberBlocks } from './materials/elementary/grade1/math';
@@ -419,6 +423,14 @@ function AppFull() {
       available: true,
     },
     {
+      id: 'electricity-experiment',
+      title: '電流・電圧・抵抗の関係実験器',
+      description: 'オームの法則を体験的に学習！回路を組み立てて、電流・電圧・抵抗の関係をリアルタイムで観察。直列・並列回路の特性も理解できます。',
+      grade: '中学2年生',
+      subject: '理科',
+      available: true,
+    },
+    {
       id: 'sorting-algorithm',
       title: 'ソートアルゴリズム可視化',
       description: '様々なソートアルゴリズムの動作を視覚的に理解しよう！プログラミング思考を身につけます。',
@@ -640,6 +652,30 @@ function AppFull() {
       title: '代数入門システム',
       description: '算数から数学へ！具体的な数から文字式へ、天秤メタファーで方程式を理解。3段階の学習ステップで代数的思考を身につけます。',
       grade: '中学1年生',
+      subject: '数学',
+      available: true,
+    },
+    {
+      id: 'earthquake-wave-simulator',
+      title: '地震波シミュレーター',
+      description: 'P波とS波の違いを視覚的に理解！震源からの距離と揺れの関係、地震波の伝わり方をリアルタイムでシミュレーション。緊急地震速報の仕組みも学習できます。',
+      grade: '中学1年生',
+      subject: '理科',
+      available: true,
+    },
+    {
+      id: 'time-zone-calculator',
+      title: '時差計算ツール',
+      description: '世界の主要都市の時差を視覚的に学習！地球の自転と時差の関係、日付変更線の概念を実践的に理解。クイズモードで理解度をチェックできます。',
+      grade: '中学1年生',
+      subject: '社会',
+      available: true,
+    },
+    {
+      id: 'proof-step-builder',
+      title: '証明ステップビルダー',
+      description: '幾何学的証明を段階的に構築！ドラッグ&ドロップで証明の流れを組み立て、論理的思考力を養います。合同証明から始めて上級問題まで挑戦できます。',
+      grade: '中学2年生',
       subject: '数学',
       available: true,
     },
@@ -873,6 +909,9 @@ function AppFull() {
               setSelectedMaterial('');
             }} />
           )}
+          {selectedMaterial === 'electricity-experiment' && (
+            <ElectricityExperiment />
+          )}
           {selectedMaterial === 'sorting-algorithm' && (
             <SortingVisualization onClose={() => {
               setMaterialOpen(false);
@@ -1026,6 +1065,15 @@ function AppFull() {
           )}
           {selectedMaterial === 'algebra-introduction' && (
             <AlgebraIntroductionSystem />
+          )}
+          {selectedMaterial === 'earthquake-wave-simulator' && (
+            <EarthquakeWaveSimulator />
+          )}
+          {selectedMaterial === 'time-zone-calculator' && (
+            <TimeZoneCalculator />
+          )}
+          {selectedMaterial === 'proof-step-builder' && (
+            <ProofStepBuilder />
           )}
           {/* 新しい教材 - TODO: MaterialComponentPropsの問題を解決後に有効化 */}
           {/* {selectedMaterial === 'town-exploration-map' && (
