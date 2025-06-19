@@ -78,7 +78,7 @@ export default function FractionMasterTool() {
         difficulty: 'medium'
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ height: '100%', overflow: 'auto' }}>
         <Tabs
           value={mode}
           onChange={handleTabChange}

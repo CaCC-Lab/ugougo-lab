@@ -362,12 +362,16 @@ const ClockLearningTool: React.FC<ClockLearningToolProps> = ({ onClose }) => {
             
             <Grid item xs={12} md={6}>
               <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="h6" gutterBottom>
-                  デジタル表示
-                </Typography>
-                <DigitalDisplay elevation={3}>
-                  {formatTime(hour, minute)}
-                </DigitalDisplay>
+                {(mode === 'practice' || (mode === 'quiz' && selectedAnswer)) && (
+                  <>
+                    <Typography variant="h6" gutterBottom>
+                      デジタル表示
+                    </Typography>
+                    <DigitalDisplay elevation={3}>
+                      {formatTime(hour, minute)}
+                    </DigitalDisplay>
+                  </>
+                )}
                 
                 {mode === 'practice' && (
                   <Box sx={{ mt: 3 }}>

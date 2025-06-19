@@ -109,6 +109,7 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
   const [targetArea, setTargetArea] = useState(100);
   const [showAnimation, setShowAnimation] = useState(false);
   const [challengeDialog, setChallengeDialog] = useState(false);
+  const [triangleMode, setTriangleMode] = useState<'free' | 'isosceles' | 'equilateral'>('free');
   
   // 図形の初期化
   const initializeShape = (type: Shape['type']) => {
@@ -139,14 +140,39 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
         });
         break;
       case 'triangle':
-        setShape({
-          type,
-          vertices: [
-            { x: centerX, y: centerY - 60 },
-            { x: centerX + 60, y: centerY + 40 },
-            { x: centerX - 60, y: centerY + 40 },
-          ],
-        });
+        if (triangleMode === 'equilateral') {
+          // 正三角形
+          const sideLength = 100;
+          const height = (Math.sqrt(3) / 2) * sideLength;
+          setShape({
+            type,
+            vertices: [
+              { x: centerX, y: centerY - height / 2 },
+              { x: centerX + sideLength / 2, y: centerY + height / 2 },
+              { x: centerX - sideLength / 2, y: centerY + height / 2 },
+            ],
+          });
+        } else if (triangleMode === 'isosceles') {
+          // 二等辺三角形
+          setShape({
+            type,
+            vertices: [
+              { x: centerX, y: centerY - 60 },
+              { x: centerX + 50, y: centerY + 40 },
+              { x: centerX - 50, y: centerY + 40 },
+            ],
+          });
+        } else {
+          // 自由モード
+          setShape({
+            type,
+            vertices: [
+              { x: centerX, y: centerY - 60 },
+              { x: centerX + 60, y: centerY + 40 },
+              { x: centerX - 60, y: centerY + 40 },
+            ],
+          });
+        }
         break;
       case 'parallelogram':
         setShape({
@@ -162,63 +188,91 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
     }
   };
   
-  // 面積の計算
+  // 面積の計算（Shoelace formula使用）
   const calculateArea = (): number => {
-    const { type, vertices } = shape;
+    const { vertices } = shape;
     
-    switch (type) {
-      case 'square':
-      case 'rectangle': {
-        const width = Math.abs(vertices[1].x - vertices[0].x);
-        const height = Math.abs(vertices[2].y - vertices[1].y);
-        return (width * height) / 400; // 20px = 1cm
-      }
-      case 'triangle': {
-        // ヘロンの公式を使用
-        const a = Math.sqrt(Math.pow(vertices[1].x - vertices[0].x, 2) + Math.pow(vertices[1].y - vertices[0].y, 2));
-        const b = Math.sqrt(Math.pow(vertices[2].x - vertices[1].x, 2) + Math.pow(vertices[2].y - vertices[1].y, 2));
-        const c = Math.sqrt(Math.pow(vertices[0].x - vertices[2].x, 2) + Math.pow(vertices[0].y - vertices[2].y, 2));
-        const s = (a + b + c) / 2;
-        const area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
-        return area / 400;
-      }
-      case 'parallelogram': {
-        // ベクトルの外積を使用
-        const base = Math.sqrt(Math.pow(vertices[1].x - vertices[0].x, 2) + Math.pow(vertices[1].y - vertices[0].y, 2));
-        const v1 = { x: vertices[1].x - vertices[0].x, y: vertices[1].y - vertices[0].y };
-        const v2 = { x: vertices[3].x - vertices[0].x, y: vertices[3].y - vertices[0].y };
-        const height = Math.abs(v1.x * v2.y - v1.y * v2.x) / base;
-        return (base * height) / 400;
-      }
-      default:
-        return 0;
+    // Shoelace formula（ガウスの面積公式）
+    let area = 0;
+    const n = vertices.length;
+    
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      area += vertices[i].x * vertices[j].y;
+      area -= vertices[j].x * vertices[i].y;
     }
+    
+    area = Math.abs(area) / 2;
+    return area / 400; // 20px = 1cm, 400 = 20²
   };
   
+  // 図形の辺の長さを計算
+  const getDistance = (p1: Point, p2: Point): number => {
+    return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2)) / 20;
+  };
+
   // 面積の公式を取得
   const getFormula = (): string => {
     const { type, vertices } = shape;
     
     switch (type) {
       case 'square': {
-        const side = Math.abs(vertices[1].x - vertices[0].x) / 20;
-        return `一辺 × 一辺 = ${side.toFixed(1)} × ${side.toFixed(1)}`;
+        // すべての辺の長さを計算して平均を取る（正方形なのでほぼ同じはず）
+        const sides = [
+          getDistance(vertices[0], vertices[1]),
+          getDistance(vertices[1], vertices[2]),
+          getDistance(vertices[2], vertices[3]),
+          getDistance(vertices[3], vertices[0])
+        ];
+        const avgSide = sides.reduce((a, b) => a + b) / sides.length;
+        return `一辺 × 一辺 = ${avgSide.toFixed(1)} × ${avgSide.toFixed(1)}`;
       }
       case 'rectangle': {
-        const width = Math.abs(vertices[1].x - vertices[0].x) / 20;
-        const height = Math.abs(vertices[2].y - vertices[1].y) / 20;
+        // 隣接する2辺の長さを取得
+        const width = getDistance(vertices[0], vertices[1]);
+        const height = getDistance(vertices[1], vertices[2]);
         return `たて × よこ = ${height.toFixed(1)} × ${width.toFixed(1)}`;
       }
       case 'triangle': {
-        const base = Math.abs(vertices[2].x - vertices[1].x) / 20;
-        const height = Math.abs(vertices[0].y - vertices[1].y) / 20;
-        return `底辺 × 高さ ÷ 2 = ${base.toFixed(1)} × ${height.toFixed(1)} ÷ 2`;
+        const area = calculateArea();
+        const sides = [
+          getDistance(vertices[0], vertices[1]),
+          getDistance(vertices[1], vertices[2]),
+          getDistance(vertices[2], vertices[0])
+        ];
+        
+        if (triangleMode === 'isosceles') {
+          // 二等辺三角形の公式表示
+          const base = getDistance(vertices[1], vertices[2]);
+          
+          // 底辺の中点
+          const midX = (vertices[1].x + vertices[2].x) / 2;
+          const midY = (vertices[1].y + vertices[2].y) / 2;
+          
+          // 頂点から底辺の中点までの距離（高さ）
+          const height = Math.sqrt(
+            Math.pow(vertices[0].x - midX, 2) + 
+            Math.pow(vertices[0].y - midY, 2)
+          ) / 20;
+          
+          return `底辺 × 高さ ÷ 2 = ${base.toFixed(1)} × ${height.toFixed(1)} ÷ 2`;
+        } else if (triangleMode === 'equilateral') {
+          // 正三角形の公式表示
+          const side = sides[0]; // すべての辺が等しい
+          return `(√3 ÷ 4) × 一辺² = (√3 ÷ 4) × ${side.toFixed(1)}²`;
+        } else {
+          // 自由モード
+          return `面積 = ${area.toFixed(1)} cm²`;
+        }
       }
       case 'parallelogram': {
-        const base = Math.sqrt(Math.pow(vertices[1].x - vertices[0].x, 2) + Math.pow(vertices[1].y - vertices[0].y, 2)) / 20;
+        // 底辺と高さを計算
+        const base = getDistance(vertices[0], vertices[1]);
         const v1 = { x: vertices[1].x - vertices[0].x, y: vertices[1].y - vertices[0].y };
         const v2 = { x: vertices[3].x - vertices[0].x, y: vertices[3].y - vertices[0].y };
-        const height = Math.abs(v1.x * v2.y - v1.y * v2.x) / Math.sqrt(v1.x * v1.x + v1.y * v1.y) / 20;
+        const crossProduct = Math.abs(v1.x * v2.y - v1.y * v2.x);
+        const baseLength = Math.sqrt(v1.x * v1.x + v1.y * v1.y);
+        const height = crossProduct / baseLength / 20;
         return `底辺 × 高さ = ${base.toFixed(1)} × ${height.toFixed(1)}`;
       }
       default:
@@ -244,15 +298,46 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
     
     // 正方形と長方形の場合は、形状を維持
     if (shape.type === 'square') {
-      const dx = x - shape.vertices[draggedVertex].x;
-      const dy = y - shape.vertices[draggedVertex].y;
-      const avgDelta = (Math.abs(dx) + Math.abs(dy)) / 2;
+      // 対角の頂点を固定点として正方形を維持（軸に平行）
+      const oppositeIndex = (draggedVertex + 2) % 4;
+      const oppositeVertex = shape.vertices[oppositeIndex];
       
-      // 対角の頂点を特定して、正方形を維持
+      // 正方形の中心点
+      const centerX = (x + oppositeVertex.x) / 2;
+      const centerY = (y + oppositeVertex.y) / 2;
+      
+      // マウス位置から中心までの距離（対角線の半分）
+      const dx = x - centerX;
+      const dy = y - centerY;
+      
+      // 正方形の一辺の長さ（対角線から計算）
+      const halfSide = Math.max(Math.abs(dx), Math.abs(dy));
+      
+      // 各頂点の位置を中心から計算（軸に平行な正方形）
       if (draggedVertex === 0) {
-        newVertices[1] = { x: newVertices[0].x + avgDelta, y: newVertices[0].y };
-        newVertices[2] = { x: newVertices[0].x + avgDelta, y: newVertices[0].y + avgDelta };
-        newVertices[3] = { x: newVertices[0].x, y: newVertices[0].y + avgDelta };
+        // 左上
+        newVertices[0] = { x: centerX - halfSide, y: centerY - halfSide };
+        newVertices[1] = { x: centerX + halfSide, y: centerY - halfSide };
+        newVertices[2] = { x: centerX + halfSide, y: centerY + halfSide };
+        newVertices[3] = { x: centerX - halfSide, y: centerY + halfSide };
+      } else if (draggedVertex === 1) {
+        // 右上
+        newVertices[0] = { x: centerX - halfSide, y: centerY - halfSide };
+        newVertices[1] = { x: centerX + halfSide, y: centerY - halfSide };
+        newVertices[2] = { x: centerX + halfSide, y: centerY + halfSide };
+        newVertices[3] = { x: centerX - halfSide, y: centerY + halfSide };
+      } else if (draggedVertex === 2) {
+        // 右下
+        newVertices[0] = { x: centerX - halfSide, y: centerY - halfSide };
+        newVertices[1] = { x: centerX + halfSide, y: centerY - halfSide };
+        newVertices[2] = { x: centerX + halfSide, y: centerY + halfSide };
+        newVertices[3] = { x: centerX - halfSide, y: centerY + halfSide };
+      } else if (draggedVertex === 3) {
+        // 左下
+        newVertices[0] = { x: centerX - halfSide, y: centerY - halfSide };
+        newVertices[1] = { x: centerX + halfSide, y: centerY - halfSide };
+        newVertices[2] = { x: centerX + halfSide, y: centerY + halfSide };
+        newVertices[3] = { x: centerX - halfSide, y: centerY + halfSide };
       }
     } else if (shape.type === 'rectangle' && draggedVertex < 4) {
       // 長方形の頂点を調整
@@ -262,6 +347,138 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
       
       newVertices[adj1] = { x: newVertices[draggedVertex].x, y: newVertices[opposite].y };
       newVertices[adj2] = { x: newVertices[opposite].x, y: newVertices[draggedVertex].y };
+    } else if (shape.type === 'triangle') {
+      // 三角形のモードに応じて制約を適用
+      if (triangleMode === 'isosceles') {
+        // 二等辺三角形: 頂点から底辺の両端までの距離が等しい
+        if (draggedVertex === 0) {
+          // 頂点（上）を動かす場合
+          const base1 = shape.vertices[1];
+          const base2 = shape.vertices[2];
+          const midX = (base1.x + base2.x) / 2;
+          
+          // 頂点は底辺の中点の垂線上に制約
+          newVertices[0] = { x: midX, y: y };
+        } else if (draggedVertex === 1 || draggedVertex === 2) {
+          // 底辺の端点を動かす場合
+          const topVertex = shape.vertices[0];
+          const otherBaseIndex = draggedVertex === 1 ? 2 : 1;
+          const otherBase = shape.vertices[otherBaseIndex];
+          
+          // ドラッグした頂点を更新
+          newVertices[draggedVertex] = { x, y };
+          
+          // 新しい底辺の中点
+          const newMidX = (x + otherBase.x) / 2;
+          const newMidY = (y + otherBase.y) / 2;
+          
+          // 底辺の長さ
+          const baseLength = Math.sqrt(Math.pow(x - otherBase.x, 2) + Math.pow(y - otherBase.y, 2));
+          
+          // 元の高さを計算（頂点から底辺への垂直距離）
+          const baseVector = { x: x - otherBase.x, y: y - otherBase.y };
+          const baseUnitVector = {
+            x: baseVector.x / baseLength,
+            y: baseVector.y / baseLength
+          };
+          
+          // 90度回転した垂直ベクトル
+          const perpVector = { x: -baseUnitVector.y, y: baseUnitVector.x };
+          
+          // 元の頂点が底辺のどちら側にあるかを判定
+          const oldMidX = (shape.vertices[1].x + shape.vertices[2].x) / 2;
+          const oldMidY = (shape.vertices[1].y + shape.vertices[2].y) / 2;
+          const vectorToTop = {
+            x: topVertex.x - oldMidX,
+            y: topVertex.y - oldMidY
+          };
+          
+          // 新しい底辺の垂直ベクトルと元のベクトルの内積で向きを判定
+          const dotProduct = perpVector.x * vectorToTop.x + perpVector.y * vectorToTop.y;
+          const direction = dotProduct >= 0 ? 1 : -1;
+          
+          // 元の高さを計算
+          const originalHeight = Math.sqrt(
+            Math.pow(vectorToTop.x, 2) + Math.pow(vectorToTop.y, 2)
+          );
+          
+          // 頂点を底辺の垂直二等分線上に配置（向きを保持）
+          newVertices[0] = {
+            x: newMidX + perpVector.x * originalHeight * direction,
+            y: newMidY + perpVector.y * originalHeight * direction
+          };
+        }
+      } else if (triangleMode === 'equilateral') {
+        // 正三角形: すべての辺が等しい
+        if (draggedVertex === 0) {
+          // 頂点（上）を動かす場合
+          const base1 = shape.vertices[1];
+          const base2 = shape.vertices[2];
+          const midX = (base1.x + base2.x) / 2;
+          const midY = (base1.y + base2.y) / 2;
+          
+          // 底辺の長さ
+          const baseLength = Math.sqrt(Math.pow(base2.x - base1.x, 2) + Math.pow(base2.y - base1.y, 2));
+          
+          // 正三角形の高さ = (√3/2) * 辺の長さ
+          const height = (Math.sqrt(3) / 2) * baseLength;
+          
+          // 頂点は底辺の中点から垂直に高さ分離れた位置
+          const baseAngle = Math.atan2(base2.y - base1.y, base2.x - base1.x);
+          newVertices[0] = {
+            x: midX - height * Math.sin(baseAngle),
+            y: midY - height * Math.cos(baseAngle)
+          };
+        } else if (draggedVertex === 1 || draggedVertex === 2) {
+          // 底辺の端点を動かす場合：新しい正三角形を構築
+          const fixedIndex = draggedVertex === 1 ? 2 : 1;
+          const fixedVertex = shape.vertices[fixedIndex];
+          
+          // 新しい辺の長さ
+          const newSideLength = Math.sqrt(Math.pow(x - fixedVertex.x, 2) + Math.pow(y - fixedVertex.y, 2));
+          
+          // 新しい頂点位置を計算
+          const angle = Math.atan2(y - fixedVertex.y, x - fixedVertex.x);
+          
+          // ドラッグした頂点
+          newVertices[draggedVertex] = { x, y };
+          
+          // もう一つの頂点（60度回転）
+          const thirdAngle = angle - Math.PI / 3;
+          newVertices[0] = {
+            x: fixedVertex.x + newSideLength * Math.cos(thirdAngle),
+            y: fixedVertex.y + newSideLength * Math.sin(thirdAngle)
+          };
+        }
+      }
+      // else: 自由モード（制約なし）
+    } else if (shape.type === 'parallelogram') {
+      // 平行四辺形の性質を維持
+      if (draggedVertex === 0) {
+        // 左上をドラッグ
+        const dx = x - shape.vertices[0].x;
+        const dy = y - shape.vertices[0].y;
+        newVertices[0] = { x, y };
+        newVertices[3] = { x: shape.vertices[3].x + dx, y: shape.vertices[3].y + dy };
+      } else if (draggedVertex === 1) {
+        // 右上をドラッグ
+        const dx = x - shape.vertices[1].x;
+        const dy = y - shape.vertices[1].y;
+        newVertices[1] = { x, y };
+        newVertices[2] = { x: shape.vertices[2].x + dx, y: shape.vertices[2].y + dy };
+      } else if (draggedVertex === 2) {
+        // 右下をドラッグ
+        const dx = x - shape.vertices[2].x;
+        const dy = y - shape.vertices[2].y;
+        newVertices[2] = { x, y };
+        newVertices[1] = { x: shape.vertices[1].x + dx, y: shape.vertices[1].y + dy };
+      } else if (draggedVertex === 3) {
+        // 左下をドラッグ
+        const dx = x - shape.vertices[3].x;
+        const dy = y - shape.vertices[3].y;
+        newVertices[3] = { x, y };
+        newVertices[0] = { x: shape.vertices[0].x + dx, y: shape.vertices[0].y + dy };
+      }
     }
     
     setShape({ ...shape, vertices: newVertices });
@@ -275,8 +492,19 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
   const handleShapeTypeChange = (_: React.MouseEvent<HTMLElement>, newType: Shape['type'] | null) => {
     if (newType) {
       setShapeType(newType);
+      if (newType !== 'triangle') {
+        setTriangleMode('free'); // 三角形以外に変更したらモードをリセット
+      }
       initializeShape(newType);
       setShowAnimation(false);
+    }
+  };
+  
+  // 三角形モードの変更
+  const handleTriangleModeChange = (mode: 'free' | 'isosceles' | 'equilateral') => {
+    setTriangleMode(mode);
+    if (shapeType === 'triangle') {
+      initializeShape('triangle');
     }
   };
   
@@ -354,6 +582,32 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
                 </ToggleButtonGroup>
               </Box>
               
+              {/* 三角形モード選択 */}
+              {shapeType === 'triangle' && (
+                <Box sx={{ mb: 2 }}>
+                  <ButtonGroup variant="outlined" size={isMobile ? 'small' : 'medium'}>
+                    <Button
+                      onClick={() => handleTriangleModeChange('free')}
+                      variant={triangleMode === 'free' ? 'contained' : 'outlined'}
+                    >
+                      自由
+                    </Button>
+                    <Button
+                      onClick={() => handleTriangleModeChange('isosceles')}
+                      variant={triangleMode === 'isosceles' ? 'contained' : 'outlined'}
+                    >
+                      二等辺三角形
+                    </Button>
+                    <Button
+                      onClick={() => handleTriangleModeChange('equilateral')}
+                      variant={triangleMode === 'equilateral' ? 'contained' : 'outlined'}
+                    >
+                      正三角形
+                    </Button>
+                  </ButtonGroup>
+                </Box>
+              )}
+              
               <CanvasContainer
                 ref={canvasRef}
                 elevation={3}
@@ -381,6 +635,74 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
                     stroke={theme.palette.primary.main}
                     strokeWidth="2"
                   />
+                  
+                  {/* 二等辺三角形の高さと等しい辺の表示 */}
+                  {shape.type === 'triangle' && triangleMode === 'isosceles' && (
+                    <>
+                      {/* 高さの線 */}
+                      <line
+                        x1={(shape.vertices[1].x + shape.vertices[2].x) / 2}
+                        y1={(shape.vertices[1].y + shape.vertices[2].y) / 2}
+                        x2={shape.vertices[0].x}
+                        y2={shape.vertices[0].y}
+                        stroke={theme.palette.secondary.main}
+                        strokeWidth="1"
+                        strokeDasharray="3,3"
+                        opacity={0.7}
+                      />
+                      <circle
+                        cx={(shape.vertices[1].x + shape.vertices[2].x) / 2}
+                        cy={(shape.vertices[1].y + shape.vertices[2].y) / 2}
+                        r="3"
+                        fill={theme.palette.secondary.main}
+                        opacity={0.7}
+                      />
+                      
+                      {/* 等しい辺にマーカー */}
+                      <circle
+                        cx={(shape.vertices[0].x + shape.vertices[1].x) / 2}
+                        cy={(shape.vertices[0].y + shape.vertices[1].y) / 2}
+                        r="4"
+                        fill={theme.palette.info.main}
+                        opacity={0.8}
+                      />
+                      <circle
+                        cx={(shape.vertices[0].x + shape.vertices[2].x) / 2}
+                        cy={(shape.vertices[0].y + shape.vertices[2].y) / 2}
+                        r="4"
+                        fill={theme.palette.info.main}
+                        opacity={0.8}
+                      />
+                    </>
+                  )}
+                  
+                  {/* 正三角形の等しい辺の表示 */}
+                  {shape.type === 'triangle' && triangleMode === 'equilateral' && (
+                    <>
+                      {/* すべての辺にマーカー */}
+                      <circle
+                        cx={(shape.vertices[0].x + shape.vertices[1].x) / 2}
+                        cy={(shape.vertices[0].y + shape.vertices[1].y) / 2}
+                        r="4"
+                        fill={theme.palette.info.main}
+                        opacity={0.8}
+                      />
+                      <circle
+                        cx={(shape.vertices[1].x + shape.vertices[2].x) / 2}
+                        cy={(shape.vertices[1].y + shape.vertices[2].y) / 2}
+                        r="4"
+                        fill={theme.palette.info.main}
+                        opacity={0.8}
+                      />
+                      <circle
+                        cx={(shape.vertices[2].x + shape.vertices[0].x) / 2}
+                        cy={(shape.vertices[2].y + shape.vertices[0].y) / 2}
+                        r="4"
+                        fill={theme.palette.info.main}
+                        opacity={0.8}
+                      />
+                    </>
+                  )}
                   
                   {/* 三角形のアニメーション */}
                   {showAnimation && shape.type === 'triangle' && (
@@ -501,7 +823,7 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
                   グリッド {showGrid ? 'OFF' : 'ON'}
                 </Button>
                 
-                {shape.type === 'triangle' && (
+                {shape.type === 'triangle' && triangleMode === 'free' && (
                   <Button
                     variant="outlined"
                     startIcon={<PlayArrowIcon />}
@@ -527,6 +849,9 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
                   onClick={() => {
                     initializeShape(shapeType);
                     setMode('free');
+                    if (shapeType === 'triangle') {
+                      setTriangleMode('free');
+                    }
                   }}
                   fullWidth
                 >
@@ -544,13 +869,19 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
               • 頂点（青い点）をドラッグして図形の大きさを変えられます
             </Typography>
             <Typography variant="body2" color="text.secondary">
+              • 正方形と長方形は形を保ちながらサイズが変わります
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              • 平行四辺形は対辺が平行を保ちます
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              • 三角形は自由/二等辺/正三角形モードを選べます
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
               • グリッドの1マスは1cm×1cm（1cm²）です
             </Typography>
             <Typography variant="body2" color="text.secondary">
               • チャレンジモードで、指定された面積の図形を作ってみよう！
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              • 三角形のアニメーションで、面積の求め方がわかります
             </Typography>
           </Box>
         </CardContent>

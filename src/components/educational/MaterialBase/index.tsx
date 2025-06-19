@@ -169,7 +169,7 @@ export const MaterialBase = ({
       </Box>
 
       {/* メインコンテンツ */}
-      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
         {children}
       </Box>
 
