@@ -727,8 +727,6 @@ function ElementPuzzleGameContent({ onClose }: { onClose: () => void }) {
   );
 }
 
-}
-
 // 元素記号パズルゲーム（MaterialWrapperでラップ）
 function ElementPuzzleGame({ onClose }: { onClose: () => void }) {
   return (

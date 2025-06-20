@@ -955,8 +955,6 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
   );
 }
 
-}
-
 // 化学反応シミュレーター（MaterialWrapperでラップ）
 function ChemicalReactionSimulator({ onClose }: { onClose: () => void }) {
   return (

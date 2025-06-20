@@ -728,8 +728,6 @@ const LeverPrincipleExperimentContent: React.FC<LeverPrincipleExperimentProps> =
   );
 };
 
-};
-
 // てこの原理実験シミュレーター（MaterialWrapperでラップ）
 const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onClose }) => {
   return (

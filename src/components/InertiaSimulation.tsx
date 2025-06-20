@@ -721,8 +721,6 @@ function InertiaSimulationContent({ onClose }: { onClose: () => void }) {
   );
 }
 
-}
-
 // 慣性の法則シミュレーション（MaterialWrapperでラップ）
 function InertiaSimulation({ onClose }: { onClose: () => void }) {
   return (

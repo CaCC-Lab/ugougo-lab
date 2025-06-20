@@ -25,6 +25,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 interface Point {
   x: number;
@@ -35,9 +36,10 @@ interface QuadraticFunctionGraphProps {
   onClose?: () => void;
 }
 
-const QuadraticFunctionGraph: React.FC<QuadraticFunctionGraphProps> = ({ onClose }) => {
+const QuadraticFunctionGraphContent: React.FC<QuadraticFunctionGraphProps> = ({ onClose }) => {
   const theme = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   
   // 係数
   const [a, setA] = useState<number>(1);
@@ -319,6 +321,7 @@ const QuadraticFunctionGraph: React.FC<QuadraticFunctionGraphProps> = ({ onClose
     const mathY = f(mathX, animatedA, animatedB, animatedC);
     
     setClickedPoint({ x: mathX, y: mathY });
+    recordInteraction({ action: 'click_graph', x: mathX, y: mathY });
   };
   
   // リセット
@@ -374,7 +377,10 @@ const QuadraticFunctionGraph: React.FC<QuadraticFunctionGraphProps> = ({ onClose
               </Typography>
               <Slider
                 value={a}
-                onChange={(_, value) => setA(value as number)}
+                onChange={(_, value) => {
+                  setA(value as number);
+                  recordInteraction({ action: 'change_coefficient', coefficient: 'a', value: value as number });
+                }}
                 min={-5}
                 max={5}
                 step={0.1}
@@ -389,7 +395,10 @@ const QuadraticFunctionGraph: React.FC<QuadraticFunctionGraphProps> = ({ onClose
               </Typography>
               <Slider
                 value={b}
-                onChange={(_, value) => setB(value as number)}
+                onChange={(_, value) => {
+                  setB(value as number);
+                  recordInteraction({ action: 'change_coefficient', coefficient: 'b', value: value as number });
+                }}
                 min={-10}
                 max={10}
                 step={0.1}
@@ -404,7 +413,10 @@ const QuadraticFunctionGraph: React.FC<QuadraticFunctionGraphProps> = ({ onClose
               </Typography>
               <Slider
                 value={c}
-                onChange={(_, value) => setC(value as number)}
+                onChange={(_, value) => {
+                  setC(value as number);
+                  recordInteraction({ action: 'change_coefficient', coefficient: 'c', value: value as number });
+                }}
                 min={-10}
                 max={10}
                 step={0.1}
