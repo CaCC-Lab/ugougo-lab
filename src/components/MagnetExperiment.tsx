@@ -21,6 +21,7 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import GrainIcon from '@mui/icons-material/Grain';
 import ExploreIcon from '@mui/icons-material/Explore';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 実験エリアのスタイル
 const ExperimentArea = styled(Paper)(({ theme }) => ({
@@ -106,7 +107,9 @@ interface MagnetExperimentProps {
   onClose?: () => void;
 }
 
-const MagnetExperiment: React.FC<MagnetExperimentProps> = ({ onClose }) => {
+// 磁石の実験シミュレーター（内部コンポーネント）
+const MagnetExperimentContent: React.FC<MagnetExperimentProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const experimentRef = useRef<HTMLDivElement>(null);
@@ -177,6 +180,17 @@ const MagnetExperiment: React.FC<MagnetExperimentProps> = ({ onClose }) => {
           const newX = Math.max(0, Math.min(material.x + totalFx * 0.1, 700 - material.width));
           const newY = Math.max(0, Math.min(material.y + totalFy * 0.1, 450 - material.height));
           
+          // 鉄が磁石に引き寄せられたことを検知して記録
+          const distanceMoved = Math.sqrt((newX - material.x) ** 2 + (newY - material.y) ** 2);
+          if (distanceMoved > 2 && Math.random() < 0.01) { // 低频度で記録
+            recordAnswer(true, {
+              problem: '鉄の磁性反応の観察',
+              userAnswer: '鉄が磁石に引き寄せられることを確認',
+              correctAnswer: '鉄は強磁性体で磁石に引き寄せられる',
+              distance: distanceMoved.toFixed(2)
+            });
+          }
+          
           return {
             ...material,
             x: newX,
@@ -204,6 +218,7 @@ const MagnetExperiment: React.FC<MagnetExperimentProps> = ({ onClose }) => {
   const handleMouseDown = (e: React.MouseEvent, itemId: string) => {
     e.preventDefault();
     setDraggedItem(itemId);
+    recordInteraction('drag');
   };
   
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -287,6 +302,7 @@ const MagnetExperiment: React.FC<MagnetExperimentProps> = ({ onClose }) => {
       { id: 'plastic1', type: 'plastic', x: 300, y: 300, width: 60, height: 40 },
     ]);
     setCompassPosition({ x: 400, y: 350 });
+    recordInteraction('click');
   };
   
   // 棒磁石の描画
@@ -398,14 +414,38 @@ const MagnetExperiment: React.FC<MagnetExperimentProps> = ({ onClose }) => {
               <ButtonGroup variant="outlined" size={isMobile ? 'small' : 'medium'}>
                 <Button
                   startIcon={<GrainIcon />}
-                  onClick={() => setShowIronFilings(!showIronFilings)}
+                  onClick={() => {
+                    setShowIronFilings(!showIronFilings);
+                    recordInteraction('click');
+                    
+                    // 砂鉄モードを初めて使用した場合の学習記録
+                    if (!showIronFilings) {
+                      recordAnswer(true, {
+                        problem: '磁力線の観察',
+                        userAnswer: '砂鉄モードで磁力線を表示',
+                        correctAnswer: '磁力線の可視化に成功'
+                      });
+                    }
+                  }}
                   variant={showIronFilings ? 'contained' : 'outlined'}
                 >
                   砂鉄モード
                 </Button>
                 <Button
                   startIcon={<ExploreIcon />}
-                  onClick={() => setShowCompass(!showCompass)}
+                  onClick={() => {
+                    setShowCompass(!showCompass);
+                    recordInteraction('click');
+                    
+                    // コンパスを初めて使用した場合の学習記録
+                    if (!showCompass) {
+                      recordAnswer(true, {
+                        problem: '磁界の方向の観察',
+                        userAnswer: 'コンパスで磁界の方向を確認',
+                        correctAnswer: '磁力の方向を正しく理解'
+                      });
+                    }
+                  }}
                   variant={showCompass ? 'contained' : 'outlined'}
                 >
                   コンパス
@@ -516,6 +556,20 @@ const MagnetExperiment: React.FC<MagnetExperimentProps> = ({ onClose }) => {
         </CardContent>
       </Card>
     </Container>
+  );
+};
+
+// 磁石の実験シミュレーター（MaterialWrapperでラップ）
+const MagnetExperiment: React.FC<MagnetExperimentProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="magnet-experiment"
+      materialName="磁石の実験シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <MagnetExperimentContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

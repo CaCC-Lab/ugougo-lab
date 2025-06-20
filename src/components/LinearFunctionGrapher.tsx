@@ -29,9 +29,11 @@ import {
   Circle as PointIcon,
   Quiz as QuizIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// 一次関数グラフ描画ツール
-function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
+// 一次関数グラフ描画ツール（内部コンポーネント）
+function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // 第1の直線 y = ax + b
@@ -394,6 +396,13 @@ function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
       
       const isCorrect = Math.abs(answerA - a1) < 0.1 && Math.abs(answerB - b1) < 0.1;
       
+      // 学習履歴に記録
+      recordAnswer(isCorrect, {
+        problem: `グラフから式を求める: y = ${a1}x ${b1 >= 0 ? '+' : ''} ${b1}`,
+        userAnswer: `y = ${answerA}x ${answerB >= 0 ? '+' : ''} ${answerB}`,
+        correctAnswer: `y = ${a1}x ${b1 >= 0 ? '+' : ''} ${b1}`
+      });
+      
       if (isCorrect) {
         setScore(prev => prev + 1);
         setProgress(prev => Math.min(prev + 20, 100));
@@ -417,6 +426,13 @@ function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
         const isCorrect = 
           Math.abs(answerX - intersection.x) < 0.1 && 
           Math.abs(answerY - intersection.y) < 0.1;
+        
+        // 学習履歴に記録
+        recordAnswer(isCorrect, {
+          problem: `2直線の交点: y = ${a1}x ${b1 >= 0 ? '+' : ''} ${b1} と y = ${a2}x ${b2 >= 0 ? '+' : ''} ${b2}`,
+          userAnswer: `(${answerX}, ${answerY})`,
+          correctAnswer: `(${intersection.x.toFixed(1)}, ${intersection.y.toFixed(1)})`
+        });
         
         if (isCorrect) {
           setScore(prev => prev + 1);
@@ -519,7 +535,12 @@ function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
         <ToggleButtonGroup
           value={mode}
           exclusive
-          onChange={(_, value) => value && setMode(value)}
+          onChange={(_, value) => {
+            if (value) {
+              setMode(value);
+              recordInteraction('click');
+            }
+          }}
           fullWidth
         >
           <ToggleButton value="free">
@@ -559,7 +580,10 @@ function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
                     </Typography>
                     <Slider
                       value={a1}
-                      onChange={(_, value) => setA1(value as number)}
+                      onChange={(_, value) => {
+                        setA1(value as number);
+                        recordInteraction('drag');
+                      }}
                       min={-5}
                       max={5}
                       step={0.1}
@@ -572,7 +596,10 @@ function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
                     </Typography>
                     <Slider
                       value={b1}
-                      onChange={(_, value) => setB1(value as number)}
+                      onChange={(_, value) => {
+                        setB1(value as number);
+                        recordInteraction('drag');
+                      }}
                       min={-10}
                       max={10}
                       step={0.5}
@@ -609,7 +636,10 @@ function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
                       </Typography>
                       <Slider
                         value={a2}
-                        onChange={(_, value) => setA2(value as number)}
+                        onChange={(_, value) => {
+                          setA2(value as number);
+                          recordInteraction('drag');
+                        }}
                         min={-5}
                         max={5}
                         step={0.1}
@@ -622,7 +652,10 @@ function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
                       </Typography>
                       <Slider
                         value={b2}
-                        onChange={(_, value) => setB2(value as number)}
+                        onChange={(_, value) => {
+                          setB2(value as number);
+                          recordInteraction('drag');
+                        }}
                         min={-10}
                         max={10}
                         step={0.5}
@@ -1050,6 +1083,20 @@ function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 一次関数グラフ描画ツール（MaterialWrapperでラップ）
+function LinearFunctionGrapher({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="linear-function"
+      materialName="一次関数グラフ描画ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <LinearFunctionGrapherContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

@@ -24,6 +24,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ThermostatIcon from '@mui/icons-material/Thermostat';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // アニメーションコンテナのスタイル
 const AnimationContainer = styled(Paper)(({ theme }) => ({
@@ -92,7 +93,9 @@ interface WaterStateAnimationProps {
   onClose?: () => void;
 }
 
-const WaterStateAnimation: React.FC<WaterStateAnimationProps> = ({ onClose }) => {
+// 水の三態変化アニメーション（内部コンポーネント）
+const WaterStateAnimationContent: React.FC<WaterStateAnimationProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const animationRef = useRef<number>();
@@ -126,14 +129,41 @@ const WaterStateAnimation: React.FC<WaterStateAnimationProps> = ({ onClose }) =>
   
   // 温度による状態変化
   useEffect(() => {
+    const prevState = waterState;
+    let newState: 'ice' | 'water' | 'steam';
+    
     if (temperature <= 0) {
-      setWaterState('ice');
+      newState = 'ice';
     } else if (temperature >= 100) {
-      setWaterState('steam');
+      newState = 'steam';
     } else {
-      setWaterState('water');
+      newState = 'water';
     }
-  }, [temperature]);
+    
+    // 状態変化が起きた場合の学習記録
+    if (prevState !== newState) {
+      const transitions = {
+        'ice-water': '氷が溶けて水になりました（融解）',
+        'water-steam': '水が沸騰して水蒸気になりました（気化）',
+        'steam-water': '水蒸気が冷えて水になりました（液化）',
+        'water-ice': '水が凍って氷になりました（凝固）',
+        'ice-steam': '氷が直接水蒸気になりました（昇華）',
+        'steam-ice': '水蒸気が直接氷になりました（昇華）'
+      };
+      
+      const transitionKey = `${prevState}-${newState}` as keyof typeof transitions;
+      if (transitions[transitionKey]) {
+        recordAnswer(true, {
+          problem: '水の状態変化の観察',
+          userAnswer: `${temperature}°Cで${prevState}から${newState}へ変化`,
+          correctAnswer: transitions[transitionKey],
+          temperature: temperature
+        });
+      }
+    }
+    
+    setWaterState(newState);
+  }, [temperature, waterState, recordAnswer]);
   
   // 分子の動きをアニメーション
   const animateMolecules = () => {
@@ -235,6 +265,7 @@ const WaterStateAnimation: React.FC<WaterStateAnimationProps> = ({ onClose }) =>
     setIsPlaying(false);
     setTemperature(20);
     setExperiment('heating');
+    recordInteraction('click');
     
     // 分子を初期位置に戻す
     const rows = 6;
@@ -346,7 +377,10 @@ const WaterStateAnimation: React.FC<WaterStateAnimationProps> = ({ onClose }) =>
                 </Typography>
                 <Slider
                   value={temperature}
-                  onChange={(_, value) => setTemperature(value as number)}
+                  onChange={(_, value) => {
+                    setTemperature(value as number);
+                    recordInteraction('drag');
+                  }}
                   min={-20}
                   max={120}
                   marks={[
@@ -362,14 +396,31 @@ const WaterStateAnimation: React.FC<WaterStateAnimationProps> = ({ onClose }) =>
                 <Button
                   variant="contained"
                   startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={() => {
+                    setIsPlaying(!isPlaying);
+                    recordInteraction('click');
+                    
+                    // 実験開始時の記録
+                    if (!isPlaying) {
+                      recordAnswer(true, {
+                        problem: '水の状態変化実験の開始',
+                        userAnswer: `${experiment}実験を開始（初期温度: ${temperature}°C）`,
+                        correctAnswer: '温度変化による状態変化の観察実験',
+                        experimentType: experiment,
+                        startTemperature: temperature
+                      });
+                    }
+                  }}
                   color={experiment === 'heating' ? 'error' : 'primary'}
                 >
                   {isPlaying ? '一時停止' : experiment === 'heating' ? '加熱実験' : '冷却実験'}
                 </Button>
                 <Button
                   variant="outlined"
-                  onClick={() => setExperiment(experiment === 'heating' ? 'cooling' : 'heating')}
+                  onClick={() => {
+                    setExperiment(experiment === 'heating' ? 'cooling' : 'heating');
+                    recordInteraction('click');
+                  }}
                   disabled={isPlaying}
                 >
                   {experiment === 'heating' ? '冷却に切替' : '加熱に切替'}
@@ -459,6 +510,20 @@ const WaterStateAnimation: React.FC<WaterStateAnimationProps> = ({ onClose }) =>
         </CardContent>
       </Card>
     </Container>
+  );
+};
+
+// 水の三態変化アニメーション（MaterialWrapperでラップ）
+const WaterStateAnimation: React.FC<WaterStateAnimationProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="water-state-animation"
+      materialName="水の三態変化アニメーション"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <WaterStateAnimationContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

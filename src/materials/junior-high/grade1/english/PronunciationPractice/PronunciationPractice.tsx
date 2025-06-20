@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -20,7 +20,7 @@ import {
   Info as InfoIcon
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MaterialBase } from '../../../../../components/educational/MaterialBase';
+import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import { usePronunciationPractice } from './hooks';
 import {
   PhonemeSelector,
@@ -30,7 +30,9 @@ import {
 
 type ViewMode = 'select' | 'practice' | 'progress';
 
-const PronunciationPractice: React.FC = () => {
+// 発音練習ツール（内部コンポーネント）
+const PronunciationPracticeContent: React.FC = () => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const [viewMode, setViewMode] = useState<ViewMode>('select');
   const [tabValue, setTabValue] = useState(0);
   const [showHelp, setShowHelp] = useState(false);
@@ -51,12 +53,14 @@ const PronunciationPractice: React.FC = () => {
     setTabValue(newValue);
     if (newValue === 0) setViewMode('select');
     else if (newValue === 1) setViewMode('progress');
+    recordInteraction('click');
   };
 
   const handleSelectPhoneme = (phoneme: any) => {
     selectPhoneme(phoneme);
     setViewMode('practice');
     setTabValue(-1); // タブを非選択状態に
+    recordInteraction('click');
   };
 
   const handleBackToSelect = () => {
@@ -70,23 +74,25 @@ const PronunciationPractice: React.FC = () => {
   ) => {
     if (newMode !== null) {
       setPracticeMode(newMode);
+      recordInteraction('change');
     }
   };
 
   const statistics = getStatistics();
 
+  // 発音スコアの変化を監視して記録
+  useEffect(() => {
+    if (state.currentScore !== null && state.currentPhoneme) {
+      recordAnswer(state.currentScore >= 70, {
+        phoneme: state.currentPhoneme,
+        mode: state.practiceMode,
+        score: state.currentScore,
+        recognizedText: state.recognizedText
+      });
+    }
+  }, [state.currentScore]);
+
   return (
-    <MaterialBase
-      title="発音練習ツール"
-      description="英語の音素（母音・子音）から単語まで、段階的に発音を練習しよう！"
-      learningObjectives={[
-        '英語の基本的な音素を正しく発音できる',
-        '日本語にない音の違いを理解する',
-        '単語レベルで正確な発音ができる',
-        '発音の自己評価と改善ができる'
-      ]}
-      onReset={reset}
-    >
       <Container maxWidth="lg">
         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
           <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -120,7 +126,10 @@ const PronunciationPractice: React.FC = () => {
             </Box>
 
             <Tooltip title="使い方">
-              <IconButton onClick={() => setShowHelp(!showHelp)}>
+              <IconButton onClick={() => {
+                setShowHelp(!showHelp);
+                recordInteraction('click');
+              }}>
                 <HelpIcon />
               </IconButton>
             </Tooltip>
@@ -163,7 +172,10 @@ const PronunciationPractice: React.FC = () => {
                     onSelectPhoneme={handleSelectPhoneme}
                     selectedPhoneme={state.currentPhoneme}
                     difficulty={state.difficulty}
-                    onDifficultyChange={setDifficulty}
+                    onDifficultyChange={(difficulty) => {
+                      setDifficulty(difficulty);
+                      recordInteraction('change');
+                    }}
                   />
                 </Box>
               </Fade>
@@ -180,10 +192,22 @@ const PronunciationPractice: React.FC = () => {
                     currentScore={state.currentScore}
                     recognizedText={state.recognizedText}
                     feedback={state.feedback}
-                    onStartRecording={startRecording}
-                    onStopRecording={stopRecording}
-                    onPlaySound={playSound}
-                    onBack={handleBackToSelect}
+                    onStartRecording={() => {
+                      startRecording();
+                      recordInteraction('click');
+                    }}
+                    onStopRecording={() => {
+                      stopRecording();
+                      recordInteraction('click');
+                    }}
+                    onPlaySound={() => {
+                      playSound();
+                      recordInteraction('click');
+                    }}
+                    onBack={() => {
+                      handleBackToSelect();
+                      recordInteraction('click');
+                    }}
                   />
                 </Box>
               </Fade>
@@ -202,7 +226,20 @@ const PronunciationPractice: React.FC = () => {
           </AnimatePresence>
         </Paper>
       </Container>
-    </MaterialBase>
+  );
+};
+
+// 発音練習ツール（MaterialWrapperでラップ）
+const PronunciationPractice: React.FC = () => {
+  return (
+    <MaterialWrapper
+      materialId="pronunciation-practice"
+      materialName="発音練習ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <PronunciationPracticeContent />
+    </MaterialWrapper>
   );
 };
 

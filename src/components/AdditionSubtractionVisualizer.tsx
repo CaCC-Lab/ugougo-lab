@@ -21,9 +21,13 @@ import {
   Remove as RemoveIcon,
   Apple as AppleIcon
 } from '@mui/icons-material';
+import { useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // たし算・ひき算ビジュアライザー
 function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
+  // 学習追跡の取得
+  const { recordAnswer, recordHintUsed, recordInteraction } = useLearningTrackerContext();
+  
   const [operation, setOperation] = useState<'addition' | 'subtraction'>('addition');
   const [firstNumber, setFirstNumber] = useState(3);
   const [secondNumber, setSecondNumber] = useState(2);
@@ -35,6 +39,8 @@ function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
   const [attempts, setAttempts] = useState(0);
   const [progress, setProgress] = useState(0);
   const [successStreak, setSuccessStreak] = useState(0);
+  const [wrongAttempts, setWrongAttempts] = useState(0);
+  const [hintLevel, setHintLevel] = useState(0);
   
   const maxNumber = 10;
   const correctAnswer = operation === 'addition' ? firstNumber + secondNumber : firstNumber - secondNumber;
@@ -55,6 +61,8 @@ function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
     setUserAnswer('');
     setShowResult(false);
     setIsCorrect(false);
+    setWrongAttempts(0);
+    setHintLevel(0);
   };
   
   // 答えをチェック
@@ -68,6 +76,13 @@ function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
     setShowResult(true);
     setAttempts(prev => prev + 1);
     
+    // 学習記録を追加
+    recordAnswer(correct, {
+      problem: `${firstNumber} ${operation === 'addition' ? '+' : '-'} ${secondNumber}`,
+      userAnswer: userAnswer,
+      correctAnswer: correctAnswer.toString()
+    });
+    
     if (correct) {
       setScore(prev => prev + 1);
       setSuccessStreak(prev => prev + 1);
@@ -80,6 +95,43 @@ function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
       }, 2000);
     } else {
       setSuccessStreak(0);
+      setWrongAttempts(prev => prev + 1);
+      setHintLevel(wrongAttempts + 1);
+      // 答えの入力をクリアして再入力を促す
+      if (wrongAttempts < 2) {
+        setTimeout(() => {
+          setUserAnswer('');
+          setShowResult(false);
+        }, 2000);
+      }
+    }
+  };
+  
+  // ヒントを生成
+  const getHint = () => {
+    if (hintLevel === 0) return null;
+    
+    if (hintLevel === 1) {
+      return 'もういちどかんがえてみよう！';
+    } else if (hintLevel === 2) {
+      // 数値ヒントを提供
+      if (operation === 'addition') {
+        if (correctAnswer > 10) {
+          return '10よりおおきいよ！';
+        } else if (correctAnswer > 5) {
+          return '5よりおおきいよ！';
+        } else {
+          return '5よりちいさいよ！';
+        }
+      } else {
+        if (correctAnswer >= 5) {
+          return '5以上だよ！';
+        } else {
+          return '5よりちいさいよ！';
+        }
+      }
+    } else {
+      return `こたえは ${correctAnswer} だよ`;
     }
   };
   
@@ -259,11 +311,16 @@ function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
                     🎉 せいかい！
                   </Typography>
                 ) : (
-                  <Typography variant="h6" sx={{ color: 'error.main' }}>
-                    ❌ もういちど！
-                    <br />
-                    こたえは {correctAnswer} だよ
-                  </Typography>
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'error.main' }}>
+                      ❌ ちがうよ！
+                    </Typography>
+                    {getHint() && (
+                      <Typography variant="body1" sx={{ mt: 1, color: 'text.secondary' }}>
+                        {getHint()}
+                      </Typography>
+                    )}
+                  </Box>
                 )}
               </Box>
             )}

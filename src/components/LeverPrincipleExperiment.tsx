@@ -33,6 +33,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 interface Weight {
   id: string;
@@ -52,7 +53,9 @@ interface LeverPrincipleExperimentProps {
   onClose?: () => void;
 }
 
-const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onClose }) => {
+// てこの原理実験シミュレーター（内部コンポーネント）
+const LeverPrincipleExperimentContent: React.FC<LeverPrincipleExperimentProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const stageRef = useRef<any>(null);
   
@@ -221,12 +224,32 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Tooltip title="身近な道具">
-            <IconButton onClick={() => setShowTools(true)}>
+            <IconButton onClick={() => {
+              setShowTools(true);
+              recordInteraction('click');
+              
+              // 身近な道具表示を記録
+              recordAnswer(true, {
+                problem: '身近な道具の確認',
+                userAnswer: 'てこを使った道具を調査',
+                correctAnswer: '日常生活でのてこの応用例の理解'
+              });
+            }}>
               <HelpOutlineIcon />
             </IconButton>
           </Tooltip>
           <Tooltip title="使い方">
-            <IconButton onClick={() => setShowExplanation(!showExplanation)}>
+            <IconButton onClick={() => {
+              setShowExplanation(!showExplanation);
+              recordInteraction('click');
+              
+              // ヘルプ表示切り替えを記録
+              recordAnswer(true, {
+                problem: 'ヘルプ情報の確認',
+                userAnswer: showExplanation ? 'ヘルプを非表示' : 'ヘルプを表示',
+                correctAnswer: '使い方の理解'
+              });
+            }}>
               <HelpOutlineIcon />
             </IconButton>
           </Tooltip>
@@ -251,7 +274,20 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
           <ToggleButtonGroup
             value={leverType}
             exclusive
-            onChange={(_, value) => value && setLeverType(value)}
+            onChange={(_, value) => {
+              if (value) {
+                setLeverType(value);
+                recordInteraction('click');
+                
+                // てこの種類変更を記録
+                recordAnswer(true, {
+                  problem: 'てこの種類の選択',
+                  userAnswer: `第${value.slice(-1)}種てこを選択`,
+                  correctAnswer: 'てこの種類の理解',
+                  leverType: value
+                });
+              }
+            }}
             fullWidth
             sx={{ mb: 3 }}
           >
@@ -266,7 +302,19 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
           </Typography>
           <Slider
             value={fulcrumPosition}
-            onChange={(_, value) => setFulcrumPosition(value as number)}
+            onChange={(_, value) => {
+              const newPosition = value as number;
+              setFulcrumPosition(newPosition);
+              recordInteraction('drag');
+              
+              // 支点位置変更を記録
+              recordAnswer(true, {
+                problem: '支点位置の調整',
+                userAnswer: `支点を${newPosition}%の位置に設定`,
+                correctAnswer: '支点位置がてこのバランスに影響することを理解',
+                fulcrumPosition: newPosition
+              });
+            }}
             min={10}
             max={90}
             step={5}
@@ -295,6 +343,17 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
                 const select = e.currentTarget.previousElementSibling?.querySelector('input');
                 const mass = parseInt(select?.getAttribute('value') || '50');
                 addWeight(mass, 'left');
+                recordInteraction('click');
+                
+                // 左側へのおもり追加を記録
+                recordAnswer(true, {
+                  problem: 'おもりの追加',
+                  userAnswer: `${mass}gのおもりを左側に追加`,
+                  correctAnswer: 'おもりの重さと位置がモーメントに影響することを理解',
+                  weightMass: mass,
+                  side: 'left',
+                  totalWeights: weights.length + 1
+                });
               }}
             >
               左に追加
@@ -306,6 +365,17 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
                 const select = e.currentTarget.parentElement?.querySelector('input');
                 const mass = parseInt(select?.getAttribute('value') || '50');
                 addWeight(mass, 'right');
+                recordInteraction('click');
+                
+                // 右側へのおもり追加を記録
+                recordAnswer(true, {
+                  problem: 'おもりの追加',
+                  userAnswer: `${mass}gのおもりを右側に追加`,
+                  correctAnswer: 'おもりの重さと位置がモーメントに影響することを理解',
+                  weightMass: mass,
+                  side: 'right',
+                  totalWeights: weights.length + 1
+                });
               }}
             >
               右に追加
@@ -343,21 +413,71 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
             <Button
               variant="contained"
-              onClick={() => setIsAnimating(true)}
+              onClick={() => {
+                setIsAnimating(true);
+                recordInteraction('click');
+                
+                // アニメーション開始を記録
+                const { leftMoment, rightMoment } = calculateMoment();
+                recordAnswer(true, {
+                  problem: 'てこの動きの観察',
+                  userAnswer: 'てこの動きをアニメーションで確認',
+                  correctAnswer: 'てこの動きとモーメントの関係を理解',
+                  moments: { leftMoment, rightMoment },
+                  isBalanced: Math.abs(leftMoment - rightMoment) < 0.1,
+                  weightsCount: weights.length
+                });
+              }}
               startIcon={<PlayArrowIcon />}
             >
               動かす
             </Button>
             <Button
               variant="outlined"
-              onClick={recordExperiment}
+              onClick={() => {
+                recordExperiment();
+                recordInteraction('click');
+                
+                // 実験記録を記録
+                const { leftMoment, rightMoment } = calculateMoment();
+                const isBalanced = Math.abs(leftMoment - rightMoment) < 0.1;
+                recordAnswer(true, {
+                  problem: 'てこの実験結果の記録',
+                  userAnswer: `左${leftMoment.toFixed(1)}N・cm 右${rightMoment.toFixed(1)}N・cm`,
+                  correctAnswer: 'モーメントの数値を正確に記録',
+                  experimentData: {
+                    leftMoment,
+                    rightMoment,
+                    isBalanced,
+                    leverType,
+                    fulcrumPosition,
+                    weightsCount: weights.length
+                  }
+                });
+              }}
               startIcon={<AddIcon />}
             >
               記録
             </Button>
             <Button
               variant="outlined"
-              onClick={handleReset}
+              onClick={() => {
+                handleReset();
+                recordInteraction('click');
+                
+                // リセット実行を記録
+                recordAnswer(true, {
+                  problem: 'てこ実験のリセット',
+                  userAnswer: '実験を初期状態に戻す',
+                  correctAnswer: '新しい実験の準備',
+                  resetData: {
+                    previousWeightsCount: weights.length,
+                    previousLeverType: leverType,
+                    previousFulcrumPosition: fulcrumPosition,
+                    experimentsRecorded: experimentData.length
+                  }
+                });
+              }}
               startIcon={<RefreshIcon />}
             >
               リセット
@@ -519,7 +639,22 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
                     </Typography>
                     <Slider
                       value={weight.position}
-                      onChange={(_, value) => updateWeightPosition(weight.id, value as number)}
+                      onChange={(_, value) => {
+                        const newPosition = value as number;
+                        updateWeightPosition(weight.id, newPosition);
+                        recordInteraction('drag');
+                        
+                        // おもり位置変更を記録
+                        recordAnswer(true, {
+                          problem: 'おもりの位置調整',
+                          userAnswer: `${weight.mass}gのおもりを${newPosition}cmの位置に移動`,
+                          correctAnswer: 'おもりの位置がモーメントに影響することを理解',
+                          weightId: weight.id,
+                          mass: weight.mass,
+                          side: weight.side,
+                          newPosition: newPosition
+                        });
+                      }}
                       min={0}
                       max={100}
                       step={5}
@@ -528,7 +663,23 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
                     />
                     <IconButton
                       size="small"
-                      onClick={() => removeWeight(weight.id)}
+                      onClick={() => {
+                        removeWeight(weight.id);
+                        recordInteraction('click');
+                        
+                        // おもり削除を記録
+                        recordAnswer(true, {
+                          problem: 'おもりの削除',
+                          userAnswer: `${weight.mass}gのおもりを削除`,
+                          correctAnswer: '不要なおもりの整理',
+                          removedWeight: {
+                            mass: weight.mass,
+                            position: weight.position,
+                            side: weight.side
+                          },
+                          remainingWeights: weights.length - 1
+                        });
+                      }}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -541,7 +692,17 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
       </Box>
 
       {/* 身近な道具ダイアログ */}
-      <Dialog open={showTools} onClose={() => setShowTools(false)} maxWidth="sm" fullWidth>
+      <Dialog open={showTools} onClose={() => {
+        setShowTools(false);
+        recordInteraction('click');
+        
+        // 道具ダイアログ終了を記録
+        recordAnswer(true, {
+          problem: '身近な道具の学習終了',
+          userAnswer: 'てこを使った道具の学習を終了',
+          correctAnswer: '日常生活でのてこの応用例を理解'
+        });
+      }} maxWidth="sm" fullWidth>
         <DialogTitle>てこを使った身近な道具</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
@@ -564,6 +725,22 @@ const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onC
         </DialogContent>
       </Dialog>
     </Card>
+  );
+};
+
+};
+
+// てこの原理実験シミュレーター（MaterialWrapperでラップ）
+const LeverPrincipleExperiment: React.FC<LeverPrincipleExperimentProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="lever-principle-experiment"
+      materialName="てこの原理実験シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <LeverPrincipleExperimentContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

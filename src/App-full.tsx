@@ -23,7 +23,7 @@ import {
   Alert,
   Paper
 } from '@mui/material';
-import { Close as CloseIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Dashboard as DashboardIcon } from '@mui/icons-material';
 import MultiplicationVisualization from './components/MultiplicationVisualization';
 import NumberLineIntegers from './components/NumberLineIntegers';
 import FractionVisualization from './components/FractionVisualization';
@@ -76,6 +76,8 @@ import { EarthquakeWaveSimulator } from './materials/junior-high/grade1/science'
 import { TimeZoneCalculator } from './materials/junior-high/grade1/social';
 import { ProofStepBuilder } from './materials/junior-high/grade2/math';
 import { ElectricityExperiment } from './materials/junior-high/grade2/science';
+import { ProgressDashboard } from './components/dashboard/ProgressDashboard';
+import { MaterialWrapper, useLearningTrackerContext } from './components/wrappers/MaterialWrapper';
 
 // TODO: MaterialComponentPropsの問題を解決後に有効化
 // import { NumberBlocks } from './materials/elementary/grade1/math';
@@ -123,8 +125,9 @@ const themes = {
   }),
 };
 
-// 数の合成・分解教材
-function NumberBlocksMaterial({ onClose }: { onClose: () => void }) {
+// 数の合成・分解教材（内部コンポーネント）
+function NumberBlocksMaterialContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const [target, setTarget] = useState(Math.floor(Math.random() * 16) + 4); // 4〜19
   const [currentSum, setCurrentSum] = useState(0);
   const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
@@ -139,6 +142,9 @@ function NumberBlocksMaterial({ onClose }: { onClose: () => void }) {
   const numbers = Array.from({ length: 10 }, (_, i) => i + 1);
 
   const handleNumberClick = (num: number) => {
+    // インタラクションを記録
+    recordInteraction('click');
+    
     if (selectedNumbers.includes(num)) {
       const newSelected = selectedNumbers.filter(n => n !== num);
       setSelectedNumbers(newSelected);
@@ -158,6 +164,13 @@ function NumberBlocksMaterial({ onClose }: { onClose: () => void }) {
           if (newSelected.length === 3) bonus = 200;
           else if (newSelected.length === 4) bonus = 400;
           else if (newSelected.length >= 5) bonus = 800;
+          
+          // 学習履歴に正解を記録
+          recordAnswer(true, {
+            problem: `${target}を作る`,
+            userAnswer: newSelected.join('+'),
+            correctAnswer: `${newSelected.length}個の組み合わせで${target}`
+          });
           
           const emoji = newSelected.length >= 5 ? '🌟' : newSelected.length >= 4 ? '⭐' : newSelected.length >= 3 ? '✨' : '🎉';
           setMessage(`せいかい！${emoji} ${newSelected.length}個の組み合わせ！ +${bonus}点`);
@@ -420,11 +433,26 @@ function NumberBlocksMaterial({ onClose }: { onClose: () => void }) {
   );
 }
 
+// 数の合成・分解教材（MaterialWrapperでラップ）
+function NumberBlocksMaterial({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="number-blocks"
+      materialName="数の合成・分解ブロック"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <NumberBlocksMaterialContent onClose={onClose} />
+    </MaterialWrapper>
+  );
+}
+
 // メインアプリ
 function AppFull() {
   const [currentTheme, setCurrentTheme] = useState<'elementary' | 'juniorHigh' | 'highSchool'>('elementary');
   const [materialOpen, setMaterialOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<string>('');
+  const [showDashboard, setShowDashboard] = useState(false);
 
   const materials = [
     {
@@ -857,6 +885,15 @@ function AppFull() {
             動く教材
           </Typography>
           
+          <Button 
+            color="inherit" 
+            startIcon={<DashboardIcon />}
+            onClick={() => setShowDashboard(!showDashboard)}
+            sx={{ mr: 2 }}
+          >
+            {showDashboard ? '教材一覧' : 'ダッシュボード'}
+          </Button>
+          
           <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
             <InputLabel sx={{ color: 'white' }}>学年</InputLabel>
             <Select
@@ -873,21 +910,24 @@ function AppFull() {
       </AppBar>
 
       {/* メインコンテンツ */}
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          動く教材へようこそ！
-        </Typography>
-        
-        <Typography variant="body1" color="text.secondary" paragraph>
-          インタラクティブな教材で、楽しく学習しましょう。
-          学年を選択してテーマを変更できます。
-        </Typography>
+      {showDashboard ? (
+        <ProgressDashboard />
+      ) : (
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Typography variant="h3" component="h1" gutterBottom>
+            動く教材へようこそ！
+          </Typography>
+          
+          <Typography variant="body1" color="text.secondary" paragraph>
+            インタラクティブな教材で、楽しく学習しましょう。
+            学年を選択してテーマを変更できます。
+          </Typography>
 
-        <Typography variant="h4" component="h2" gutterBottom sx={{ mt: 4 }}>
-          {currentTheme === 'elementary' ? '小学生' : currentTheme === 'juniorHigh' ? '中学生' : '高校生'}向けの教材
-        </Typography>
-        
-        <Grid container spacing={3}>
+          <Typography variant="h4" component="h2" gutterBottom sx={{ mt: 4 }}>
+            {currentTheme === 'elementary' ? '小学生' : currentTheme === 'juniorHigh' ? '中学生' : '高校生'}向けの教材
+          </Typography>
+          
+          <Grid container spacing={3}>
           {materials
             .filter((material) => {
               if (currentTheme === 'elementary') {
@@ -940,7 +980,8 @@ function AppFull() {
             </Grid>
           ))}
         </Grid>
-      </Container>
+        </Container>
+      )}
 
       {/* 教材ダイアログ */}
       <Dialog

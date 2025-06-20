@@ -34,6 +34,7 @@ import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 原子の種類と色
 const atomTypes = {
@@ -116,8 +117,9 @@ const presetReactions = {
   }
 };
 
-// 化学反応シミュレーター
-function ChemicalReactionSimulator({ onClose }: { onClose: () => void }) {
+// 化学反応シミュレーター（内部コンポーネント）
+function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [reactionType, setReactionType] = useState<ReactionType>('combustion');
   const [isAnimating, setIsAnimating] = useState(false);
@@ -521,12 +523,36 @@ function ChemicalReactionSimulator({ onClose }: { onClose: () => void }) {
   const startAnimation = () => {
     setIsAnimating(true);
     setAnimationProgress(0);
+    recordInteraction('click');
+    
+    // アニメーション開始を記録
+    const currentReaction = presetReactions[reactionType];
+    recordAnswer(true, {
+      problem: '化学反応アニメーションの開始',
+      userAnswer: `${currentReaction.name}のアニメーションを開始`,
+      correctAnswer: '化学反応の過程を視覚的に理解',
+      reactionType: reactionType,
+      reactionName: currentReaction.name,
+      equation: currentReaction.equation,
+      heat: currentReaction.heat
+    });
     
     const animate = () => {
       setAnimationProgress(prev => {
         const next = prev + 0.02;
         if (next >= 1) {
           setIsAnimating(false);
+          
+          // アニメーション完了を記録
+          recordAnswer(true, {
+            problem: '化学反応アニメーションの完了',
+            userAnswer: `${currentReaction.name}の反応過程を完全に観察`,
+            correctAnswer: '化学反応の理解完了',
+            reactionType: reactionType,
+            reactionName: currentReaction.name,
+            completionTime: Date.now()
+          });
+          
           return 1;
         }
         return next;
@@ -544,6 +570,22 @@ function ChemicalReactionSimulator({ onClose }: { onClose: () => void }) {
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '化学反応シミュレーターのリセット',
+      userAnswer: 'シミュレーターを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousReactionType: reactionType,
+        previousProgress: animationProgress,
+        previousScore: score,
+        previousAttempts: attempts,
+        quizModeActive: quizMode
+      }
+    });
+    
     setAnimationProgress(0);
     setIsAnimating(false);
     setCustomEquation('');
@@ -623,6 +665,19 @@ function ChemicalReactionSimulator({ onClose }: { onClose: () => void }) {
             if (value) {
               setReactionType(value);
               setAnimationProgress(0);
+              recordInteraction('click');
+              
+              // 反応タイプ変更を記録
+              const newReaction = presetReactions[value];
+              recordAnswer(true, {
+                problem: '化学反応タイプの選択',
+                userAnswer: `${newReaction.name}を選択`,
+                correctAnswer: '反応の種類の理解',
+                newReactionType: value,
+                reactionName: newReaction.name,
+                equation: newReaction.equation,
+                heat: newReaction.heat
+              });
             }
           }}
           fullWidth
@@ -659,6 +714,16 @@ function ChemicalReactionSimulator({ onClose }: { onClose: () => void }) {
               onClick={() => {
                 if (isAnimating) {
                   setIsAnimating(false);
+                  recordInteraction('click');
+                  
+                  // アニメーション停止を記録
+                  recordAnswer(true, {
+                    problem: '化学反応アニメーションの停止',
+                    userAnswer: 'アニメーションを一時停止',
+                    correctAnswer: 'アニメーション制御の理解',
+                    stopProgress: animationProgress,
+                    reactionType: reactionType
+                  });
                 } else {
                   startAnimation();
                 }
@@ -686,14 +751,36 @@ function ChemicalReactionSimulator({ onClose }: { onClose: () => void }) {
               <Button
                 size="small"
                 variant={showMolecularView ? 'contained' : 'outlined'}
-                onClick={() => setShowMolecularView(!showMolecularView)}
+                onClick={() => {
+                  setShowMolecularView(!showMolecularView);
+                  recordInteraction('click');
+                  
+                  // 分子モデル表示切り替えを記録
+                  recordAnswer(true, {
+                    problem: '分子モデル表示の切り替え',
+                    userAnswer: showMolecularView ? '分子モデルを非表示' : '分子モデルを表示',
+                    correctAnswer: '表示設定の調整',
+                    showMolecularView: !showMolecularView
+                  });
+                }}
               >
                 分子モデル
               </Button>
               <Button
                 size="small"
                 variant={showEquation ? 'contained' : 'outlined'}
-                onClick={() => setShowEquation(!showEquation)}
+                onClick={() => {
+                  setShowEquation(!showEquation);
+                  recordInteraction('click');
+                  
+                  // 化学式表示切り替えを記録
+                  recordAnswer(true, {
+                    problem: '化学式表示の切り替え',
+                    userAnswer: showEquation ? '化学式を非表示' : '化学式を表示',
+                    correctAnswer: '表示設定の調整',
+                    showEquation: !showEquation
+                  });
+                }}
               >
                 化学反応式
               </Button>
@@ -865,6 +952,22 @@ function ChemicalReactionSimulator({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+}
+
+// 化学反応シミュレーター（MaterialWrapperでラップ）
+function ChemicalReactionSimulator({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="chemical-reaction-simulator"
+      materialName="化学反応シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <ChemicalReactionSimulatorContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

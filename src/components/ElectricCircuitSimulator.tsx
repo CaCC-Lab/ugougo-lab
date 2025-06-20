@@ -27,6 +27,7 @@ import {
   Shuffle as WireIcon,
   Help as HelpIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 部品の種類
 type ComponentType = 'battery' | 'bulb' | 'switch' | 'wire';
@@ -63,8 +64,9 @@ const connectionPoints: { [key in ComponentType]: { [key: string]: { x: number; 
   }
 };
 
-// 電気回路シミュレーター
-function ElectricCircuitSimulator({ onClose }: { onClose: () => void }) {
+// 電気回路シミュレーター（内部コンポーネント）
+function ElectricCircuitSimulatorContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [components, setComponents] = useState<CircuitComponent[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
@@ -133,6 +135,7 @@ function ElectricCircuitSimulator({ onClose }: { onClose: () => void }) {
     });
     
     setComponents(prev => [...prev, newComponent]);
+    recordInteraction('click');
   };
   
   // 部品を削除
@@ -170,6 +173,7 @@ function ElectricCircuitSimulator({ onClose }: { onClose: () => void }) {
         ? { ...comp, isOn: !comp.isOn }
         : comp
     ));
+    recordInteraction('click');
   };
   
   // 回路の解析と電流計算
@@ -471,7 +475,16 @@ function ElectricCircuitSimulator({ onClose }: { onClose: () => void }) {
   // クイズの答え合わせ
   const checkQuizAnswer = () => {
     const quiz = quizQuestions[currentQuiz];
-    if (quiz.checkFunction(components)) {
+    const isCorrect = quiz.checkFunction(components);
+    
+    // 学習履歴に記録
+    recordAnswer(isCorrect, {
+      problem: quiz.question,
+      userAnswer: isCorrect ? '正しい回路を作成' : '不正解の回路',
+      correctAnswer: '正しい回路構成'
+    });
+    
+    if (isCorrect) {
       setScore(prev => prev + 1);
       setProgress(prev => Math.min(prev + 33.33, 100));
       
@@ -819,6 +832,20 @@ function ElectricCircuitSimulator({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 電気回路シミュレーター（MaterialWrapperでラップ）
+function ElectricCircuitSimulator({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="electric-circuit"
+      materialName="電気回路シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <ElectricCircuitSimulatorContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

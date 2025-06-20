@@ -22,9 +22,11 @@ import {
   DirectionsWalk as WalkIcon,
   Train as TrainIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// 慣性の法則シミュレーション
-function InertiaSimulation({ onClose }: { onClose: () => void }) {
+// 慣性の法則シミュレーション（内部コンポーネント）
+function InertiaSimulationContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   
@@ -390,16 +392,53 @@ function InertiaSimulation({ onClose }: { onClose: () => void }) {
       setPersonVelocityY(-8);
       setSuccessCount(prev => prev + 1);
       setProgress(prev => Math.min(prev + 15, 100));
+      recordInteraction('click');
+      
+      // ジャンプ実験を記録
+      recordAnswer(true, {
+        problem: '慣性の法則ジャンプ実験',
+        userAnswer: '電車内でジャンプを実行',
+        correctAnswer: '慣性により人は電車と同じ速度を保つ',
+        viewMode: viewMode,
+        trainVelocity: trainVelocity,
+        experimentCount: successCount + 1
+      });
     }
   };
   
   // アニメーション開始/停止
   const toggleAnimation = () => {
     setIsAnimating(!isAnimating);
+    recordInteraction('click');
+    
+    // アニメーション状態変更を記録
+    recordAnswer(true, {
+      problem: '慣性シミュレーションの制御',
+      userAnswer: `アニメーションを${!isAnimating ? '開始' : '停止'}`,
+      correctAnswer: 'シミュレーション制御の理解',
+      scenario: scenario,
+      viewMode: viewMode,
+      isAnimating: !isAnimating
+    });
   };
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '慣性シミュレーションのリセット',
+      userAnswer: 'シミュレーションを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousScenario: scenario,
+        previousProgress: progress,
+        previousSuccessCount: successCount,
+        previousTrainVelocity: trainVelocity
+      }
+    });
+    
     setIsAnimating(false);
     setProgress(0);
     setSuccessCount(0);
@@ -418,6 +457,24 @@ function InertiaSimulation({ onClose }: { onClose: () => void }) {
   
   // シナリオ変更
   const changeScenario = (newScenario: typeof scenario) => {
+    recordInteraction('click');
+    
+    // シナリオ変更を記録
+    const scenarios = {
+      acceleration: { name: '加速', description: '電車が加速するときの慣性' },
+      deceleration: { name: '減速', description: '電車が減速するときの慣性' },
+      jump: { name: 'ジャンプ', description: '電車内でジャンプしたときの慣性' }
+    };
+    
+    recordAnswer(true, {
+      problem: '慣性現象シナリオの選択',
+      userAnswer: `${scenarios[newScenario].name}シナリオを選択`,
+      correctAnswer: '異なる慣性現象の理解',
+      newScenario: newScenario,
+      scenarioDescription: scenarios[newScenario].description,
+      previousScenario: scenario
+    });
+    
     setScenario(newScenario);
     handleReset();
   };
@@ -554,7 +611,20 @@ function InertiaSimulation({ onClose }: { onClose: () => void }) {
               control={
                 <Switch
                   checked={viewMode === 'outside'}
-                  onChange={(e) => setViewMode(e.target.checked ? 'outside' : 'inside')}
+                  onChange={(e) => {
+                    const newViewMode = e.target.checked ? 'outside' : 'inside';
+                    setViewMode(newViewMode);
+                    recordInteraction('click');
+                    
+                    // 視点切り替えを記録
+                    recordAnswer(true, {
+                      problem: '慣性現象の視点切り替え',
+                      userAnswer: `${newViewMode === 'outside' ? '外部' : '内部'}視点に変更`,
+                      correctAnswer: '異なる視点での慣性現象の理解',
+                      newViewMode: newViewMode,
+                      scenario: scenario
+                    });
+                  }}
                 />
               }
               label="外からの視点"
@@ -566,7 +636,20 @@ function InertiaSimulation({ onClose }: { onClose: () => void }) {
               control={
                 <Switch
                   checked={showInertia}
-                  onChange={(e) => setShowInertia(e.target.checked)}
+                  onChange={(e) => {
+                    const showInertiaForce = e.target.checked;
+                    setShowInertia(showInertiaForce);
+                    recordInteraction('click');
+                    
+                    // 慣性力表示切り替えを記録
+                    recordAnswer(true, {
+                      problem: '慣性力の視覚化切り替え',
+                      userAnswer: `慣性力の表示を${showInertiaForce ? 'ON' : 'OFF'}`,
+                      correctAnswer: '慣性力の可視化理解',
+                      showInertiaForce: showInertiaForce,
+                      scenario: scenario
+                    });
+                  }}
                 />
               }
               label="慣性の力を表示"
@@ -635,6 +718,22 @@ function InertiaSimulation({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+}
+
+// 慣性の法則シミュレーション（MaterialWrapperでラップ）
+function InertiaSimulation({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="inertia-simulation"
+      materialName="慣性の法則シミュレーション"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <InertiaSimulationContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

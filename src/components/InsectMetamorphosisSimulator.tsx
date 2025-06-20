@@ -23,6 +23,7 @@ import {
   Pause as PauseIcon,
   SkipNext as NextIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 変態のステージ
 interface MetamorphosisStage {
@@ -40,8 +41,9 @@ interface InsectType {
   stages: MetamorphosisStage[];
 }
 
-// 昆虫の変態シミュレーター
-function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
+// 昆虫の変態シミュレーター（内部コンポーネント）
+function InsectMetamorphosisSimulatorContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const insects: InsectType[] = [
     {
       id: 'butterfly',
@@ -139,6 +141,22 @@ function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
   const handleInsectChange = (insectId: string) => {
     const insect = insects.find(i => i.id === insectId);
     if (insect) {
+      recordInteraction('click');
+      
+      // 昆虫選択を記録
+      recordAnswer(true, {
+        problem: '昆虫の種類選択',
+        userAnswer: `${insect.name}を選択`,
+        correctAnswer: '昆虫の変態タイプの理解',
+        insectSelection: {
+          from: selectedInsect.name,
+          to: insect.name,
+          metamorphosisType: insect.type,
+          stageCount: insect.stages.length,
+          totalDuration: insect.stages.reduce((sum, stage) => sum + stage.duration, 0)
+        }
+      });
+      
       setSelectedInsect(insect);
       setCurrentStageIndex(0);
       setDaysPassed(0);
@@ -148,6 +166,25 @@ function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '昆虫変態シミュレーターのリセット',
+      userAnswer: 'シミュレーターを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousInsect: selectedInsect.name,
+        previousStage: currentStageIndex,
+        previousDays: daysPassed,
+        previousScore: score,
+        previousAttempts: attempts,
+        wasPlaying: isPlaying,
+        currentSpeed: speed,
+        wasInQuizMode: quizMode
+      }
+    });
+    
     setCurrentStageIndex(0);
     setDaysPassed(0);
     setIsPlaying(false);
@@ -158,11 +195,29 @@ function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
   // 次のステージへ
   const handleNextStage = () => {
     if (currentStageIndex < selectedInsect.stages.length - 1) {
+      const nextStageIndex = currentStageIndex + 1;
+      recordInteraction('click');
+      
+      // ステージ進行を記録
+      recordAnswer(true, {
+        problem: '変態ステージの手動進行',
+        userAnswer: `${selectedInsect.stages[nextStageIndex].name}ステージに進行`,
+        correctAnswer: '変態プロセスの段階的理解',
+        stageProgression: {
+          insect: selectedInsect.name,
+          fromStage: selectedInsect.stages[currentStageIndex].name,
+          toStage: selectedInsect.stages[nextStageIndex].name,
+          stageIndex: nextStageIndex + 1,
+          totalStages: selectedInsect.stages.length,
+          metamorphosisType: selectedInsect.type
+        }
+      });
+      
       setCurrentStageIndex(prev => prev + 1);
       // 日数も調整
       let totalDays = 0;
-      for (let i = 0; i <= currentStageIndex + 1; i++) {
-        if (i === currentStageIndex + 1) {
+      for (let i = 0; i <= nextStageIndex; i++) {
+        if (i === nextStageIndex) {
           setDaysPassed(totalDays + 1);
           break;
         }
@@ -174,7 +229,27 @@ function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
   // クイズの答えをチェック
   const handleQuizAnswer = (isComplete: boolean) => {
     setAttempts(prev => prev + 1);
-    if ((selectedInsect.type === 'complete') === isComplete) {
+    recordInteraction('click');
+    
+    const isCorrect = (selectedInsect.type === 'complete') === isComplete;
+    
+    // クイズ回答を記録
+    recordAnswer(isCorrect, {
+      problem: `${selectedInsect.name}の変態タイプ識別`,
+      userAnswer: isComplete ? '完全変態' : '不完全変態',
+      correctAnswer: selectedInsect.type === 'complete' ? '完全変態' : '不完全変態',
+      quizData: {
+        insect: selectedInsect.name,
+        selectedType: isComplete ? 'complete' : 'incomplete',
+        correctType: selectedInsect.type,
+        isCorrect: isCorrect,
+        stageCount: selectedInsect.stages.length,
+        currentScore: score + (isCorrect ? 1 : 0),
+        currentAttempts: attempts + 1
+      }
+    });
+    
+    if (isCorrect) {
       setScore(prev => prev + 1);
       alert('せいかい！');
       // 次の昆虫へ
@@ -248,13 +323,53 @@ function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
       <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
         <Button
           variant={!quizMode ? 'contained' : 'outlined'}
-          onClick={() => setQuizMode(false)}
+          onClick={() => {
+            if (quizMode) {
+              recordInteraction('click');
+              
+              // 観察モード切り替えを記録
+              recordAnswer(true, {
+                problem: '観察モードへの切り替え',
+                userAnswer: 'クイズモードから観察モードに変更',
+                correctAnswer: 'モード切り替えの理解',
+                modeSwitch: {
+                  from: 'quiz',
+                  to: 'observation',
+                  quizResults: {
+                    score: score,
+                    attempts: attempts
+                  },
+                  currentInsect: selectedInsect.name
+                }
+              });
+              
+              setQuizMode(false);
+            }
+          }}
         >
           観察モード
         </Button>
         <Button
           variant={quizMode ? 'contained' : 'outlined'}
-          onClick={() => setQuizMode(true)}
+          onClick={() => {
+            recordInteraction('click');
+            
+            // クイズモード開始を記録
+            recordAnswer(true, {
+              problem: 'クイズモードの開始',
+              userAnswer: '観察モードからクイズモードに切り替え',
+              correctAnswer: 'クイズモード開始',
+              modeSwitch: {
+                from: 'observation',
+                to: 'quiz',
+                currentInsect: selectedInsect.name,
+                currentStage: selectedInsect.stages[currentStageIndex].name,
+                currentProgress: Math.round((daysPassed / totalDuration) * 100)
+              }
+            });
+            
+            setQuizMode(true);
+          }}
         >
           クイズモード
         </Button>
@@ -354,7 +469,26 @@ function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
                 <IconButton
                   size="large"
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={() => {
+                    const newIsPlaying = !isPlaying;
+                    setIsPlaying(newIsPlaying);
+                    recordInteraction('click');
+                    
+                    // アニメーション制御を記録
+                    recordAnswer(true, {
+                      problem: '変態アニメーションの制御',
+                      userAnswer: newIsPlaying ? 'アニメーション開始' : 'アニメーション停止',
+                      correctAnswer: 'アニメーション制御の理解',
+                      animationControl: {
+                        action: newIsPlaying ? 'start' : 'stop',
+                        insect: selectedInsect.name,
+                        currentStage: selectedInsect.stages[currentStageIndex].name,
+                        currentDay: daysPassed,
+                        speed: speed,
+                        progressPercent: Math.round((daysPassed / totalDuration) * 100)
+                      }
+                    });
+                  }}
                   color="primary"
                 >
                   {isPlaying ? <PauseIcon /> : <PlayIcon />}
@@ -373,21 +507,69 @@ function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
                 <Button
                   size="small"
                   variant={speed === 1 ? 'contained' : 'outlined'}
-                  onClick={() => setSpeed(1)}
+                  onClick={() => {
+                    setSpeed(1);
+                    recordInteraction('click');
+                    
+                    // 速度変更を記録
+                    recordAnswer(true, {
+                      problem: 'アニメーション速度の調整',
+                      userAnswer: '等倍速（×1）に設定',
+                      correctAnswer: '速度調整の理解',
+                      speedChange: {
+                        from: speed,
+                        to: 1,
+                        insect: selectedInsect.name,
+                        currentStage: selectedInsect.stages[currentStageIndex].name
+                      }
+                    });
+                  }}
                 >
                   ×1
                 </Button>
                 <Button
                   size="small"
                   variant={speed === 5 ? 'contained' : 'outlined'}
-                  onClick={() => setSpeed(5)}
+                  onClick={() => {
+                    setSpeed(5);
+                    recordInteraction('click');
+                    
+                    // 速度変更を記録
+                    recordAnswer(true, {
+                      problem: 'アニメーション速度の調整',
+                      userAnswer: '5倍速（×5）に設定',
+                      correctAnswer: '速度調整の理解',
+                      speedChange: {
+                        from: speed,
+                        to: 5,
+                        insect: selectedInsect.name,
+                        currentStage: selectedInsect.stages[currentStageIndex].name
+                      }
+                    });
+                  }}
                 >
                   ×5
                 </Button>
                 <Button
                   size="small"
                   variant={speed === 10 ? 'contained' : 'outlined'}
-                  onClick={() => setSpeed(10)}
+                  onClick={() => {
+                    setSpeed(10);
+                    recordInteraction('click');
+                    
+                    // 速度変更を記録
+                    recordAnswer(true, {
+                      problem: 'アニメーション速度の調整',
+                      userAnswer: '10倍速（×10）に設定',
+                      correctAnswer: '速度調整の理解',
+                      speedChange: {
+                        from: speed,
+                        to: 10,
+                        insect: selectedInsect.name,
+                        currentStage: selectedInsect.stages[currentStageIndex].name
+                      }
+                    });
+                  }}
                 >
                   ×10
                 </Button>
@@ -446,6 +628,20 @@ function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 昆虫の変態シミュレーター（MaterialWrapperでラップ）
+function InsectMetamorphosisSimulator({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="insect-metamorphosis-simulator"
+      materialName="昆虫の変態シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <InsectMetamorphosisSimulatorContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

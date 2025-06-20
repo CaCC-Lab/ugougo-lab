@@ -341,73 +341,132 @@ export const useFractionLogic = () => {
   // ヒントを生成
   const generateHint = useCallback(() => {
     const hints: LearningHint[] = [];
+    const currentHintLevel = Math.min(hintsUsed + 1, 3); // 段階的ヒント
 
     switch (mode) {
       case 'explore':
-        hints.push({
-          text: '分数は「全体をいくつかに分けたうちのいくつ分」を表します',
-          level: 'basic'
-        });
-        hints.push({
-          text: '分母は「全体を何個に分けたか」、分子は「そのうちの何個か」を表します',
-          level: 'intermediate'
-        });
-        break;
-
-      case 'compare':
-        hints.push({
-          text: '分母が同じ分数は、分子が大きい方が大きい分数です',
-          level: 'basic'
-        });
-        hints.push({
-          text: '分母が違う分数を比べるときは、通分すると比べやすくなります',
-          level: 'intermediate'
-        });
-        break;
-
-      case 'commonDenom':
-        hints.push({
-          text: '通分とは、分母を同じ数に揃えることです',
-          level: 'basic'
-        });
-        hints.push({
-          text: '最小公倍数を使って通分すると、計算が簡単になります',
-          level: 'advanced'
-        });
-        break;
-
-      case 'operations':
-        if (selectedOperation === 'add' || selectedOperation === 'subtract') {
+        if (currentHintLevel === 1) {
           hints.push({
-            text: '分数の足し算・引き算では、まず分母を揃える必要があります',
+            text: 'スライダーを動かして、図がどう変わるか観察してみましょう',
             level: 'basic'
           });
-        } else if (selectedOperation === 'multiply') {
+        } else if (currentHintLevel === 2) {
           hints.push({
-            text: '分数のかけ算は、分子同士、分母同士をかけます',
+            text: '分母の数字に注目してください。それは何を表していますか？',
             level: 'basic'
           });
         } else {
           hints.push({
-            text: '分数の割り算は、割る数を逆数にしてかけ算に変えます',
+            text: '分母は「全体を何個に分けたか」、分子は「そのうちの何個か」を表します',
+            level: 'intermediate'
+          });
+        }
+        break;
+
+      case 'compare':
+        if (currentHintLevel === 1) {
+          hints.push({
+            text: '2つの分数の分母を比べてみましょう',
             level: 'basic'
           });
+        } else if (currentHintLevel === 2) {
+          hints.push({
+            text: '分母が同じ場合と違う場合で、比べ方が変わります',
+            level: 'basic'
+          });
+        } else {
+          hints.push({
+            text: '分母が違う分数を比べるときは、通分すると比べやすくなります',
+            level: 'intermediate'
+          });
+        }
+        break;
+
+      case 'commonDenom':
+        if (currentHintLevel === 1) {
+          hints.push({
+            text: '通分とは何をすることでしょうか？',
+            level: 'basic'
+          });
+        } else if (currentHintLevel === 2) {
+          hints.push({
+            text: '2つの分数の分母を同じにする方法を考えましょう',
+            level: 'basic'
+          });
+        } else {
+          hints.push({
+            text: '最小公倍数を使って通分すると、計算が簡単になります',
+            level: 'advanced'
+          });
+        }
+        break;
+
+      case 'operations':
+        if (selectedOperation === 'add' || selectedOperation === 'subtract') {
+          if (currentHintLevel === 1) {
+            hints.push({
+              text: 'まず2つの分数の分母を確認しましょう',
+              level: 'basic'
+            });
+          } else if (currentHintLevel === 2) {
+            hints.push({
+              text: '分母が違う場合、何かしなければいけません',
+              level: 'basic'
+            });
+          } else {
+            hints.push({
+              text: '分数の足し算・引き算では、まず分母を揃える（通分）必要があります',
+              level: 'basic'
+            });
+          }
+        } else if (selectedOperation === 'multiply') {
+          if (currentHintLevel === 1) {
+            hints.push({
+              text: '分数のかけ算には特別なルールがあります',
+              level: 'basic'
+            });
+          } else if (currentHintLevel === 2) {
+            hints.push({
+              text: '分子同士、分母同士に注目してください',
+              level: 'basic'
+            });
+          } else {
+            hints.push({
+              text: '分数のかけ算は、分子同士、分母同士をかけます',
+              level: 'basic'
+            });
+          }
+        } else {
+          if (currentHintLevel === 1) {
+            hints.push({
+              text: '分数の割り算は特別な方法を使います',
+              level: 'basic'
+            });
+          } else if (currentHintLevel === 2) {
+            hints.push({
+              text: '割る数を「ひっくり返す」ことがポイントです',
+              level: 'basic'
+            });
+          } else {
+            hints.push({
+              text: '分数の割り算は、割る数を逆数にしてかけ算に変えます',
+              level: 'basic'
+            });
+          }
         }
         break;
     }
 
-    // 難易度調整に応じたヒントを選択
-    const appropriateHints = hints.filter(hint => {
-      if (difficultyAdjustment === 'decrease' || !progress) return hint.level === 'basic';
-      if (difficultyAdjustment === 'maintain') return hint.level !== 'advanced';
-      return true;
-    });
-
-    const hint = appropriateHints[Math.floor(Math.random() * appropriateHints.length)];
+    // 現在のヒントレベルに応じたヒントを選択
+    const hint = hints[0] || {
+      text: 'もう一度、問題をよく見てみましょう',
+      level: 'basic'
+    };
+    
     setCurrentHint(hint);
     setShowHint(true);
     setHintsUsed(hintsUsed + 1);
-  }, [mode, selectedOperation, difficultyAdjustment, progress, hintsUsed]);
+  }, [mode, selectedOperation, hintsUsed]);
 
   // 分数を更新
   const updateFraction = (index: number, fraction: Fraction) => {

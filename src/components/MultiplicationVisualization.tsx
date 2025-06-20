@@ -10,9 +10,11 @@ import {
   IconButton 
 } from '@mui/material';
 import { Close as CloseIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// かけ算九九の視覚化教材
-function MultiplicationVisualization({ onClose }: { onClose: () => void }) {
+// かけ算九九の視覚化教材（内部コンポーネント）
+function MultiplicationVisualizationContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const [currentProblem, setCurrentProblem] = useState({ a: 3, b: 4 });
   const [showAnimation, setShowAnimation] = useState(false);
   const [visibleBoxes, setVisibleBoxes] = useState(0);
@@ -38,6 +40,7 @@ function MultiplicationVisualization({ onClose }: { onClose: () => void }) {
   const startVisualization = () => {
     setShowAnimation(true);
     setVisibleBoxes(0);
+    recordInteraction('click');
     
     // 段階的にボックスを表示
     const totalBoxes = currentProblem.a * currentProblem.b;
@@ -55,7 +58,16 @@ function MultiplicationVisualization({ onClose }: { onClose: () => void }) {
   // 回答チェック
   const checkAnswer = (selectedAnswer: number) => {
     setUserAnswer(selectedAnswer);
-    if (selectedAnswer === answer) {
+    const isCorrect = selectedAnswer === answer;
+    
+    // 学習履歴に記録
+    recordAnswer(isCorrect, {
+      problem: `${currentProblem.a} × ${currentProblem.b}`,
+      userAnswer: selectedAnswer.toString(),
+      correctAnswer: answer.toString()
+    });
+    
+    if (isCorrect) {
       setSuccessCount(prev => prev + 1);
       setProgress(prev => Math.min(prev + 10, 100));
       setTimeout(() => {
@@ -71,12 +83,37 @@ function MultiplicationVisualization({ onClose }: { onClose: () => void }) {
     generateNewProblem();
   };
 
+  // Fisher-Yatesシャッフルアルゴリズム
+  const fisherYatesShuffle = <T,>(array: T[]): T[] => {
+    const result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  };
+
   // 選択肢を生成
   const generateChoices = () => {
     const correct = answer;
     const choices = [correct];
     
-    // 間違いの選択肢を追加
+    // より教育的な間違いの選択肢を追加
+    // 1. 1つ違いの答え（計算ミスを想定）
+    if (correct > 1 && !choices.includes(correct - 1)) {
+      choices.push(correct - 1);
+    }
+    if (correct < 81 && !choices.includes(correct + 1)) {
+      choices.push(correct + 1);
+    }
+    
+    // 2. 片方の数字だけでかけた答え（理解不足を想定）
+    const singleMultiple = currentProblem.a > currentProblem.b ? currentProblem.a : currentProblem.b;
+    if (!choices.includes(singleMultiple) && singleMultiple !== correct) {
+      choices.push(singleMultiple);
+    }
+    
+    // 3. ランダムな間違い（残りの選択肢）
     while (choices.length < 4) {
       const wrong = correct + Math.floor(Math.random() * 20) - 10;
       if (wrong > 0 && wrong <= 81 && !choices.includes(wrong)) {
@@ -84,8 +121,13 @@ function MultiplicationVisualization({ onClose }: { onClose: () => void }) {
       }
     }
     
-    // シャッフル
-    return choices.sort(() => Math.random() - 0.5);
+    // 選択肢を4つに調整
+    if (choices.length > 4) {
+      choices.length = 4;
+    }
+    
+    // Fisher-Yatesシャッフルで完全にランダム化
+    return fisherYatesShuffle(choices);
   };
 
   const choices = generateChoices();
@@ -258,6 +300,20 @@ function MultiplicationVisualization({ onClose }: { onClose: () => void }) {
         )}
       </Box>
     </Box>
+  );
+}
+
+// かけ算九九の視覚化教材（MaterialWrapperでラップ）
+function MultiplicationVisualization({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="multiplication-table"
+      materialName="かけ算九九の視覚化"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <MultiplicationVisualizationContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

@@ -27,6 +27,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 interface Point {
   x: number;
@@ -43,7 +44,9 @@ interface CalculusVisualizerProps {
   onClose?: () => void;
 }
 
-const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
+// 微分積分可視化ツール（内部コンポーネント）
+const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const derivativeCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -449,6 +452,24 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '微分積分ビジュアライザーのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousFunction: functionStr,
+        previousMode: mode,
+        previousTangentPoint: tangentPoint,
+        previousIntegralBounds: integralBounds,
+        previousRectangleCount: rectangleCount,
+        previousTaylorOrder: taylorOrder,
+        wasAnimating: isAnimating
+      }
+    });
+    
     setFunctionStr('x^2');
     setTangentPoint(0);
     setIntegralBounds({ a: -2, b: 2 });
@@ -464,7 +485,26 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
           微分積分ビジュアライザー
         </Typography>
         <Tooltip title="使い方">
-          <IconButton onClick={() => setShowExplanation(!showExplanation)}>
+          <IconButton onClick={() => {
+            const newShowExplanation = !showExplanation;
+            setShowExplanation(newShowExplanation);
+            recordInteraction('click');
+            
+            // ヘルプ表示切り替えを記録
+            recordAnswer(true, {
+              problem: 'ヘルプ・使い方の表示',
+              userAnswer: newShowExplanation ? 'ヘルプを表示' : 'ヘルプを非表示',
+              correctAnswer: 'ツールの使用方法理解',
+              helpAction: {
+                isShowing: newShowExplanation,
+                currentSettings: {
+                  function: functionStr,
+                  mode: mode,
+                  tangentPoint: tangentPoint
+                }
+              }
+            });
+          }}>
             <HelpOutlineIcon />
           </IconButton>
         </Tooltip>
@@ -485,7 +525,25 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
             fullWidth
             label="関数 f(x)"
             value={functionStr}
-            onChange={(e) => setFunctionStr(e.target.value)}
+            onChange={(e) => {
+              const newFunction = e.target.value;
+              setFunctionStr(newFunction);
+              recordInteraction('input');
+              
+              // 関数変更を記録（入力完了時）
+              if (newFunction.length > 0 && !newFunction.includes('undefined')) {
+                recordAnswer(true, {
+                  problem: '数学関数の入力',
+                  userAnswer: `関数f(x) = ${newFunction}を入力`,
+                  correctAnswer: '関数の定義と理解',
+                  functionInput: {
+                    function: newFunction,
+                    mode: mode,
+                    isValidFunction: true // 基本的な妥当性チェック
+                  }
+                });
+              }
+            }}
             placeholder="例: x^2, sin(x), exp(x)"
             sx={{ mb: 2 }}
           />
@@ -494,7 +552,24 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
           <ToggleButtonGroup
             value={mode}
             exclusive
-            onChange={(_, value) => value && setMode(value)}
+            onChange={(_, value) => {
+              if (value) {
+                setMode(value);
+                recordInteraction('click');
+                
+                // モード変更を記録
+                recordAnswer(true, {
+                  problem: '微分積分モードの選択',
+                  userAnswer: `${value === 'derivative' ? '微分' : value === 'integral' ? '積分' : '両方'}モードを選択`,
+                  correctAnswer: 'モード選択の理解',
+                  modeChange: {
+                    from: mode,
+                    to: value,
+                    function: functionStr
+                  }
+                });
+              }
+            }}
             fullWidth
             sx={{ mb: 2 }}
           >
@@ -514,7 +589,27 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
               </Typography>
               <Slider
                 value={tangentPoint}
-                onChange={(_, value) => setTangentPoint(value as number)}
+                onChange={(_, value) => {
+                  const newTangentPoint = value as number;
+                  setTangentPoint(newTangentPoint);
+                  recordInteraction('slider');
+                  
+                  // 接線点変更を記録（主要な値で）
+                  if (Math.abs(newTangentPoint) % 0.5 < 0.1) {
+                    const slope = derivative(parseFunction(functionStr), newTangentPoint);
+                    recordAnswer(true, {
+                      problem: '接線の点の調整',
+                      userAnswer: `x = ${newTangentPoint.toFixed(1)}での接線を表示`,
+                      correctAnswer: '微分の幾何学的意味の理解',
+                      tangentPoint: {
+                        x: newTangentPoint,
+                        function: functionStr,
+                        slope: slope,
+                        y: parseFunction(functionStr)(newTangentPoint)
+                      }
+                    });
+                  }
+                }}
                 min={-5}
                 max={5}
                 step={0.1}
@@ -525,7 +620,23 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
                 control={
                   <Switch
                     checked={showTangent}
-                    onChange={(e) => setShowTangent(e.target.checked)}
+                    onChange={(e) => {
+                      const showTangentLine = e.target.checked;
+                      setShowTangent(showTangentLine);
+                      recordInteraction('click');
+                      
+                      // 接線表示切り替えを記録
+                      recordAnswer(true, {
+                        problem: '接線表示の切り替え',
+                        userAnswer: showTangentLine ? '接線を表示' : '接線を非表示',
+                        correctAnswer: '微分の視覚化理解',
+                        tangentDisplay: {
+                          isVisible: showTangentLine,
+                          currentPoint: tangentPoint,
+                          function: functionStr
+                        }
+                      });
+                    }}
                   />
                 }
                 label="接線を表示"
@@ -557,6 +668,22 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
                   onChange={(_, value) => {
                     const [a, b] = value as number[];
                     setIntegralBounds({ a, b });
+                    recordInteraction('slider');
+                    
+                    // 積分区間変更を記録
+                    const integralVal = integrate(parseFunction(functionStr), a, b);
+                    recordAnswer(true, {
+                      problem: '積分区間の調整',
+                      userAnswer: `積分区間を[${a.toFixed(1)}, ${b.toFixed(1)}]に設定`,
+                      correctAnswer: '定積分の区間理解',
+                      integralBounds: {
+                        from: a,
+                        to: b,
+                        function: functionStr,
+                        integralValue: integralVal,
+                        width: b - a
+                      }
+                    });
                   }}
                   min={-5}
                   max={5}
@@ -570,7 +697,28 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
               </Typography>
               <Slider
                 value={rectangleCount}
-                onChange={(_, value) => setRectangleCount(value as number)}
+                onChange={(_, value) => {
+                  const newCount = value as number;
+                  setRectangleCount(newCount);
+                  recordInteraction('slider');
+                  
+                  // 分割数変更を記録（重要な値で）
+                  if ([1, 5, 10, 20, 50, 100].includes(newCount)) {
+                    const integralVal = integrate(parseFunction(functionStr), integralBounds.a, integralBounds.b, newCount);
+                    recordAnswer(true, {
+                      problem: 'リーマン和の分割数調整',
+                      userAnswer: `分割数を${newCount}に設定`,
+                      correctAnswer: '積分近似の精度理解',
+                      rectangleApproximation: {
+                        count: newCount,
+                        function: functionStr,
+                        bounds: integralBounds,
+                        approximateValue: integralVal,
+                        accuracy: newCount > 50 ? 'high' : newCount > 10 ? 'medium' : 'low'
+                      }
+                    });
+                  }
+                }}
                 min={1}
                 max={100}
                 step={1}
@@ -591,7 +739,22 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
               control={
                 <Switch
                   checked={showCriticalPoints}
-                  onChange={(e) => setShowCriticalPoints(e.target.checked)}
+                  onChange={(e) => {
+                    const showCritical = e.target.checked;
+                    setShowCriticalPoints(showCritical);
+                    recordInteraction('click');
+                    
+                    // 極値・変曲点表示切り替えを記録
+                    recordAnswer(true, {
+                      problem: '極値・変曲点表示の切り替え',
+                      userAnswer: showCritical ? '極値・変曲点を表示' : '極値・変曲点を非表示',
+                      correctAnswer: '関数の特徴点理解',
+                      criticalPointsDisplay: {
+                        isVisible: showCritical,
+                        function: functionStr
+                      }
+                    });
+                  }}
                 />
               }
               label="極値・変曲点を表示"
@@ -627,7 +790,24 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               variant="contained"
-              onClick={() => setIsAnimating(!isAnimating)}
+              onClick={() => {
+                const newIsAnimating = !isAnimating;
+                setIsAnimating(newIsAnimating);
+                recordInteraction('click');
+                
+                // アニメーション制御を記録
+                recordAnswer(true, {
+                  problem: '微分積分アニメーションの制御',
+                  userAnswer: newIsAnimating ? 'アニメーション開始' : 'アニメーション停止',
+                  correctAnswer: 'アニメーション制御の理解',
+                  animationControl: {
+                    action: newIsAnimating ? 'start' : 'stop',
+                    function: functionStr,
+                    mode: mode,
+                    currentTangentPoint: tangentPoint
+                  }
+                });
+              }}
               startIcon={<PlayArrowIcon />}
             >
               {isAnimating ? '停止' : 'アニメーション'}
@@ -734,6 +914,20 @@ const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
         </Box>
       </Box>
     </Card>
+  );
+};
+
+// 微分積分可視化ツール（MaterialWrapperでラップ）
+const CalculusVisualizer: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="calculus-visualizer"
+      materialName="微分積分ビジュアライザー"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <CalculusVisualizerContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

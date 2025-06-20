@@ -25,6 +25,7 @@ import {
   Park as ParkIcon,
   LocationOn as LocationIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 施設の情報
 interface Facility {
@@ -38,8 +39,9 @@ interface Facility {
   visited: boolean;
 }
 
-// 町探検マップ
-function TownExplorationMap({ onClose }: { onClose: () => void }) {
+// 町探検マップ（内部コンポーネント）
+function TownExplorationMapContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const mapRef = useRef<HTMLDivElement>(null);
   
   const [facilities, setFacilities] = useState<Facility[]>([
@@ -108,9 +110,28 @@ function TownExplorationMap({ onClose }: { onClose: () => void }) {
   
   // 施設をクリック
   const handleFacilityClick = (facility: Facility) => {
+    recordInteraction('click');
+    
     if (quizMode) {
       // クイズモード
-      if (facility.id === quizFacility?.id) {
+      const isCorrect = facility.id === quizFacility?.id;
+      
+      // クイズ回答を記録
+      recordAnswer(isCorrect, {
+        problem: `施設位置クイズ: ${quizFacility?.name}`,
+        userAnswer: `${facility.name}を選択`,
+        correctAnswer: `${quizFacility?.name}`,
+        quizData: {
+          targetFacility: quizFacility?.name || '',
+          selectedFacility: facility.name,
+          facilityType: facility.type,
+          isCorrect: isCorrect,
+          currentScore: score + (isCorrect ? 1 : 0),
+          currentAttempts: attempts + 1
+        }
+      });
+      
+      if (isCorrect) {
         setScore(prev => prev + 1);
         alert('せいかい！');
         startQuiz();
@@ -122,6 +143,21 @@ function TownExplorationMap({ onClose }: { onClose: () => void }) {
       // 探検モード
       setSelectedFacility(facility);
       setShowDialog(true);
+      
+      // 施設探索を記録
+      recordAnswer(true, {
+        problem: '町の施設探索',
+        userAnswer: `${facility.name}を訪問`,
+        correctAnswer: '施設の役割理解',
+        facilityExploration: {
+          facilityName: facility.name,
+          facilityType: facility.type,
+          description: facility.description,
+          visitOrder: visitedCount + 1,
+          totalFacilities: facilities.length,
+          isFirstVisit: !facility.visited
+        }
+      });
       
       // 訪問済みにする
       setFacilities(prev => prev.map(f => 
@@ -145,6 +181,22 @@ function TownExplorationMap({ onClose }: { onClose: () => void }) {
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '町探検マップのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousScore: score,
+        previousAttempts: attempts,
+        facilitiesVisited: visitedCount,
+        wasInQuizMode: quizMode,
+        explorationProgress: Math.round(progress)
+      }
+    });
+    
     setFacilities(prev => prev.map(f => ({ ...f, visited: false })));
     setScore(0);
     setAttempts(0);
@@ -211,13 +263,51 @@ function TownExplorationMap({ onClose }: { onClose: () => void }) {
       <Box sx={{ mb: 2, display: 'flex', gap: 2 }}>
         <Button
           variant={!quizMode ? 'contained' : 'outlined'}
-          onClick={() => setQuizMode(false)}
+          onClick={() => {
+            if (quizMode) {
+              recordInteraction('click');
+              
+              // 探検モード切り替えを記録
+              recordAnswer(true, {
+                problem: '探検モードへの切り替え',
+                userAnswer: 'クイズモードから探検モードに変更',
+                correctAnswer: 'モード切り替えの理解',
+                modeSwitch: {
+                  from: 'quiz',
+                  to: 'exploration',
+                  quizResults: {
+                    score: score,
+                    attempts: attempts
+                  },
+                  explorationProgress: visitedCount
+                }
+              });
+              
+              setQuizMode(false);
+            }
+          }}
         >
           探検モード
         </Button>
         <Button
           variant={quizMode ? 'contained' : 'outlined'}
           onClick={() => {
+            recordInteraction('click');
+            
+            // クイズモード開始を記録
+            recordAnswer(true, {
+              problem: 'クイズモードの開始',
+              userAnswer: '探検モードからクイズモードに切り替え',
+              correctAnswer: 'クイズモード開始',
+              modeSwitch: {
+                from: 'exploration',
+                to: 'quiz',
+                facilitiesVisited: visitedCount,
+                totalFacilities: facilities.length,
+                readyForQuiz: visitedCount > 0
+              }
+            });
+            
             setQuizMode(true);
             startQuiz();
           }}
@@ -410,6 +500,20 @@ function TownExplorationMap({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 町探検マップ（MaterialWrapperでラップ）
+function TownExplorationMap({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="town-exploration-map"
+      materialName="町探検マップ"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <TownExplorationMapContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

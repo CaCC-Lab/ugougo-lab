@@ -18,9 +18,11 @@ import {
   PlayArrow as PlayIcon, 
   Pause as PauseIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// 動く点Pの教材
-function MovingPointP({ onClose }: { onClose: () => void }) {
+// 動く点Pの教材（内部コンポーネント）
+function MovingPointPContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   
@@ -32,6 +34,10 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
   const [isDragging, setIsDragging] = useState(false);
   const [currentArea, setCurrentArea] = useState(0);
   const [maxArea, setMaxArea] = useState(0);
+  const [explorationMode, setExplorationMode] = useState<'free' | 'guided'>('guided');
+  const [currentChallenge, setCurrentChallenge] = useState(0);
+  const [observations, setObservations] = useState<string[]>([]);
+  const [discoveredPatterns, setDiscoveredPatterns] = useState<Set<string>>(new Set());
   
   // 四角形の座標設定（キャンバス上の座標）
   const rect = {
@@ -40,6 +46,41 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
     width: 300,
     height: 200
   };
+  
+  // 探索チャレンジ
+  const challenges = [
+    {
+      id: 0,
+      title: "点Pを四角形の角に移動させよう",
+      description: "まず、点Pを四角形の4つの角（A、B、C、D）に移動させて、それぞれの面積を観察しましょう。",
+      checkCondition: () => {
+        const corners = [0, 0.25, 0.5, 0.75];
+        return corners.some(pos => Math.abs(pointPosition - pos) < 0.02);
+      },
+      hint: "点Pをドラッグして、各角に移動させてみましょう。"
+    },
+    {
+      id: 1,
+      title: "面積が0になる位置を見つけよう",
+      description: "三角形ABPの面積が0になる位置を探してみましょう。どこにありますか？",
+      checkCondition: () => currentArea < 10,
+      hint: "三角形の面積が0になるのは、3つの点が一直線上にあるときです。"
+    },
+    {
+      id: 2,
+      title: "面積が最大になる位置を探そう",
+      description: "三角形ABPの面積が最大になる位置を見つけてください。",
+      checkCondition: () => currentArea > maxArea * 0.95 && currentArea > 100,
+      hint: "点Pが辺ABから最も離れた位置にあるとき、面積が最大になります。"
+    },
+    {
+      id: 3,
+      title: "面積の変化パターンを理解しよう",
+      description: "点Pをゆっくり一周させて、面積がどのように変化するか観察しましょう。",
+      checkCondition: () => observations.length >= 3,
+      hint: "各辺での面積の変化に注目してください。"
+    }
+  ];
   
   // 固定点A（四角形の左上角）
   const pointA = { x: rect.x, y: rect.y };
@@ -228,6 +269,7 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
     if (distance < 20) {
       setIsDragging(true);
       setIsAnimating(false);
+      recordInteraction('drag');
     }
   };
   
@@ -244,9 +286,31 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
     // マウス位置から四角形の周囲の最も近い点を見つける
     const newPosition = findNearestPositionOnRectangle(x, y);
     setPointPosition(newPosition);
+    
+    // ドラッグによる位置変更を記録（連続的な操作なので適度な間隔で）
+    if (Math.random() < 0.1) {
+      recordAnswer(true, {
+        problem: 'ドラッグによる点Pの位置調整',
+        userAnswer: `位置${(newPosition * 100).toFixed(1)}%に移動`,
+        correctAnswer: '手動操作による探索',
+        dragPosition: newPosition,
+        currentArea: currentArea
+      });
+    }
   };
   
   const handleCanvasMouseUp = () => {
+    if (isDragging) {
+      // ドラッグ完了時の記録
+      recordAnswer(true, {
+        problem: 'ドラッグ操作の完了',
+        userAnswer: `点Pの位置を${(pointPosition * 100).toFixed(1)}%に設定`,
+        correctAnswer: 'ドラッグ操作完了',
+        finalPosition: pointPosition,
+        finalArea: currentArea,
+        explorationMode: explorationMode
+      });
+    }
     setIsDragging(false);
   };
   
@@ -281,16 +345,134 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
   // アニメーション制御
   const toggleAnimation = () => {
     setIsAnimating(!isAnimating);
+    recordInteraction('click');
+    
+    // アニメーション状態変更を記録
+    recordAnswer(true, {
+      problem: 'アニメーション制御',
+      userAnswer: `アニメーション${!isAnimating ? '開始' : '停止'}`,
+      correctAnswer: 'アニメーション状態変更完了',
+      animationState: !isAnimating ? 'started' : 'stopped',
+      currentPosition: pointPosition,
+      currentArea: currentArea
+    });
   };
   
+  // 観察を記録
+  const recordObservation = (observation: string) => {
+    setObservations(prev => [...prev, observation]);
+    recordInteraction('click');
+    
+    // 観察記録を学習履歴に記録
+    recordAnswer(true, {
+      problem: '動く点Pの観察記録',
+      userAnswer: observation,
+      correctAnswer: '観察完了',
+      pointPosition: pointPosition,
+      currentArea: currentArea,
+      maxArea: maxArea,
+      explorationMode: explorationMode
+    });
+    
+    // パターンを検出
+    if (currentArea < 10) {
+      setDiscoveredPatterns(prev => new Set([...prev, 'zero_area']));
+      recordAnswer(true, {
+        problem: 'パターン発見: 面積が0になる条件',
+        userAnswer: '面積が最小値に到達',
+        correctAnswer: '面積最小パターンの発見',
+        pattern: 'zero_area',
+        pointPosition: pointPosition
+      });
+    }
+    if (currentArea > maxArea * 0.95 && currentArea > 100) {
+      setDiscoveredPatterns(prev => new Set([...prev, 'max_area']));
+      recordAnswer(true, {
+        problem: 'パターン発見: 最大面積の発見',
+        userAnswer: '面積が最大値に到達',
+        correctAnswer: '面積最大パターンの発見',
+        pattern: 'max_area',
+        pointPosition: pointPosition,
+        maxAreaValue: currentArea
+      });
+    }
+    if (pointPosition < 0.02 || Math.abs(pointPosition - 0.25) < 0.02 || 
+        Math.abs(pointPosition - 0.5) < 0.02 || Math.abs(pointPosition - 0.75) < 0.02) {
+      setDiscoveredPatterns(prev => new Set([...prev, 'corners']));
+      recordAnswer(true, {
+        problem: 'パターン発見: 特殊な位置での探索',
+        userAnswer: '四隅や辺の中点での観察',
+        correctAnswer: '重要な位置パターンの発見',
+        pattern: 'corners',
+        pointPosition: pointPosition
+      });
+    }
+  };
+
+  // チャレンジ完了をチェック
+  const checkChallengeCompletion = () => {
+    if (explorationMode === 'guided' && currentChallenge < challenges.length) {
+      const challenge = challenges[currentChallenge];
+      if (challenge.checkCondition()) {
+        setSuccessCount(prev => prev + 1);
+        setProgress(prev => Math.min(prev + 25, 100));
+        
+        // チャレンジ完了を学習履歴に記録
+        recordAnswer(true, {
+          problem: `ガイド付きチャレンジ ${currentChallenge + 1}`,
+          userAnswer: challenge.title,
+          correctAnswer: 'チャレンジ達成',
+          challengeId: challenge.id,
+          challengeTitle: challenge.title,
+          pointPosition: pointPosition,
+          currentArea: currentArea,
+          successCount: successCount + 1
+        });
+        
+        // 自動的に観察を記録
+        if (challenge.id === 0) {
+          recordObservation(`角での面積: ${currentArea.toFixed(1)}`);
+        } else if (challenge.id === 1) {
+          recordObservation(`面積が0になる位置を発見！`);
+        } else if (challenge.id === 2) {
+          recordObservation(`最大面積: ${currentArea.toFixed(1)}`);
+        }
+        
+        // 次のチャレンジへ
+        if (currentChallenge < challenges.length - 1) {
+          setTimeout(() => setCurrentChallenge(prev => prev + 1), 1000);
+        }
+      }
+    }
+  };
+
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '動く点P探索のリセット',
+      userAnswer: '探索状態をリセット',
+      correctAnswer: 'リセット完了',
+      beforeReset: {
+        progress: progress,
+        successCount: successCount,
+        observationsCount: observations.length,
+        discoveredPatterns: discoveredPatterns.size,
+        maxAreaFound: maxArea
+      }
+    });
+    
     setPointPosition(0);
     setIsAnimating(false);
     setCurrentArea(0);
     setMaxArea(0);
     setProgress(0);
     setSuccessCount(0);
+    setCurrentChallenge(0);
+    setObservations([]);
+    setDiscoveredPatterns(new Set());
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
@@ -314,6 +496,7 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     drawCanvas();
     drawAreaGraph();
+    checkChallengeCompletion();
   }, [pointPosition]);
   
   useEffect(() => {
@@ -383,6 +566,66 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
               コントロール
             </Typography>
 
+            {/* 探索モード選択 */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" sx={{ mb: 1, display: 'block' }}>
+                探索モード
+              </Typography>
+              <Button
+                variant={explorationMode === 'guided' ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => {
+                  setExplorationMode('guided');
+                  recordInteraction('click');
+                  recordAnswer(true, {
+                    problem: '探索モード変更',
+                    userAnswer: 'ガイド付きモードを選択',
+                    correctAnswer: 'ガイド付きモードに切り替え完了'
+                  });
+                }}
+                sx={{ mr: 1 }}
+              >
+                ガイド付き
+              </Button>
+              <Button
+                variant={explorationMode === 'free' ? 'contained' : 'outlined'}
+                size="small"
+                onClick={() => {
+                  setExplorationMode('free');
+                  recordInteraction('click');
+                  recordAnswer(true, {
+                    problem: '探索モード変更',
+                    userAnswer: '自由探索モードを選択',
+                    correctAnswer: '自由探索モードに切り替え完了'
+                  });
+                }}
+              >
+                自由探索
+              </Button>
+            </Box>
+
+            {/* チャレンジ表示（ガイドモード時） */}
+            {explorationMode === 'guided' && currentChallenge < challenges.length && (
+              <Card variant="outlined" sx={{ mb: 2, bgcolor: 'primary.light', color: 'primary.contrastText' }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    チャレンジ {currentChallenge + 1}
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    {challenges[currentChallenge].title}
+                  </Typography>
+                  <Typography variant="caption">
+                    {challenges[currentChallenge].description}
+                  </Typography>
+                  {successCount > currentChallenge && (
+                    <Typography variant="caption" sx={{ display: 'block', mt: 1, fontStyle: 'italic' }}>
+                      💡 ヒント: {challenges[currentChallenge].hint}
+                    </Typography>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* アニメーション制御 */}
             <Button
               variant="contained"
@@ -400,7 +643,10 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
             </Typography>
             <Slider
               value={speed * 1000}
-              onChange={(_, value) => setSpeed((value as number) / 1000)}
+              onChange={(_, value) => {
+                setSpeed((value as number) / 1000);
+                recordInteraction('drag');
+              }}
               min={1}
               max={50}
               valueLabelDisplay="auto"
@@ -414,13 +660,31 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
             </Typography>
             <Slider
               value={pointPosition * 100}
-              onChange={(_, value) => setPointPosition((value as number) / 100)}
+              onChange={(_, value) => {
+                setPointPosition((value as number) / 100);
+                recordInteraction('drag');
+              }}
               min={0}
               max={100}
               valueLabelDisplay="auto"
               valueLabelFormat={(value) => `${value}%`}
               sx={{ mb: 2 }}
             />
+
+            {/* 観察記録ボタン */}
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={() => {
+                const positionName = pointPosition < 0.25 ? '上辺' : 
+                                   pointPosition < 0.5 ? '右辺' :
+                                   pointPosition < 0.75 ? '下辺' : '左辺';
+                recordObservation(`${positionName}での面積: ${currentArea.toFixed(1)}`);
+              }}
+              sx={{ mb: 2 }}
+            >
+              現在の観察を記録
+            </Button>
 
             {/* 情報表示 */}
             <Card variant="outlined">
@@ -436,6 +700,42 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
                 </Typography>
               </CardContent>
             </Card>
+
+            {/* 観察記録 */}
+            {observations.length > 0 && (
+              <Card variant="outlined" sx={{ mt: 2 }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    📝 観察記録
+                  </Typography>
+                  {observations.map((obs, index) => (
+                    <Typography key={index} variant="caption" display="block" sx={{ mb: 0.5 }}>
+                      • {obs}
+                    </Typography>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 発見したパターン */}
+            {discoveredPatterns.size > 0 && (
+              <Card variant="outlined" sx={{ mt: 2, bgcolor: 'success.light' }}>
+                <CardContent sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    🎯 発見したパターン
+                  </Typography>
+                  {discoveredPatterns.has('zero_area') && (
+                    <Typography variant="caption" display="block">✓ 面積が0になる位置</Typography>
+                  )}
+                  {discoveredPatterns.has('max_area') && (
+                    <Typography variant="caption" display="block">✓ 面積が最大になる位置</Typography>
+                  )}
+                  {discoveredPatterns.has('corners') && (
+                    <Typography variant="caption" display="block">✓ 角での面積の特徴</Typography>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </Paper>
         </Grid>
 
@@ -480,12 +780,27 @@ function MovingPointP({ onClose }: { onClose: () => void }) {
         </Typography>
         <Typography variant="body2">
           • 四角形ABCD上を点Pが移動すると、三角形ABPの面積が変化します<br/>
-          • 右側のグラフで、点Pの位置に対する面積の変化を確認できます<br/>
-          • 面積が最大になるのはどの位置でしょうか？その理由も考えてみましょう<br/>
+          • <strong>ガイド付きモードで段階的に探索すると、パターンが見えてきます</strong><br/>
+          • 観察を記録して、どこで面積が最大・最小になるか発見しましょう<br/>
+          • 右側のグラフで、点Pの位置と面積の関係を視覚的に理解できます<br/>
           • この問題は高校入試でもよく出題される重要な概念です
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 動く点Pの教材（MaterialWrapperでラップ）
+function MovingPointP({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="moving-point-p"
+      materialName="動く点Pの探索"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <MovingPointPContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

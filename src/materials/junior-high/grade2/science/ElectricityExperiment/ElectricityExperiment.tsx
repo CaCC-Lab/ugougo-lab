@@ -15,7 +15,8 @@ import {
   DialogContent,
   DialogActions,
   Chip,
-  Grid
+  Grid,
+  Stack
 } from '@mui/material';
 import {
   PlayArrow as StartIcon,
@@ -25,7 +26,7 @@ import {
   Assignment as TemplateIcon,
   Help as HelpIcon
 } from '@mui/icons-material';
-// import { MaterialBase } from '@components/educational';
+import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import {
   CircuitEditor,
   MeasurementDisplay,
@@ -37,7 +38,9 @@ import { useCircuitSimulation } from './hooks';
 import { circuitTemplates, experimentChallenges } from './data/circuitComponents';
 import type { ExperimentMode } from './types';
 
-const ElectricityExperiment: React.FC = () => {
+// 電流・電圧・抵抗の関係実験器（内部コンポーネント）
+const ElectricityExperimentContent: React.FC = () => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   console.log('ElectricityExperiment rendering');
   
   try {
@@ -121,14 +124,20 @@ const ElectricityExperiment: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<TemplateIcon />}
-                onClick={() => setShowTemplateDialog(true)}
+                onClick={() => {
+                  setShowTemplateDialog(true);
+                  recordInteraction('click');
+                }}
               >
                 テンプレート
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<HelpIcon />}
-                onClick={() => setShowHelp(true)}
+                onClick={() => {
+                  setShowHelp(true);
+                  recordInteraction('click');
+                }}
               >
                 使い方
               </Button>
@@ -149,7 +158,10 @@ const ElectricityExperiment: React.FC = () => {
             {experimentSteps.map((step) => (
               <Button
                 key={step.mode}
-                onClick={() => setMode(step.mode)}
+                onClick={() => {
+                  setMode(step.mode);
+                  recordInteraction('click');
+                }}
                 variant={mode === step.mode ? 'contained' : 'outlined'}
                 disabled={step.mode === 'measure' && circuit.components.length === 0}
               >
@@ -179,7 +191,10 @@ const ElectricityExperiment: React.FC = () => {
                       variant="contained"
                       color="success"
                       startIcon={<StartIcon />}
-                      onClick={runSimulation}
+                      onClick={() => {
+                        runSimulation();
+                        recordInteraction('click');
+                      }}
                     >
                       シミュレーション実行
                     </Button>
@@ -188,7 +203,10 @@ const ElectricityExperiment: React.FC = () => {
                     variant="outlined"
                     color="error"
                     startIcon={<ResetIcon />}
-                    onClick={resetCircuit}
+                    onClick={() => {
+                      resetCircuit();
+                      recordInteraction('click');
+                    }}
                   >
                     リセット
                   </Button>
@@ -200,11 +218,26 @@ const ElectricityExperiment: React.FC = () => {
                 height={500}
                 components={circuit.components}
                 selectedComponent={selectedComponent}
-                onAddComponent={addComponent}
-                onMoveComponent={moveComponent}
-                onSelectComponent={selectComponent}
-                onRemoveComponent={removeComponent}
-                onAddWire={addWire}
+                onAddComponent={(component) => {
+                  addComponent(component);
+                  recordInteraction('click');
+                }}
+                onMoveComponent={(id, position) => {
+                  moveComponent(id, position);
+                  recordInteraction('drag');
+                }}
+                onSelectComponent={(component) => {
+                  selectComponent(component);
+                  recordInteraction('click');
+                }}
+                onRemoveComponent={(id) => {
+                  removeComponent(id);
+                  recordInteraction('click');
+                }}
+                onAddWire={(wire) => {
+                  addWire(wire);
+                  recordInteraction('click');
+                }}
                 isSimulating={mode === 'measure'}
               />
               
@@ -246,7 +279,10 @@ const ElectricityExperiment: React.FC = () => {
                   <ParameterControl
                     components={circuit.components}
                     selectedComponent={selectedComponent}
-                    onUpdateValue={updateComponentValue}
+                    onUpdateValue={(id, value) => {
+                      updateComponentValue(id, value);
+                      recordInteraction('change');
+                    }}
                     onSelectComponent={selectComponent}
                     isSimulating={mode === 'measure'}
                   />
@@ -307,6 +343,7 @@ const ElectricityExperiment: React.FC = () => {
                   onClick={() => {
                     loadTemplate(key);
                     setShowTemplateDialog(false);
+                    recordInteraction('click');
                   }}
                 >
                   <Typography variant="subtitle1">{template.name}</Typography>
@@ -390,6 +427,20 @@ const ElectricityExperiment: React.FC = () => {
       </Box>
     );
   }
+};
+
+// 電流・電圧・抵抗の関係実験器（MaterialWrapperでラップ）
+const ElectricityExperiment: React.FC = () => {
+  return (
+    <MaterialWrapper
+      materialId="electricity-experiment"
+      materialName="電流・電圧・抵抗の関係実験器"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <ElectricityExperimentContent />
+    </MaterialWrapper>
+  );
 };
 
 export default ElectricityExperiment;

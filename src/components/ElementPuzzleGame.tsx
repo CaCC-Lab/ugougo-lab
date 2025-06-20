@@ -18,6 +18,7 @@ import {
   PlayArrow as PlayIcon, 
   Pause as PauseIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 interface Ball {
   id: string;
@@ -37,8 +38,9 @@ interface GameState {
   combo: number;
 }
 
-// 元素記号パズルゲーム
-function ElementPuzzleGame({ onClose }: { onClose: () => void }) {
+// 元素記号パズルゲーム（内部コンポーネント）
+function ElementPuzzleGameContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   
@@ -250,6 +252,24 @@ function ElementPuzzleGame({ onClose }: { onClose: () => void }) {
     // 発射角度を計算
     const angle = Math.atan2(y - currentBall.y, x - currentBall.x);
     shootBall(angle);
+    
+    recordInteraction('click');
+    
+    // ボール発射を記録
+    const element = elements.find(e => e.symbol === currentBall.element);
+    recordAnswer(true, {
+      problem: 'パズルボールの発射',
+      userAnswer: `${currentBall.type === 'symbol' ? element?.symbol : element?.name}ボールを発射`,
+      correctAnswer: '適切な位置への発射',
+      ballType: currentBall.type,
+      element: currentBall.element,
+      shootAngle: angle * (180 / Math.PI), // 度数で記録
+      gameState: {
+        score: gameState.score,
+        combo: gameState.combo,
+        level: gameState.level
+      }
+    });
   };
   
   // マウス移動で照準
@@ -334,6 +354,23 @@ function ElementPuzzleGame({ onClose }: { onClose: () => void }) {
         // スコア加算
         const points = matchedGroups.length * 100 * (prev.combo + 1);
         
+        // マッチ成功を記録
+        const matchedElements = [...new Set(matchedGroups.map(ball => ball.element))];
+        recordAnswer(true, {
+          problem: '元素ペアの成功マッチ',
+          userAnswer: `${matchedElements.join(', ')}の元素ペアを${matchedGroups.length}個消去`,
+          correctAnswer: '元素記号と名前の正しい対応',
+          matchedElements: matchedElements,
+          matchedCount: matchedGroups.length,
+          earnedPoints: points,
+          combo: prev.combo + 1,
+          gameProgress: {
+            beforeScore: prev.score,
+            afterScore: prev.score + points,
+            level: prev.level
+          }
+        });
+        
         return {
           ...prev,
           balls: remainingBalls,
@@ -388,13 +425,56 @@ function ElementPuzzleGame({ onClose }: { onClose: () => void }) {
   // ゲーム開始/停止
   const toggleGame = () => {
     setIsPlaying(!isPlaying);
+    recordInteraction('click');
+    
     if (!isPlaying) {
       initializeGame();
+      
+      // ゲーム開始を記録
+      recordAnswer(true, {
+        problem: '元素パズルゲームの開始',
+        userAnswer: 'ゲームを開始',
+        correctAnswer: 'ゲーム開始',
+        gameMode: 'element-puzzle',
+        startConditions: {
+          availableElements: elements.slice(0, 10).length,
+          startLevel: gameState.level
+        }
+      });
+    } else {
+      // ゲーム中断を記録
+      recordAnswer(true, {
+        problem: '元素パズルゲームの中断',
+        userAnswer: 'ゲームを中断',
+        correctAnswer: 'ゲーム中断',
+        gameResults: {
+          finalScore: gameState.score,
+          maxCombo: gameState.combo,
+          level: gameState.level,
+          ballsRemaining: gameState.balls.length
+        }
+      });
     }
   };
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '元素パズルゲームのリセット',
+      userAnswer: 'ゲームをリセット',
+      correctAnswer: 'ゲームの初期化',
+      resetData: {
+        previousScore: gameState.score,
+        previousCombo: gameState.combo,
+        previousLevel: gameState.level,
+        previousProgress: progress,
+        previousSuccessCount: successCount
+      }
+    });
+    
     setIsPlaying(false);
     setProgress(0);
     setSuccessCount(0);
@@ -416,12 +496,65 @@ function ElementPuzzleGame({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     // スコアに基づく進捗更新
     if (gameState.score > 0) {
-      setProgress(Math.min((gameState.score / 5000) * 100, 100));
+      const newProgress = Math.min((gameState.score / 5000) * 100, 100);
+      setProgress(newProgress);
+      
       if (gameState.combo > 2) {
-        setSuccessCount(prev => prev + 1);
+        setSuccessCount(prev => {
+          const newCount = prev + 1;
+          
+          // 高コンボ達成を記録
+          recordAnswer(true, {
+            problem: '高コンボ達成',
+            userAnswer: `${gameState.combo}コンボを達成`,
+            correctAnswer: '連続的な元素ペア発見の成功',
+            comboLevel: gameState.combo,
+            achievementLevel: gameState.combo > 5 ? 'excellent' : gameState.combo > 3 ? 'good' : 'normal',
+            currentScore: gameState.score,
+            successCount: newCount
+          });
+          
+          return newCount;
+        });
+      }
+      
+      // 進捗マイルストーン達成を記録
+      if (newProgress >= 25 && progress < 25) {
+        recordAnswer(true, {
+          problem: '学習進捗マイルストーン',
+          userAnswer: '25%進捗を達成',
+          correctAnswer: '元素学習の基礎習得',
+          milestone: '25%',
+          currentScore: gameState.score
+        });
+      } else if (newProgress >= 50 && progress < 50) {
+        recordAnswer(true, {
+          problem: '学習進捗マイルストーン',
+          userAnswer: '50%進捗を達成',
+          correctAnswer: '元素学習の中級習得',
+          milestone: '50%',
+          currentScore: gameState.score
+        });
+      } else if (newProgress >= 75 && progress < 75) {
+        recordAnswer(true, {
+          problem: '学習進捗マイルストーン',
+          userAnswer: '75%進捗を達成',
+          correctAnswer: '元素学習の上級習得',
+          milestone: '75%',
+          currentScore: gameState.score
+        });
+      } else if (newProgress >= 100 && progress < 100) {
+        recordAnswer(true, {
+          problem: '学習進捗完了',
+          userAnswer: '100%進捗を達成',
+          correctAnswer: '元素学習の完全習得',
+          milestone: '100%',
+          finalScore: gameState.score,
+          totalSuccessCount: successCount
+        });
       }
     }
-  }, [gameState.score, gameState.combo]);
+  }, [gameState.score, gameState.combo, progress, successCount]);
 
   return (
     <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -591,6 +724,22 @@ function ElementPuzzleGame({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+}
+
+// 元素記号パズルゲーム（MaterialWrapperでラップ）
+function ElementPuzzleGame({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="element-puzzle-game"
+      materialName="元素記号パズルゲーム"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <ElementPuzzleGameContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

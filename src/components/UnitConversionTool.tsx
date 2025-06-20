@@ -17,6 +17,7 @@ import {
 import { styled } from '@mui/material/styles';
 import StraightenIcon from '@mui/icons-material/Straighten';
 import LocalDrinkIcon from '@mui/icons-material/LocalDrink';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 const VisualizationBox = styled(Box)(({ theme }) => ({
   minHeight: '200px',
@@ -87,7 +88,9 @@ interface UnitConversionToolProps {
   onClose?: () => void;
 }
 
-const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
+// 単位変換ツール（内部コンポーネント）
+const UnitConversionToolContent: React.FC<UnitConversionToolProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
@@ -172,6 +175,7 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
   const handleModeChange = (_: React.MouseEvent<HTMLElement>, newMode: 'length' | 'volume' | null) => {
     if (newMode !== null) {
       setMode(newMode);
+      recordInteraction('click');
     }
   };
 
@@ -227,7 +231,10 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
                   <UnitCard 
                     elevation={selectedLengthUnit === 'mm' ? 4 : 1}
                     isActive={selectedLengthUnit === 'mm'}
-                    onClick={() => setSelectedLengthUnit('mm')}
+                    onClick={() => {
+                      setSelectedLengthUnit('mm');
+                      recordInteraction('click');
+                    }}
                   >
                     <Typography variant="h5" component="div">
                       {Math.round(lengthUnits.mm * 10) / 10}
@@ -244,7 +251,10 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
                   <UnitCard 
                     elevation={selectedLengthUnit === 'cm' ? 4 : 1}
                     isActive={selectedLengthUnit === 'cm'}
-                    onClick={() => setSelectedLengthUnit('cm')}
+                    onClick={() => {
+                      setSelectedLengthUnit('cm');
+                      recordInteraction('click');
+                    }}
                   >
                     <Typography variant="h5" component="div">
                       {Math.round(lengthUnits.cm * 10) / 10}
@@ -261,7 +271,10 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
                   <UnitCard 
                     elevation={selectedLengthUnit === 'm' ? 4 : 1}
                     isActive={selectedLengthUnit === 'm'}
-                    onClick={() => setSelectedLengthUnit('m')}
+                    onClick={() => {
+                      setSelectedLengthUnit('m');
+                      recordInteraction('click');
+                    }}
                   >
                     <Typography variant="h5" component="div">
                       {Math.round(lengthUnits.m * 100) / 100}
@@ -285,7 +298,10 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
                 </Typography>
                 <Slider
                   value={lengthValue}
-                  onChange={(_, value) => setLengthValue(value as number)}
+                  onChange={(_, value) => {
+                    setLengthValue(value as number);
+                    recordInteraction('drag');
+                  }}
                   min={0}
                   max={getSliderMax()}
                   step={selectedLengthUnit === 'm' ? 0.01 : 1}
@@ -332,7 +348,10 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
                   <UnitCard 
                     elevation={selectedVolumeUnit === 'mL' ? 4 : 1}
                     isActive={selectedVolumeUnit === 'mL'}
-                    onClick={() => setSelectedVolumeUnit('mL')}
+                    onClick={() => {
+                      setSelectedVolumeUnit('mL');
+                      recordInteraction('click');
+                    }}
                   >
                     <Typography variant="h5" component="div">
                       {Math.round(volumeUnits.mL)}
@@ -349,7 +368,10 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
                   <UnitCard 
                     elevation={selectedVolumeUnit === 'dL' ? 4 : 1}
                     isActive={selectedVolumeUnit === 'dL'}
-                    onClick={() => setSelectedVolumeUnit('dL')}
+                    onClick={() => {
+                      setSelectedVolumeUnit('dL');
+                      recordInteraction('click');
+                    }}
                   >
                     <Typography variant="h5" component="div">
                       {Math.round(volumeUnits.dL * 10) / 10}
@@ -366,7 +388,10 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
                   <UnitCard 
                     elevation={selectedVolumeUnit === 'L' ? 4 : 1}
                     isActive={selectedVolumeUnit === 'L'}
-                    onClick={() => setSelectedVolumeUnit('L')}
+                    onClick={() => {
+                      setSelectedVolumeUnit('L');
+                      recordInteraction('click');
+                    }}
                   >
                     <Typography variant="h5" component="div">
                       {Math.round(volumeUnits.L * 100) / 100}
@@ -390,7 +415,10 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
                 </Typography>
                 <Slider
                   value={volumeValue}
-                  onChange={(_, value) => setVolumeValue(value as number)}
+                  onChange={(_, value) => {
+                    setVolumeValue(value as number);
+                    recordInteraction('drag');
+                  }}
                   min={0}
                   max={getSliderMax()}
                   step={selectedVolumeUnit === 'L' ? 0.01 : 1}
@@ -443,6 +471,20 @@ const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
         </CardContent>
       </Card>
     </Container>
+  );
+};
+
+// 単位変換ツール（MaterialWrapperでラップ）
+const UnitConversionTool: React.FC<UnitConversionToolProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="unit-conversion"
+      materialName="単位変換ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <UnitConversionToolContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

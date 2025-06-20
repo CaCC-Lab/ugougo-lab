@@ -30,6 +30,7 @@ import GridOnIcon from '@mui/icons-material/GridOn';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // キャンバスのスタイル
 const CanvasContainer = styled(Paper)(({ theme }) => ({
@@ -87,7 +88,9 @@ interface AreaCalculatorProps {
   onClose?: () => void;
 }
 
-const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
+// 面積計算ツール（内部コンポーネント）
+const AreaCalculatorContent: React.FC<AreaCalculatorProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -110,6 +113,7 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
   const [showAnimation, setShowAnimation] = useState(false);
   const [challengeDialog, setChallengeDialog] = useState(false);
   const [triangleMode, setTriangleMode] = useState<'free' | 'isosceles' | 'equilateral'>('free');
+  const [challengeCompleted, setChallengeCompleted] = useState(false);
   
   // 図形の初期化
   const initializeShape = (type: Shape['type']) => {
@@ -284,6 +288,7 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
   const handleVertexMouseDown = (e: React.MouseEvent, index: number) => {
     e.preventDefault();
     setDraggedVertex(index);
+    recordInteraction('drag');
   };
   
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -486,12 +491,23 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
   
   const handleMouseUp = () => {
     setDraggedVertex(null);
+    
+    // チャレンジモードで成功したかチェック
+    if (mode === 'challenge' && !challengeCompleted && checkChallenge()) {
+      setChallengeCompleted(true);
+      recordAnswer(true, {
+        problem: `目標面積 ${targetArea} cm²の${shapeType === 'square' ? '正方形' : shapeType === 'rectangle' ? '長方形' : shapeType === 'triangle' ? '三角形' : '平行四辺形'}を作る`,
+        userAnswer: `${calculateArea().toFixed(1)} cm²`,
+        correctAnswer: `${targetArea} cm² (±5cm²)`
+      });
+    }
   };
   
   // 図形タイプの変更
   const handleShapeTypeChange = (_: React.MouseEvent<HTMLElement>, newType: Shape['type'] | null) => {
     if (newType) {
       setShapeType(newType);
+      recordInteraction('click');
       if (newType !== 'triangle') {
         setTriangleMode('free'); // 三角形以外に変更したらモードをリセット
       }
@@ -514,6 +530,7 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
     setTargetArea(randomArea);
     setChallengeDialog(true);
     setMode('challenge');
+    setChallengeCompleted(false);
     initializeShape(shapeType);
   };
   
@@ -905,6 +922,20 @@ const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
         </DialogActions>
       </Dialog>
     </Container>
+  );
+};
+
+// 面積計算ツール（MaterialWrapperでラップ）
+const AreaCalculator: React.FC<AreaCalculatorProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="area-calculator"
+      materialName="面積計算ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <AreaCalculatorContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

@@ -20,6 +20,7 @@ import {
   Info as InfoIcon,
   Calculate as CalculateIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import { WorldMap, ClockDisplay, TimeZoneQuiz, DateLineExplanation } from './components';
 import { useTimeZoneCalculation } from './hooks';
 import { cities, quizQuestions } from './data/cityData';
@@ -39,7 +40,9 @@ const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
   );
 };
 
-const TimeZoneCalculator: React.FC = () => {
+// 時差計算ツール（内部コンポーネント）
+const TimeZoneCalculatorContent: React.FC = () => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const [tabValue, setTabValue] = useState(0);
   const [selectedCityMode, setSelectedCityMode] = useState<'base' | 'target'>('base');
   
@@ -55,6 +58,7 @@ const TimeZoneCalculator: React.FC = () => {
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    recordInteraction('click');
   };
 
   const handleCityClick = (city: City) => {
@@ -66,10 +70,18 @@ const TimeZoneCalculator: React.FC = () => {
     } else {
       setTargetCity(city);
     }
+    recordInteraction('click');
   };
 
-  const handleQuizComplete = () => {
+  const handleQuizComplete = (score?: number) => {
     setTabValue(0);
+    if (score !== undefined) {
+      recordAnswer(score >= 70, {
+        type: 'quiz',
+        score: score,
+        topic: '時差計算'
+      });
+    }
   };
 
   return (
@@ -121,7 +133,10 @@ const TimeZoneCalculator: React.FC = () => {
                 <Button
                   variant={selectedCityMode === 'base' ? 'contained' : 'outlined'}
                   color="primary"
-                  onClick={() => setSelectedCityMode('base')}
+                  onClick={() => {
+                    setSelectedCityMode('base');
+                    recordInteraction('click');
+                  }}
                   startIcon={<CalculateIcon />}
                 >
                   基準都市を選択
@@ -129,7 +144,10 @@ const TimeZoneCalculator: React.FC = () => {
                 <Button
                   variant={selectedCityMode === 'target' ? 'contained' : 'outlined'}
                   color="secondary"
-                  onClick={() => setSelectedCityMode('target')}
+                  onClick={() => {
+                    setSelectedCityMode('target');
+                    recordInteraction('click');
+                  }}
                   startIcon={<CalculateIcon />}
                 >
                   比較都市を選択
@@ -224,6 +242,20 @@ const TimeZoneCalculator: React.FC = () => {
         </Paper>
       </Box>
     </Container>
+  );
+};
+
+// 時差計算ツール（MaterialWrapperでラップ）
+const TimeZoneCalculator: React.FC = () => {
+  return (
+    <MaterialWrapper
+      materialId="time-zone-calculator"
+      materialName="時差計算ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <TimeZoneCalculatorContent />
+    </MaterialWrapper>
   );
 };
 

@@ -19,9 +19,11 @@ import {
   Alert
 } from '@mui/material';
 import { Close as CloseIcon, Refresh as RefreshIcon, PlayArrow as PlayIcon, Pause as PauseIcon } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// 関数グラフの動的描画ツール
-function FunctionGraphTool({ onClose }: { onClose: () => void }) {
+// 関数グラフの動的描画ツール（内部コンポーネント）
+function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   
@@ -254,8 +256,25 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
 
   // アニメーション開始/停止
   const toggleAnimation = () => {
-    setIsAnimating(!isAnimating);
-    if (!isAnimating) {
+    const newIsAnimating = !isAnimating;
+    setIsAnimating(newIsAnimating);
+    recordInteraction('click');
+    
+    // アニメーション制御を記録
+    recordAnswer(true, {
+      problem: '関数グラフアニメーションの制御',
+      userAnswer: newIsAnimating ? 'グラフ描画アニメーション開始' : 'グラフ描画アニメーション停止',
+      correctAnswer: 'アニメーション制御の理解',
+      animationControl: {
+        action: newIsAnimating ? 'start' : 'stop',
+        functionType: functionType,
+        parameters: { a: paramA, b: paramB, c: paramC },
+        functionFormula: getFunctionText(functionType, paramA, paramB, paramC),
+        purpose: newIsAnimating ? 'グラフの描画過程を視覚化' : '完成したグラフを観察'
+      }
+    });
+    
+    if (!newIsAnimating) {
       setAnimationProgress(0);
     }
   };
@@ -278,8 +297,28 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
     const correct = getFunctionText(quizQuestion.type, quizQuestion.a, quizQuestion.b, quizQuestion.c);
     // 簡単な正解判定（空白や符号の違いを許容）
     const normalizeFormula = (formula: string) => formula.replace(/\s/g, '').replace(/\+\-/g, '-');
+    const isCorrect = normalizeFormula(answer) === normalizeFormula(correct);
     
-    if (normalizeFormula(answer) === normalizeFormula(correct)) {
+    recordInteraction('text_input');
+    
+    // クイズ回答を記録
+    recordAnswer(isCorrect, {
+      problem: `関数グラフクイズ: ${functionTypes[quizQuestion.type as keyof typeof functionTypes].name}の関数式`,
+      userAnswer: answer,
+      correctAnswer: correct,
+      quizData: {
+        functionType: quizQuestion.type,
+        functionName: functionTypes[quizQuestion.type as keyof typeof functionTypes].name,
+        parameters: { a: quizQuestion.a, b: quizQuestion.b, c: quizQuestion.c },
+        userFormula: answer,
+        correctFormula: correct,
+        isCorrect: isCorrect,
+        currentProgress: progress + (isCorrect ? 10 : 0),
+        successCount: successCount + (isCorrect ? 1 : 0)
+      }
+    });
+    
+    if (isCorrect) {
       setSuccessCount(prev => prev + 1);
       setProgress(prev => Math.min(prev + 10, 100));
       setTimeout(() => {
@@ -290,6 +329,24 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
 
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '関数グラフツールのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousFunctionType: functionType,
+        previousParameters: { a: paramA, b: paramB, c: paramC },
+        previousProgress: progress,
+        previousSuccessCount: successCount,
+        wasAnimating: isAnimating,
+        wasInQuizMode: quizMode,
+        currentFunction: getFunctionText(functionType, paramA, paramB, paramC)
+      }
+    });
+    
     setProgress(0);
     setSuccessCount(0);
     setIsAnimating(false);
@@ -389,7 +446,28 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
             <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
               <Button
                 variant={!quizMode ? 'contained' : 'outlined'}
-                onClick={() => setQuizMode(false)}
+                onClick={() => {
+                  if (quizMode) {
+                    recordInteraction('click');
+                    
+                    // 学習モード切り替えを記録
+                    recordAnswer(true, {
+                      problem: '学習モードへの切り替え',
+                      userAnswer: 'クイズモードから学習モードに変更',
+                      correctAnswer: 'モード切り替えの理解',
+                      modeSwitch: {
+                        from: 'quiz',
+                        to: 'learning',
+                        quizResults: {
+                          progress: progress,
+                          successCount: successCount
+                        },
+                        selectedFunction: functionType
+                      }
+                    });
+                  }
+                  setQuizMode(false);
+                }}
                 size="small"
               >
                 学習モード
@@ -397,6 +475,23 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
               <Button
                 variant={quizMode ? 'contained' : 'outlined'}
                 onClick={() => {
+                  if (!quizMode) {
+                    recordInteraction('click');
+                    
+                    // クイズモード開始を記録
+                    recordAnswer(true, {
+                      problem: 'クイズモードの開始',
+                      userAnswer: '学習モードからクイズモードに切り替え',
+                      correctAnswer: 'クイズモード開始',
+                      modeSwitch: {
+                        from: 'learning',
+                        to: 'quiz',
+                        currentFunction: functionType,
+                        currentParameters: { a: paramA, b: paramB, c: paramC },
+                        readyForQuiz: true
+                      }
+                    });
+                  }
                   setQuizMode(true);
                   generateQuiz();
                 }}
@@ -413,7 +508,26 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
                   <InputLabel>関数の種類</InputLabel>
                   <Select
                     value={functionType}
-                    onChange={(e) => setFunctionType(e.target.value)}
+                    onChange={(e) => {
+                      const newFunctionType = e.target.value;
+                      setFunctionType(newFunctionType);
+                      recordInteraction('click');
+                      
+                      // 関数タイプ変更を記録
+                      recordAnswer(true, {
+                        problem: '関数の種類の選択',
+                        userAnswer: `${functionTypes[newFunctionType as keyof typeof functionTypes].name}を選択`,
+                        correctAnswer: '関数の特性理解',
+                        functionSelection: {
+                          from: functionType,
+                          to: newFunctionType,
+                          fromName: functionTypes[functionType as keyof typeof functionTypes].name,
+                          toName: functionTypes[newFunctionType as keyof typeof functionTypes].name,
+                          formula: functionTypes[newFunctionType as keyof typeof functionTypes].formula,
+                          parameters: functionTypes[newFunctionType as keyof typeof functionTypes].params
+                        }
+                      });
+                    }}
                     size="small"
                   >
                     {Object.entries(functionTypes).map(([key, func]) => (
@@ -433,7 +547,31 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
                   <Typography variant="caption">a = {paramA}</Typography>
                   <Slider
                     value={paramA}
-                    onChange={(_, value) => setParamA(value as number)}
+                    onChange={(_, value) => {
+                      const newParamA = value as number;
+                      setParamA(newParamA);
+                      recordInteraction('slider');
+                      
+                      // パラメータa変更を記録（主要な値で）
+                      if ([-5, -2, -1, 0, 1, 2, 5].includes(Math.round(newParamA * 10) / 10)) {
+                        recordAnswer(true, {
+                          problem: 'パラメータaの調整',
+                          userAnswer: `パラメータaを${newParamA}に設定`,
+                          correctAnswer: 'パラメータの影響理解',
+                          parameterAdjustment: {
+                            parameter: 'a',
+                            newValue: newParamA,
+                            functionType: functionType,
+                            allParameters: { a: newParamA, b: paramB, c: paramC },
+                            newFormula: getFunctionText(functionType, newParamA, paramB, paramC),
+                            effect: functionType === 'linear' ? '傾きの変化' : 
+                                   functionType === 'quadratic' ? '開き方の変化' : 
+                                   functionType.includes('sin') || functionType.includes('cos') ? '振幅の変化' : 
+                                   'スケールの変化'
+                          }
+                        });
+                      }
+                    }}
                     min={-5}
                     max={5}
                     step={0.1}
@@ -446,7 +584,31 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
                   <Typography variant="caption">b = {paramB}</Typography>
                   <Slider
                     value={paramB}
-                    onChange={(_, value) => setParamB(value as number)}
+                    onChange={(_, value) => {
+                      const newParamB = value as number;
+                      setParamB(newParamB);
+                      recordInteraction('slider');
+                      
+                      // パラメータb変更を記録（主要な値で）
+                      if ([-5, -2, -1, 0, 1, 2, 5].includes(Math.round(newParamB * 10) / 10)) {
+                        recordAnswer(true, {
+                          problem: 'パラメータbの調整',
+                          userAnswer: `パラメータbを${newParamB}に設定`,
+                          correctAnswer: 'パラメータの影響理解',
+                          parameterAdjustment: {
+                            parameter: 'b',
+                            newValue: newParamB,
+                            functionType: functionType,
+                            allParameters: { a: paramA, b: newParamB, c: paramC },
+                            newFormula: getFunctionText(functionType, paramA, newParamB, paramC),
+                            effect: functionType === 'linear' ? 'y切片の変化' : 
+                                   functionType === 'quadratic' ? 'x係数の変化' : 
+                                   functionType.includes('sin') || functionType.includes('cos') ? '周期の変化' : 
+                                   '係数の変化'
+                          }
+                        });
+                      }
+                    }}
                     min={-5}
                     max={5}
                     step={0.1}
@@ -460,7 +622,30 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
                     <Typography variant="caption">c = {paramC}</Typography>
                     <Slider
                       value={paramC}
-                      onChange={(_, value) => setParamC(value as number)}
+                      onChange={(_, value) => {
+                        const newParamC = value as number;
+                        setParamC(newParamC);
+                        recordInteraction('slider');
+                        
+                        // パラメータc変更を記録（主要な値で）
+                        if ([-5, -2, -1, 0, 1, 2, 5].includes(Math.round(newParamC * 10) / 10)) {
+                          recordAnswer(true, {
+                            problem: 'パラメータcの調整',
+                            userAnswer: `パラメータcを${newParamC}に設定`,
+                            correctAnswer: 'パラメータの影響理解',
+                            parameterAdjustment: {
+                              parameter: 'c',
+                              newValue: newParamC,
+                              functionType: functionType,
+                              allParameters: { a: paramA, b: paramB, c: newParamC },
+                              newFormula: getFunctionText(functionType, paramA, paramB, newParamC),
+                              effect: functionType === 'quadratic' ? '定数項の変化' : 
+                                     functionType.includes('sin') || functionType.includes('cos') ? '位相の変化' : 
+                                     '定数項の変化'
+                            }
+                          });
+                        }
+                      }}
                       min={-5}
                       max={5}
                       step={0.1}
@@ -528,7 +713,10 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
                 
                 <TextField
                   value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
+                  onChange={(e) => {
+                    setUserAnswer(e.target.value);
+                    recordInteraction('text_input');
+                  }}
                   placeholder="例: y = 2x + 1"
                   fullWidth
                   sx={{ mb: 2 }}
@@ -573,6 +761,20 @@ function FunctionGraphTool({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 関数グラフの動的描画ツール（MaterialWrapperでラップ）
+function FunctionGraphTool({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="function-graph-tool"
+      materialName="関数グラフ動的描画ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <FunctionGraphToolContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

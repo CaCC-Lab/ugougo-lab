@@ -17,9 +17,11 @@ import {
   CardContent
 } from '@mui/material';
 import { Close as CloseIcon, Refresh as RefreshIcon, PlayArrow as PlayIcon, Pause as PauseIcon } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// 原子・分子の構造シミュレーション
-function AtomMoleculeSimulation({ onClose }: { onClose: () => void }) {
+// 原子・分子の構造シミュレーション（内部コンポーネント）
+function AtomMoleculeSimulationContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   
@@ -202,7 +204,22 @@ function AtomMoleculeSimulation({ onClose }: { onClose: () => void }) {
 
   // アニメーション開始/停止
   const toggleAnimation = () => {
-    setIsAnimating(!isAnimating);
+    const newIsAnimating = !isAnimating;
+    setIsAnimating(newIsAnimating);
+    recordInteraction('click');
+    
+    // アニメーション制御を記録
+    recordAnswer(true, {
+      problem: '電子軌道アニメーションの制御',
+      userAnswer: newIsAnimating ? '電子軌道アニメーション開始' : '電子軌道アニメーション停止',
+      correctAnswer: '電子の動きの視覚化理解',
+      animationControl: {
+        action: newIsAnimating ? 'start' : 'stop',
+        selectedMolecule: selectedMolecule,
+        purpose: newIsAnimating ? '電子の軌道運動を視覚化' : '静的な分子構造を観察',
+        moleculeInfo: molecules[selectedMolecule as keyof typeof molecules]
+      }
+    });
   };
 
   // クイズ生成
@@ -217,7 +234,32 @@ function AtomMoleculeSimulation({ onClose }: { onClose: () => void }) {
   const checkAnswer = (answer: string) => {
     setUserAnswer(answer);
     const correct = molecules[quizQuestion as keyof typeof molecules].formula;
-    if (answer === correct) {
+    const isCorrect = answer === correct;
+    
+    recordInteraction('click');
+    
+    // クイズ回答を記録
+    recordAnswer(isCorrect, {
+      problem: `分子構造クイズ: ${molecules[quizQuestion as keyof typeof molecules].name}の化学式`,
+      userAnswer: answer,
+      correctAnswer: correct,
+      quizData: {
+        moleculeName: molecules[quizQuestion as keyof typeof molecules].name,
+        questionMolecule: quizQuestion,
+        selectedFormula: answer,
+        correctFormula: correct,
+        isCorrect: isCorrect,
+        currentProgress: progress + (isCorrect ? 10 : 0),
+        successCount: successCount + (isCorrect ? 1 : 0),
+        moleculeStructure: {
+          atomCount: molecules[quizQuestion as keyof typeof molecules].atoms.length,
+          bondCount: molecules[quizQuestion as keyof typeof molecules].bonds.length,
+          elements: molecules[quizQuestion as keyof typeof molecules].atoms.map(atom => atom.element)
+        }
+      }
+    });
+    
+    if (isCorrect) {
       setSuccessCount(prev => prev + 1);
       setProgress(prev => Math.min(prev + 10, 100));
       setTimeout(() => {
@@ -228,6 +270,24 @@ function AtomMoleculeSimulation({ onClose }: { onClose: () => void }) {
 
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '原子・分子シミュレーションのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousProgress: progress,
+        previousSuccessCount: successCount,
+        previousSelectedMolecule: selectedMolecule,
+        wasAnimating: isAnimating,
+        wasInQuizMode: quizMode,
+        currentQuizQuestion: quizQuestion,
+        userAnswer: userAnswer
+      }
+    });
+    
     setProgress(0);
     setSuccessCount(0);
     setIsAnimating(false);
@@ -332,15 +392,55 @@ function AtomMoleculeSimulation({ onClose }: { onClose: () => void }) {
             <ButtonGroup fullWidth sx={{ mb: 2 }}>
               <Button
                 variant={!quizMode ? 'contained' : 'outlined'}
-                onClick={() => setQuizMode(false)}
+                onClick={() => {
+                  if (quizMode) {
+                    recordInteraction('click');
+                    
+                    // 学習モード切り替えを記録
+                    recordAnswer(true, {
+                      problem: '学習モードへの切り替え',
+                      userAnswer: 'クイズモードから学習モードに変更',
+                      correctAnswer: 'モード切り替えの理解',
+                      modeSwitch: {
+                        from: 'quiz',
+                        to: 'learning',
+                        quizResults: {
+                          progress: progress,
+                          successCount: successCount
+                        },
+                        selectedMolecule: selectedMolecule
+                      }
+                    });
+                    
+                    setQuizMode(false);
+                  }
+                }}
               >
                 学習モード
               </Button>
               <Button
                 variant={quizMode ? 'contained' : 'outlined'}
                 onClick={() => {
-                  setQuizMode(true);
-                  generateQuiz();
+                  if (!quizMode) {
+                    recordInteraction('click');
+                    
+                    // クイズモード開始を記録
+                    recordAnswer(true, {
+                      problem: 'クイズモードの開始',
+                      userAnswer: '学習モードからクイズモードに切り替え',
+                      correctAnswer: 'クイズモード開始',
+                      modeSwitch: {
+                        from: 'learning',
+                        to: 'quiz',
+                        currentMolecule: selectedMolecule,
+                        wasAnimating: isAnimating,
+                        readyForQuiz: true
+                      }
+                    });
+                    
+                    setQuizMode(true);
+                    generateQuiz();
+                  }
                 }}
               >
                 クイズモード
@@ -354,7 +454,30 @@ function AtomMoleculeSimulation({ onClose }: { onClose: () => void }) {
                   <InputLabel>分子を選択</InputLabel>
                   <Select
                     value={selectedMolecule}
-                    onChange={(e) => setSelectedMolecule(e.target.value)}
+                    onChange={(e) => {
+                      const newMolecule = e.target.value;
+                      setSelectedMolecule(newMolecule);
+                      recordInteraction('click');
+                      
+                      // 分子選択を記録
+                      recordAnswer(true, {
+                        problem: '分子の選択',
+                        userAnswer: `${molecules[newMolecule as keyof typeof molecules].name}を選択`,
+                        correctAnswer: '分子構造の理解',
+                        moleculeSelection: {
+                          from: selectedMolecule,
+                          to: newMolecule,
+                          moleculeName: molecules[newMolecule as keyof typeof molecules].name,
+                          formula: molecules[newMolecule as keyof typeof molecules].formula,
+                          description: molecules[newMolecule as keyof typeof molecules].description,
+                          structureInfo: {
+                            atomCount: molecules[newMolecule as keyof typeof molecules].atoms.length,
+                            bondCount: molecules[newMolecule as keyof typeof molecules].bonds.length,
+                            elements: molecules[newMolecule as keyof typeof molecules].atoms.map(atom => atom.element)
+                          }
+                        }
+                      });
+                    }}
                   >
                     {Object.entries(molecules).map(([key, molecule]) => (
                       <MenuItem key={key} value={key}>
@@ -472,6 +595,20 @@ function AtomMoleculeSimulation({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 原子・分子の構造シミュレーション（MaterialWrapperでラップ）
+function AtomMoleculeSimulation({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="atom-molecule-simulation"
+      materialName="原子・分子構造シミュレーション"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <AtomMoleculeSimulationContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

@@ -23,9 +23,15 @@ import {
   Add as AddIcon,
   Remove as RemoveIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// 分数ピザカッター
-function FractionPizzaCutter({ onClose }: { onClose: () => void }) {
+interface FractionPizzaCutterProps {
+  onClose?: () => void;
+}
+
+// 分数ピザカッター（内部コンポーネント）
+const FractionPizzaCutterContent: React.FC<FractionPizzaCutterProps> = ({ onClose }) => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [slices, setSlices] = useState(8); // ピザを何等分するか
   const [selectedSlices, setSelectedSlices] = useState<number[]>([]); // 選択されたピースのインデックス
@@ -168,6 +174,7 @@ function FractionPizzaCutter({ onClose }: { onClose: () => void }) {
         return [...prev, index];
       }
     });
+    recordInteraction('click');
   };
   
   // 答えをチェック（クイズモード）
@@ -180,6 +187,15 @@ function FractionPizzaCutter({ onClose }: { onClose: () => void }) {
     setIsCorrect(isAnswerCorrect);
     setShowAnswer(true);
     setAttempts(prev => prev + 1);
+    
+    // 回答結果を記録
+    recordAnswer(isAnswerCorrect, {
+      problemFraction: `${quizNumerator}/${quizDenominator}`,
+      selectedSlices: selectedSlices.length,
+      correctSlices: correctSlices,
+      attemptNumber: attempts + 1
+    });
+    recordInteraction('click');
     
     if (isAnswerCorrect) {
       setScore(prev => prev + 1);
@@ -200,6 +216,7 @@ function FractionPizzaCutter({ onClose }: { onClose: () => void }) {
     if (mode === 'quiz') {
       generateNewQuiz();
     }
+    recordInteraction('click');
   };
   
   // 分数の表示用フォーマット
@@ -289,7 +306,12 @@ function FractionPizzaCutter({ onClose }: { onClose: () => void }) {
         <ToggleButtonGroup
           value={mode}
           exclusive
-          onChange={(_, value) => value && setMode(value)}
+          onChange={(_, value) => {
+            if (value) {
+              setMode(value);
+              recordInteraction('change');
+            }
+          }}
           fullWidth
         >
           <ToggleButton value="practice">
@@ -316,11 +338,17 @@ function FractionPizzaCutter({ onClose }: { onClose: () => void }) {
                   何等分にする？
                 </Typography>
                 <ButtonGroup fullWidth sx={{ mb: 2 }}>
-                  <Button onClick={() => setSlices(Math.max(2, slices - 1))}>
+                  <Button onClick={() => {
+                    setSlices(Math.max(2, slices - 1));
+                    recordInteraction('click');
+                  }}>
                     <RemoveIcon />
                   </Button>
                   <Button disabled>{slices}等分</Button>
-                  <Button onClick={() => setSlices(Math.min(12, slices + 1))}>
+                  <Button onClick={() => {
+                    setSlices(Math.min(12, slices + 1));
+                    recordInteraction('click');
+                  }}>
                     <AddIcon />
                   </Button>
                 </ButtonGroup>
@@ -365,7 +393,10 @@ function FractionPizzaCutter({ onClose }: { onClose: () => void }) {
                 <Button
                   variant="outlined"
                   fullWidth
-                  onClick={() => setSelectedSlices([])}
+                  onClick={() => {
+                    setSelectedSlices([]);
+                    recordInteraction('click');
+                  }}
                   sx={{ mt: 2 }}
                 >
                   選択をクリア
@@ -512,6 +543,20 @@ function FractionPizzaCutter({ onClose }: { onClose: () => void }) {
       </Paper>
     </Box>
   );
-}
+};
+
+// 分数ピザカッター（MaterialWrapperでラップ）
+const FractionPizzaCutter: React.FC<FractionPizzaCutterProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="fraction-pizza-cutter"
+      materialName="分数ピザカッター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <FractionPizzaCutterContent onClose={onClose} />
+    </MaterialWrapper>
+  );
+};
 
 export default FractionPizzaCutter;

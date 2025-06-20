@@ -29,6 +29,7 @@ import { LearningAssistant } from './common/LearningAssistant';
 import { LearningMetrics } from './common/LearningMetrics';
 import { useLearningStore } from '../stores/learningStore';
 import { algebraicExpressionConcepts } from '../utils/learningSupport';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 式表示のスタイル
 const ExpressionBox = styled(Paper)(({ theme }) => ({
@@ -62,7 +63,9 @@ interface AlgebraicExpressionToolProps {
   onClose?: () => void;
 }
 
-const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClose }) => {
+// 文字式変形ツール（内部コンポーネント）
+const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction, recordHintUsed } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
@@ -73,10 +76,7 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
   const [error, setError] = useState('');
   
   // 学習支援機能
-  const [startTime, setStartTime] = useState<number>(Date.now());
   const [hintsUsed, setHintsUsed] = useState(0);
-  const [mistakes] = useState<{ problem: string; userAnswer: string; correctAnswer: string }[]>([]);
-  const { addRecord } = useLearningStore();
   
   // サンプル問題
   const sampleProblems = {
@@ -298,33 +298,19 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
     return steps;
   };
   
-  // 学習記録の保存
-  useEffect(() => {
-    // コンポーネントがアンマウントされる時に記録を保存
-    return () => {
-      if (steps.length > 0) {
-        const duration = Math.floor((Date.now() - startTime) / 1000);
-        const score = steps.some(s => s.explanation.includes('正しく')) ? 100 : 50;
-        
-        addRecord({
-          materialId: 'algebraic-expression',
-          timestamp: Date.now(),
-          duration,
-          score,
-          mistakes,
-          hintsUsed,
-          completed: true,
-        });
-      }
-    };
-  }, [steps, startTime, mistakes, hintsUsed, addRecord]);
+  // 操作モードの変更時に記録
+  const handleOperationChange = (newOperation: 'simplify' | 'expand' | 'factorize' | null) => {
+    if (newOperation && newOperation !== operation) {
+      setOperation(newOperation);
+      recordInteraction('click');
+    }
+  };
   
   // 式の処理
   const processExpression = () => {
     setError('');
     setSteps([]);
     setShowSteps(false);
-    setStartTime(Date.now()); // 計測開始
     
     if (!expression.trim()) {
       setError('式を入力してください');
@@ -348,6 +334,14 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
       
       setSteps(result);
       setShowSteps(true);
+      
+      // 学習履歴に記録
+      const isCorrect = result.length > 0 && result[result.length - 1].expression !== expression;
+      recordAnswer(isCorrect, {
+        problem: `${expression} を ${operation === 'simplify' ? '簡略化' : operation === 'expand' ? '展開' : '因数分解'}`,
+        userAnswer: result[result.length - 1]?.expression || '',
+        correctAnswer: result[result.length - 1]?.expression || ''
+      });
     } catch (err) {
       setError('式の処理中にエラーが発生しました');
     }
@@ -381,7 +375,7 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
                 <ToggleButtonGroup
                   value={operation}
                   exclusive
-                  onChange={(_, value) => value && setOperation(value)}
+                  onChange={(_, value) => handleOperationChange(value)}
                   aria-label="操作の種類"
                   size={isMobile ? 'small' : 'medium'}
                   fullWidth
@@ -565,6 +559,7 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
         concepts={algebraicExpressionConcepts}
         onHintRequest={() => {
           setHintsUsed((prev) => prev + 1);
+          recordHintUsed();
           // ヒントを表示する処理
         }}
       />
@@ -574,6 +569,20 @@ const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClo
         <LearningMetrics materialId="algebraic-expression" />
       </Box>
     </Container>
+  );
+};
+
+// 文字式変形ツール（MaterialWrapperでラップ）
+const AlgebraicExpressionTool: React.FC<AlgebraicExpressionToolProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="algebraic-expression"
+      materialName="文字式変形ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <AlgebraicExpressionToolContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

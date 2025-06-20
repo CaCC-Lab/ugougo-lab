@@ -32,6 +32,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import SpeedIcon from '@mui/icons-material/Speed';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // アニメーションエリアのスタイル
 const AnimationArea = styled(Paper)(({ theme }) => ({
@@ -89,7 +90,9 @@ interface SpeedTimeDistanceSimulatorProps {
   onClose?: () => void;
 }
 
-const SpeedTimeDistanceSimulator: React.FC<SpeedTimeDistanceSimulatorProps> = ({ onClose }) => {
+// 速さ・時間・距離の関係シミュレーター（内部コンポーネント）
+const SpeedTimeDistanceSimulatorContent: React.FC<SpeedTimeDistanceSimulatorProps> = ({ onClose }) => {
+  const { recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const animationRef = useRef<number>();
@@ -151,6 +154,7 @@ const SpeedTimeDistanceSimulator: React.FC<SpeedTimeDistanceSimulatorProps> = ({
         }
         break;
     }
+    recordInteraction('click');
   };
   
   // アニメーションの開始/停止
@@ -165,6 +169,7 @@ const SpeedTimeDistanceSimulator: React.FC<SpeedTimeDistanceSimulatorProps> = ({
       startTimeRef.current = Date.now() - elapsedTime * 1000;
       animate();
     }
+    recordInteraction('click');
   };
   
   // アニメーション処理
@@ -234,6 +239,7 @@ const SpeedTimeDistanceSimulator: React.FC<SpeedTimeDistanceSimulatorProps> = ({
     setVehicleType(type);
     setSpeed(getDefaultSpeed(type));
     reset();
+    recordInteraction('click');
   };
   
   // グラフの描画
@@ -337,7 +343,7 @@ const SpeedTimeDistanceSimulator: React.FC<SpeedTimeDistanceSimulatorProps> = ({
             </Typography>
           </Box>
           
-          <Tabs value={mode} onChange={(_, v) => { setMode(v); reset(); }} sx={{ mb: 3 }}>
+          <Tabs value={mode} onChange={(_, v) => { setMode(v); reset(); recordInteraction('click'); }} sx={{ mb: 3 }}>
             <Tab label="基本学習" value="basic" />
             <Tab label="追いつき問題" value="chase" />
           </Tabs>
@@ -662,6 +668,20 @@ const SpeedTimeDistanceSimulator: React.FC<SpeedTimeDistanceSimulatorProps> = ({
         </CardContent>
       </Card>
     </Container>
+  );
+};
+
+// 速さ・時間・距離の関係シミュレーター（MaterialWrapperでラップ）
+const SpeedTimeDistanceSimulator: React.FC<SpeedTimeDistanceSimulatorProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="speed-time-distance"
+      materialName="速さ・時間・距離の関係"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <SpeedTimeDistanceSimulatorContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

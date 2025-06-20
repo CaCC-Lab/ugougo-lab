@@ -23,6 +23,7 @@ import {
   VolumeUp as VolumeIcon,
   VolumeOff as MuteIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // ひらがなの書き順データ（簡略版）
 const hiraganaData: { [key: string]: { strokes: string[]; name: string } } = {
@@ -103,8 +104,9 @@ const hiraganaData: { [key: string]: { strokes: string[]; name: string } } = {
   }
 };
 
-// ひらがな書き順アニメーション
-function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
+// ひらがな書き順アニメーション（内部コンポーネント）
+function HiraganaStrokeOrderContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const practiceCanvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
@@ -118,6 +120,9 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [progress, setProgress] = useState(0);
   const [completedCharacters, setCompletedCharacters] = useState<string[]>([]);
+  const [practiceStrokeIndex, setPracticeStrokeIndex] = useState(0);
+  const [strokeCompleted, setStrokeCompleted] = useState<boolean[]>([]);
+  const [showStrokeGuide, setShowStrokeGuide] = useState(true);
   
   const canvasSize = 200;
   const animationSpeed = 2000; // 2秒で1画
@@ -229,6 +234,7 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
   const startAnimation = () => {
     setIsAnimating(true);
     setCurrentStroke(0);
+    recordInteraction('click');
     
     const animate = () => {
       const data = hiraganaData[selectedHiragana];
@@ -278,6 +284,7 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
     if (animationRef.current) {
       cancelAnimationFrame(animationRef.current);
     }
+    recordInteraction('click');
   };
   
   // 練習モードの処理
@@ -320,9 +327,105 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
   
   const handlePracticeEnd = () => {
     setIsDrawing(false);
-    if (isPracticeMode) {
-      // 練習結果を評価（簡易版）
-      setPracticeScore(prev => prev + 1);
+    if (isPracticeMode && practiceStrokeIndex < hiraganaData[selectedHiragana].strokes.length) {
+      // ストロークの完了を判定
+      const canvas = practiceCanvasRef.current;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      // キャンバスに描画があるかチェック
+      const imageData = ctx.getImageData(0, 0, canvasSize, canvasSize);
+      let hasDrawing = false;
+      for (let i = 3; i < imageData.data.length; i += 4) {
+        if (imageData.data[i] > 0) {
+          hasDrawing = true;
+          break;
+        }
+      }
+      
+      if (hasDrawing) {
+        // ストロークを完了としてマーク
+        const newCompleted = [...strokeCompleted];
+        newCompleted[practiceStrokeIndex] = true;
+        setStrokeCompleted(newCompleted);
+        
+        // 次のストロークへ
+        if (practiceStrokeIndex < hiraganaData[selectedHiragana].strokes.length - 1) {
+          setPracticeStrokeIndex(practiceStrokeIndex + 1);
+          setTimeout(() => {
+            drawPracticeGuide();
+          }, 500);
+        } else {
+          // すべてのストロークが完了
+          setPracticeScore(prev => prev + 10);
+          if (!completedCharacters.includes(selectedHiragana)) {
+            setCompletedCharacters([...completedCharacters, selectedHiragana]);
+          }
+          
+          // 学習履歴に記録
+          recordAnswer(true, {
+            problem: `「${selectedHiragana}」の書き順練習`,
+            userAnswer: '正しい書き順で完了',
+            correctAnswer: `${hiraganaData[selectedHiragana].strokes.length}画`
+          });
+          
+          // 完了メッセージを表示
+          setTimeout(() => {
+            alert(`「${selectedHiragana}」の練習完了！正しい書き順で書けました！`);
+            resetPractice();
+          }, 500);
+        }
+      }
+    }
+  };
+  
+  // 練習モードのリセット
+  const resetPractice = () => {
+    setPracticeStrokeIndex(0);
+    setStrokeCompleted(new Array(hiraganaData[selectedHiragana].strokes.length).fill(false));
+    clearCanvas(practiceCanvasRef.current);
+    drawPracticeGuide();
+  };
+  
+  // 練習用ガイドの描画
+  const drawPracticeGuide = () => {
+    const canvas = practiceCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    clearCanvas(canvas);
+    
+    const strokes = hiraganaData[selectedHiragana].strokes;
+    
+    // 完了したストロークを緑色で表示
+    strokeCompleted.forEach((completed, index) => {
+      if (completed && index < practiceStrokeIndex) {
+        ctx.strokeStyle = '#4CAF50';
+        ctx.lineWidth = 12;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        const path = new Path2D(strokes[index]);
+        ctx.stroke(path);
+      }
+    });
+    
+    // 現在のストロークを赤い点線でガイド表示
+    if (practiceStrokeIndex < strokes.length && showStrokeGuide) {
+      ctx.strokeStyle = '#FF5722';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([5, 5]);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      const path = new Path2D(strokes[practiceStrokeIndex]);
+      ctx.stroke(path);
+      ctx.setLineDash([]);
+      
+      // ストローク番号を表示
+      ctx.fillStyle = '#FF5722';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.fillText(`${practiceStrokeIndex + 1}画目`, 10, 25);
     }
   };
   
@@ -334,10 +437,14 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
       drawOutline(canvas);
     }
     
-    const practiceCanvas = practiceCanvasRef.current;
-    if (practiceCanvas) {
-      clearCanvas(practiceCanvas);
-      drawOutline(practiceCanvas);
+    // 文字が変更されたら練習をリセット
+    setPracticeStrokeIndex(0);
+    setStrokeCompleted(new Array(hiraganaData[selectedHiragana].strokes.length).fill(false));
+    if (isPracticeMode) {
+      const practiceCanvas = practiceCanvasRef.current;
+      if (practiceCanvas) {
+        setTimeout(() => drawPracticeGuide(), 100);
+      }
     }
   }, [selectedHiragana]);
   
@@ -407,7 +514,12 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
         <ToggleButtonGroup
           value={selectedHiragana}
           exclusive
-          onChange={(_, value) => value && setSelectedHiragana(value)}
+          onChange={(_, value) => {
+            if (value) {
+              setSelectedHiragana(value);
+              recordInteraction('click');
+            }
+          }}
           sx={{ flexWrap: 'wrap' }}
         >
           {Object.keys(hiraganaData).map(char => (
@@ -512,7 +624,15 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
               <Button
                 variant={isPracticeMode ? 'contained' : 'outlined'}
-                onClick={() => setIsPracticeMode(!isPracticeMode)}
+                onClick={() => {
+                  setIsPracticeMode(!isPracticeMode);
+                  if (!isPracticeMode) {
+                    setTimeout(() => resetPractice(), 100);
+                  } else {
+                    clearCanvas(practiceCanvasRef.current);
+                    drawOutline(practiceCanvasRef.current);
+                  }
+                }}
                 size="large"
               >
                 {isPracticeMode ? 'れんしゅうちゅう' : 'れんしゅうする'}
@@ -520,8 +640,12 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
               <Button
                 variant="outlined"
                 onClick={() => {
-                  clearCanvas(practiceCanvasRef.current);
-                  drawOutline(practiceCanvasRef.current);
+                  if (isPracticeMode) {
+                    drawPracticeGuide();
+                  } else {
+                    clearCanvas(practiceCanvasRef.current);
+                    drawOutline(practiceCanvasRef.current);
+                  }
                 }}
               >
                 けす
@@ -534,10 +658,16 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
                   れんしゅうのポイント
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  • うすい線をなぞって書いてみよう<br/>
-                  • 書き順を守って練習しよう<br/>
-                  • 何度でも練習できるよ<br/>
-                  • きれいに書けたら花丸だね！
+                  • 赤い点線が今書くストロークだよ<br/>
+                  • 順番に1画ずつなぞって書こう<br/>
+                  • 書き終わったら自動で次の画へ<br/>
+                  • 全部書けたら完成だよ！<br/>
+                  {isPracticeMode && practiceStrokeIndex < hiraganaData[selectedHiragana].strokes.length && (
+                    <>
+                      <br/>
+                      <strong>現在: {practiceStrokeIndex + 1}/{hiraganaData[selectedHiragana].strokes.length}画目</strong>
+                    </>
+                  )}
                 </Typography>
               </CardContent>
             </Card>
@@ -558,6 +688,20 @@ function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// ひらがな書き順アニメーション（MaterialWrapperでラップ）
+function HiraganaStrokeOrder({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="hiragana-stroke"
+      materialName="ひらがな書き順アニメーション"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <HiraganaStrokeOrderContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

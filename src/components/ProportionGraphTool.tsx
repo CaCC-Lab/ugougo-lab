@@ -29,6 +29,7 @@ import { useTheme } from '@mui/material/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 interface DataPoint {
   x: number;
@@ -51,7 +52,9 @@ interface ProportionGraphToolProps {
   onClose?: () => void;
 }
 
-const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) => {
+// 比例・反比例グラフツール（内部コンポーネント）
+const ProportionGraphToolContent: React.FC<ProportionGraphToolProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const stageRef = useRef<any>(null);
   const [graphType, setGraphType] = useState<'proportion' | 'inverse'>('proportion');
@@ -146,6 +149,22 @@ const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) =>
         setAnimationProgress(prev => {
           if (prev >= 1) {
             setIsAnimating(false);
+            
+            // アニメーション完了を記録
+            recordAnswer(true, {
+              problem: 'グラフ描画アニメーションの完了',
+              userAnswer: `${currentExample.title}のグラフ描画を完了`,
+              correctAnswer: 'グラフの形状と特徴の理解',
+              animationComplete: {
+                graphType: graphType,
+                coefficient: coefficient,
+                example: selectedExample,
+                exampleTitle: currentExample.title,
+                equation: graphType === 'proportion' ? `y = ${coefficient} × x` : `y = ${coefficient} ÷ x`,
+                graphCharacteristics: graphType === 'proportion' ? '原点を通る直線' : '双曲線'
+              }
+            });
+            
             return 1;
           }
           return prev + 0.02;
@@ -153,7 +172,7 @@ const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) =>
       }, 20);
       return () => clearInterval(interval);
     }
-  }, [isAnimating]);
+  }, [isAnimating, graphType, coefficient, selectedExample, currentExample]);
 
   // グラフのスケール計算
   const xScale = (x: number) => {
@@ -317,12 +336,33 @@ const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) =>
     const x = parseFloat(customX);
     const y = parseFloat(customY);
     
+    recordInteraction('click');
+    
     if (!isNaN(x) && !isNaN(y) && x > 0) {
       // 比例・反比例の関係をチェック
       const expectedY = graphType === 'proportion' ? coefficient * x : coefficient / x;
       const tolerance = Math.abs(expectedY) * 0.1; // 10%の誤差を許容
+      const isCorrect = Math.abs(y - expectedY) <= tolerance;
       
-      if (Math.abs(y - expectedY) <= tolerance) {
+      // 値予想の結果を記録
+      recordAnswer(isCorrect, {
+        problem: `${currentExample.title}の値予想`,
+        userAnswer: `${currentExample.xLabel}=${x} → ${currentExample.yLabel}=${y}`,
+        correctAnswer: `${currentExample.xLabel}=${x} → ${currentExample.yLabel}=${expectedY.toFixed(2)}`,
+        predictionData: {
+          inputX: x,
+          predictedY: y,
+          expectedY: expectedY,
+          difference: Math.abs(y - expectedY),
+          tolerance: tolerance,
+          isWithinTolerance: isCorrect,
+          graphType: graphType,
+          coefficient: coefficient,
+          equation: graphType === 'proportion' ? `y = ${coefficient} × x` : `y = ${coefficient} ÷ x`
+        }
+      });
+      
+      if (isCorrect) {
         setCustomX('');
         setCustomY('');
         // 正解のフィードバック
@@ -352,7 +392,26 @@ const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) =>
           比例・反比例グラフツール
         </Typography>
         <Tooltip title="使い方">
-          <IconButton onClick={() => setShowExplanation(!showExplanation)}>
+          <IconButton onClick={() => {
+            const newShowExplanation = !showExplanation;
+            setShowExplanation(newShowExplanation);
+            recordInteraction('click');
+            
+            // ヘルプ表示切り替えを記録
+            recordAnswer(true, {
+              problem: 'ヘルプ・使い方の表示',
+              userAnswer: newShowExplanation ? 'ヘルプを表示' : 'ヘルプを非表示',
+              correctAnswer: 'ツールの使用方法理解',
+              helpAction: {
+                isShowing: newShowExplanation,
+                currentSettings: {
+                  graphType: graphType,
+                  example: selectedExample,
+                  coefficient: coefficient
+                }
+              }
+            });
+          }}>
             <HelpOutlineIcon />
           </IconButton>
         </Tooltip>
@@ -374,6 +433,21 @@ const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) =>
             exclusive
             onChange={(_, value) => {
               if (value) {
+                recordInteraction('click');
+                
+                // グラフタイプ変更を記録
+                recordAnswer(true, {
+                  problem: '比例・反比例の切り替え',
+                  userAnswer: `${value === 'proportion' ? '比例' : '反比例'}を選択`,
+                  correctAnswer: '比例・反比例の理解',
+                  graphTypeChange: {
+                    from: graphType,
+                    to: value,
+                    previousExample: selectedExample,
+                    previousCoefficient: coefficient
+                  }
+                });
+                
                 setGraphType(value);
                 const newExample = examples.find(ex => ex.type === value);
                 if (newExample) {
@@ -399,9 +473,29 @@ const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) =>
             <Select
               value={selectedExample}
               onChange={(e) => {
-                setSelectedExample(e.target.value);
-                const example = examples.find(ex => ex.id === e.target.value);
+                const newExampleId = e.target.value;
+                recordInteraction('click');
+                
+                const example = examples.find(ex => ex.id === newExampleId);
                 if (example) {
+                  // 実例変更を記録
+                  recordAnswer(true, {
+                    problem: '実生活の例の選択',
+                    userAnswer: `${example.title}を選択`,
+                    correctAnswer: '実生活との関連付け',
+                    exampleChange: {
+                      from: selectedExample,
+                      to: newExampleId,
+                      exampleTitle: example.title,
+                      description: example.description,
+                      graphType: example.type,
+                      coefficient: example.coefficient,
+                      xLabel: example.xLabel,
+                      yLabel: example.yLabel
+                    }
+                  });
+                  
+                  setSelectedExample(newExampleId);
                   setCoefficient(example.coefficient);
                   setGraphType(example.type);
                 }
@@ -425,7 +519,26 @@ const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) =>
             </Typography>
             <Slider
               value={coefficient}
-              onChange={(_, value) => setCoefficient(value as number)}
+              onChange={(_, value) => {
+                const newCoefficient = value as number;
+                setCoefficient(newCoefficient);
+                recordInteraction('slider');
+                
+                // 係数変更を記録（重要な値で）
+                if (newCoefficient % 20 === 0) { // 20の倍数での記録
+                  recordAnswer(true, {
+                    problem: '比例・反比例の定数調整',
+                    userAnswer: `定数を${newCoefficient}に設定`,
+                    correctAnswer: '定数と関数の関係理解',
+                    coefficientChange: {
+                      value: newCoefficient,
+                      graphType: graphType,
+                      example: selectedExample,
+                      equation: graphType === 'proportion' ? `y = ${newCoefficient} × x` : `y = ${newCoefficient} ÷ x`
+                    }
+                  });
+                }
+              }}
               min={10}
               max={200}
               step={10}
@@ -454,6 +567,21 @@ const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) =>
             onClick={() => {
               setAnimationProgress(0);
               setIsAnimating(true);
+              recordInteraction('click');
+              
+              // グラフ描画開始を記録
+              recordAnswer(true, {
+                problem: 'グラフ描画アニメーションの実行',
+                userAnswer: `${currentExample.title}のグラフを描画`,
+                correctAnswer: 'グラフの生成プロセス理解',
+                animationStart: {
+                  graphType: graphType,
+                  coefficient: coefficient,
+                  example: selectedExample,
+                  exampleTitle: currentExample.title,
+                  equation: graphType === 'proportion' ? `y = ${coefficient} × x` : `y = ${coefficient} ÷ x`
+                }
+              });
             }}
             disabled={isAnimating}
             sx={{ mb: 2 }}
@@ -548,6 +676,20 @@ const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) =>
         </Box>
       </Box>
     </Card>
+  );
+};
+
+// 比例・反比例グラフツール（MaterialWrapperでラップ）
+const ProportionGraphTool: React.FC<ProportionGraphToolProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="proportion-graph-tool"
+      materialName="比例・反比例グラフツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <ProportionGraphToolContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

@@ -585,4 +585,18 @@ const QuadraticFunctionGraph: React.FC<QuadraticFunctionGraphProps> = ({ onClose
   );
 };
 
+// 二次関数グラフ変形ツール（MaterialWrapperでラップ）
+const QuadraticFunctionGraph: React.FC<QuadraticFunctionGraphProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="quadratic-function-graph"
+      materialName="二次関数グラフ変形ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <QuadraticFunctionGraphContent onClose={onClose} />
+    </MaterialWrapper>
+  );
+};
+
 export default QuadraticFunctionGraph;

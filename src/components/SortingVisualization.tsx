@@ -26,6 +26,7 @@ import {
   SkipNext as StepIcon,
   Shuffle as ShuffleIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 interface SortStep {
   array: number[];
@@ -35,8 +36,9 @@ interface SortStep {
   message: string;
 }
 
-// ソートアルゴリズムの可視化
-function SortingVisualization({ onClose }: { onClose: () => void }) {
+// ソートアルゴリズムの可視化（内部コンポーネント）
+function SortingVisualizationContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const [algorithm, setAlgorithm] = useState('bubble');
   const [arraySize, setArraySize] = useState(8);
   const [array, setArray] = useState<number[]>([]);
@@ -62,12 +64,28 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
 
   // 配列の生成
   const generateArray = () => {
+    recordInteraction('click');
+    
     const newArray = Array.from({ length: arraySize }, (_, i) => i + 1);
     // シャッフル
     for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
+    
+    // 配列生成を記録
+    recordAnswer(true, {
+      problem: 'ソート用配列の生成',
+      userAnswer: `サイズ${arraySize}の配列をシャッフル`,
+      correctAnswer: '配列の初期化完了',
+      arrayGeneration: {
+        size: arraySize,
+        initialArray: newArray,
+        algorithm: algorithm,
+        action: 'shuffle'
+      }
+    });
+    
     setArray(newArray);
     setSteps([]);
     setCurrentStep(0);
@@ -251,6 +269,8 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
 
   // ソート実行
   const executeSort = () => {
+    recordInteraction('click');
+    
     let sortSteps: SortStep[] = [];
     
     switch (algorithm) {
@@ -267,19 +287,66 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
         sortSteps = bubbleSort(array);
     }
     
+    // ソート実行開始を記録
+    recordAnswer(true, {
+      problem: 'ソートアルゴリズムの実行',
+      userAnswer: `${algorithms[algorithm as keyof typeof algorithms].name}でソート実行`,
+      correctAnswer: 'ソートプロセスの開始',
+      sortExecution: {
+        algorithm: algorithm,
+        algorithmName: algorithms[algorithm as keyof typeof algorithms].name,
+        initialArray: array,
+        arraySize: array.length,
+        totalSteps: sortSteps.length,
+        description: algorithms[algorithm as keyof typeof algorithms].description
+      }
+    });
+    
     setSteps(sortSteps);
     setCurrentStep(0);
   };
 
   // 自動再生
   const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+    const newIsPlaying = !isPlaying;
+    setIsPlaying(newIsPlaying);
+    recordInteraction('click');
+    
+    // 再生状態変更を記録
+    recordAnswer(true, {
+      problem: 'ソートアニメーションの制御',
+      userAnswer: newIsPlaying ? 'アニメーション再生開始' : 'アニメーション一時停止',
+      correctAnswer: 'アニメーション制御の理解',
+      playbackControl: {
+        action: newIsPlaying ? 'play' : 'pause',
+        currentStep: currentStep,
+        totalSteps: steps.length,
+        algorithm: algorithm,
+        progressPercent: steps.length > 0 ? ((currentStep / (steps.length - 1)) * 100).toFixed(1) : 0
+      }
+    });
   };
 
   // 次のステップ
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      const newStep = currentStep + 1;
+      setCurrentStep(newStep);
+      recordInteraction('click');
+      
+      // ステップ進行を記録
+      recordAnswer(true, {
+        problem: 'ソートステップの手動進行',
+        userAnswer: `ステップ${newStep + 1}に進行`,
+        correctAnswer: 'ソートプロセスの段階的理解',
+        stepProgression: {
+          currentStep: newStep + 1,
+          totalSteps: steps.length,
+          algorithm: algorithm,
+          stepMessage: steps[newStep]?.message || '',
+          progressPercent: ((newStep / (steps.length - 1)) * 100).toFixed(1)
+        }
+      });
     }
   };
 
@@ -394,7 +461,26 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
   // クイズ回答チェック
   const checkAnswer = (answer: string) => {
     setUserAnswer(answer);
-    if (answer === quizQuestion.algorithm) {
+    recordInteraction('click');
+    
+    const isCorrect = answer === quizQuestion.algorithm;
+    
+    // クイズ回答を記録
+    recordAnswer(isCorrect, {
+      problem: `ソートアルゴリズム識別クイズ`,
+      userAnswer: `${algorithms[answer as keyof typeof algorithms].name}を選択`,
+      correctAnswer: `${algorithms[quizQuestion.algorithm as keyof typeof algorithms].name}`,
+      quizData: {
+        questionArray: quizQuestion.array,
+        selectedAlgorithm: answer,
+        correctAlgorithm: quizQuestion.algorithm,
+        isCorrect: isCorrect,
+        currentScore: successCount + (isCorrect ? 1 : 0),
+        currentProgress: progress + (isCorrect ? 10 : 0)
+      }
+    });
+    
+    if (isCorrect) {
       setSuccessCount(prev => prev + 1);
       setProgress(prev => Math.min(prev + 10, 100));
       setTimeout(() => {
@@ -405,6 +491,25 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
 
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: 'ソート可視化ツールのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousProgress: progress,
+        previousSuccessCount: successCount,
+        wasPlaying: isPlaying,
+        wasInQuizMode: quizMode,
+        currentAlgorithm: algorithm,
+        currentStep: currentStep,
+        totalSteps: steps.length,
+        arraySize: arraySize
+      }
+    });
+    
     setProgress(0);
     setSuccessCount(0);
     setIsPlaying(false);
@@ -521,7 +626,28 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
             <ButtonGroup fullWidth sx={{ mb: 2 }}>
               <Button
                 variant={!quizMode ? 'contained' : 'outlined'}
-                onClick={() => setQuizMode(false)}
+                onClick={() => {
+                  if (quizMode) {
+                    recordInteraction('click');
+                    
+                    // 学習モード切り替えを記録
+                    recordAnswer(true, {
+                      problem: '学習モードへの切り替え',
+                      userAnswer: 'クイズモードから学習モードに変更',
+                      correctAnswer: 'モード切り替えの理解',
+                      modeSwitch: {
+                        from: 'quiz',
+                        to: 'learning',
+                        quizResults: {
+                          score: successCount,
+                          progress: progress
+                        }
+                      }
+                    });
+                    
+                    setQuizMode(false);
+                  }
+                }}
                 size="small"
               >
                 学習モード
@@ -529,6 +655,21 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
               <Button
                 variant={quizMode ? 'contained' : 'outlined'}
                 onClick={() => {
+                  recordInteraction('click');
+                  
+                  // クイズモード開始を記録
+                  recordAnswer(true, {
+                    problem: 'クイズモードの開始',
+                    userAnswer: '学習モードからクイズモードに切り替え',
+                    correctAnswer: 'クイズモード開始',
+                    modeSwitch: {
+                      from: 'learning',
+                      to: 'quiz',
+                      currentAlgorithm: algorithm,
+                      currentArraySize: arraySize
+                    }
+                  });
+                  
                   setQuizMode(true);
                   generateQuiz();
                 }}
@@ -545,7 +686,24 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
                   <InputLabel>アルゴリズム</InputLabel>
                   <Select
                     value={algorithm}
-                    onChange={(e) => setAlgorithm(e.target.value)}
+                    onChange={(e) => {
+                      const newAlgorithm = e.target.value;
+                      setAlgorithm(newAlgorithm);
+                      recordInteraction('click');
+                      
+                      // アルゴリズム変更を記録
+                      recordAnswer(true, {
+                        problem: 'ソートアルゴリズムの選択',
+                        userAnswer: `${algorithms[newAlgorithm as keyof typeof algorithms].name}を選択`,
+                        correctAnswer: 'アルゴリズムの切り替え',
+                        algorithmChange: {
+                          from: algorithm,
+                          to: newAlgorithm,
+                          algorithmName: algorithms[newAlgorithm as keyof typeof algorithms].name,
+                          description: algorithms[newAlgorithm as keyof typeof algorithms].description
+                        }
+                      });
+                    }}
                     size="small"
                   >
                     {Object.entries(algorithms).map(([key, alg]) => (
@@ -562,7 +720,23 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
                 </Typography>
                 <Slider
                   value={arraySize}
-                  onChange={(_, value) => setArraySize(value as number)}
+                  onChange={(_, value) => {
+                    const newSize = value as number;
+                    setArraySize(newSize);
+                    recordInteraction('slider');
+                    
+                    // 配列サイズ変更を記録
+                    recordAnswer(true, {
+                      problem: '配列サイズの調整',
+                      userAnswer: `配列サイズを${newSize}に変更`,
+                      correctAnswer: '配列サイズの理解',
+                      arraySizeChange: {
+                        from: arraySize,
+                        to: newSize,
+                        algorithm: algorithm
+                      }
+                    });
+                  }}
                   min={4}
                   max={10}
                   marks
@@ -723,6 +897,20 @@ function SortingVisualization({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// ソートアルゴリズムの可視化（MaterialWrapperでラップ）
+function SortingVisualization({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="sorting-visualization"
+      materialName="ソートアルゴリズム可視化"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <SortingVisualizationContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

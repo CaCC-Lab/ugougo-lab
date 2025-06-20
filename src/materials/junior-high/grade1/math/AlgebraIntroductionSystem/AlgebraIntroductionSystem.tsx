@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Card, Typography, Stepper, Step, StepLabel, Button } from '@mui/material';
-import { MaterialBase } from '../../../../../components/educational/MaterialBase';
+import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import { 
   NumberToPlaceholder,
   PlaceholderToVariable,
@@ -13,7 +13,9 @@ import {
 import { useAlgebraLearning } from './hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const AlgebraIntroductionSystem: React.FC = () => {
+// 代数入門システム（内部コンポーネント）
+const AlgebraIntroductionSystemContent: React.FC = () => {
+  const { recordInteraction, recordAnswer: recordAnswerToTracker } = useLearningTrackerContext();
   const [activeStep, setActiveStep] = useState(0);
   const [showHint, setShowHint] = useState(false);
   
@@ -37,6 +39,7 @@ const AlgebraIntroductionSystem: React.FC = () => {
     if (activeStep < steps.length - 1) {
       setActiveStep(prev => prev + 1);
       setShowHint(false);
+      recordInteraction('click');
     }
   };
 
@@ -44,6 +47,7 @@ const AlgebraIntroductionSystem: React.FC = () => {
     if (activeStep > 0) {
       setActiveStep(prev => prev - 1);
       setShowHint(false);
+      recordInteraction('click');
     }
   };
 
@@ -54,9 +58,19 @@ const AlgebraIntroductionSystem: React.FC = () => {
           <NumberToPlaceholder
             onComplete={(success) => {
               recordAnswer(success);
+              recordAnswerToTracker(success, {
+                stage: '具体的な数から記号へ',
+                step: activeStep
+              });
               if (success) handleNext();
             }}
-            onMisconception={(type) => recordMisconception(type)}
+            onMisconception={(type) => {
+              recordMisconception(type);
+              recordAnswerToTracker(false, {
+                misconception: type,
+                stage: '具体的な数から記号へ'
+              });
+            }}
           />
         );
       case 1:
@@ -64,9 +78,19 @@ const AlgebraIntroductionSystem: React.FC = () => {
           <PlaceholderToVariable
             onComplete={(success) => {
               recordAnswer(success);
+              recordAnswerToTracker(success, {
+                stage: '記号から文字へ',
+                step: activeStep
+              });
               if (success) handleNext();
             }}
-            onMisconception={(type) => recordMisconception(type)}
+            onMisconception={(type) => {
+              recordMisconception(type);
+              recordAnswerToTracker(false, {
+                misconception: type,
+                stage: '記号から文字へ'
+              });
+            }}
           />
         );
       case 2:
@@ -76,6 +100,11 @@ const AlgebraIntroductionSystem: React.FC = () => {
               equation={currentProblem?.equation || 'x + 3 = 8'}
               onSolve={(correct) => {
                 recordAnswer(correct);
+                recordAnswerToTracker(correct, {
+                  stage: '文字式と方程式',
+                  equation: currentProblem?.equation || 'x + 3 = 8',
+                  step: activeStep
+                });
                 if (correct) getNextProblem();
               }}
             />
@@ -85,6 +114,7 @@ const AlgebraIntroductionSystem: React.FC = () => {
                 onManipulate={(steps) => {
                   // 操作履歴を記録
                   console.log('操作ステップ:', steps);
+                  recordInteraction('drag');
                 }}
               />
             </Box>
@@ -95,20 +125,7 @@ const AlgebraIntroductionSystem: React.FC = () => {
     }
   };
 
-  const material = {
-    id: 'algebra-introduction',
-    title: '代数入門システム',
-    description: '算数から数学へ - 文字式と方程式の世界を体験しよう',
-    gradeLevel: 'juniorHigh1' as const,
-    subject: 'math' as const,
-    tags: ['代数', '文字式', '方程式'],
-    difficulty: 'normal' as const,
-    estimatedTime: 30,
-    isPremium: false
-  };
-
   return (
-    <MaterialBase material={material}>
       <Box sx={{ width: '100%', p: 3 }}>
         {/* 学習進度表示 */}
         <Card sx={{ mb: 3, p: 2, bgcolor: 'background.paper' }}>
@@ -179,7 +196,10 @@ const AlgebraIntroductionSystem: React.FC = () => {
           </Button>
           
           <Button
-            onClick={() => setShowHint(!showHint)}
+            onClick={() => {
+              setShowHint(!showHint);
+              recordInteraction('click');
+            }}
             variant="outlined"
             color="info"
           >
@@ -187,7 +207,10 @@ const AlgebraIntroductionSystem: React.FC = () => {
           </Button>
 
           <Button
-            onClick={resetProgress}
+            onClick={() => {
+              resetProgress();
+              recordInteraction('click');
+            }}
             variant="outlined"
             color="warning"
           >
@@ -195,7 +218,20 @@ const AlgebraIntroductionSystem: React.FC = () => {
           </Button>
         </Box>
       </Box>
-    </MaterialBase>
+  );
+};
+
+// 代数入門システム（MaterialWrapperでラップ）
+const AlgebraIntroductionSystem: React.FC = () => {
+  return (
+    <MaterialWrapper
+      materialId="algebra-introduction"
+      materialName="代数入門システム"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <AlgebraIntroductionSystemContent />
+    </MaterialWrapper>
   );
 };
 

@@ -27,6 +27,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 interface FunctionData {
   id: string;
@@ -48,7 +49,9 @@ interface TrigonometricFunctionGraphProps {
   onClose?: () => void;
 }
 
-const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({ onClose }) => {
+// 三角関数グラフツール（内部コンポーネント）
+const TrigonometricFunctionGraphContent: React.FC<TrigonometricFunctionGraphProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const unitCircleCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -389,6 +392,16 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
     const y = -(canvasY - centerY) / (80 * yScale);
     
     setClickedPoint({ x, y });
+    recordInteraction('click');
+    
+    // グラフ上の点クリックを記録
+    recordAnswer(true, {
+      problem: 'グラフ上の座標確認',
+      userAnswer: `点(${x.toFixed(2)}, ${y.toFixed(2)})をクリック`,
+      correctAnswer: '三角関数の値の確認',
+      clickedPoint: { x, y },
+      angleMode: angleMode
+    });
   };
   
   // 関数の追加
@@ -446,7 +459,17 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
           三角関数グラフ描画ツール
         </Typography>
         <Tooltip title="使い方">
-          <IconButton onClick={() => setShowExplanation(!showExplanation)}>
+          <IconButton onClick={() => {
+            setShowExplanation(!showExplanation);
+            recordInteraction('click');
+            
+            // ヘルプ表示切り替えを記録
+            recordAnswer(true, {
+              problem: 'ヘルプ情報の確認',
+              userAnswer: showExplanation ? 'ヘルプを非表示' : 'ヘルプを表示',
+              correctAnswer: '使い方の理解'
+            });
+          }}>
             <HelpOutlineIcon />
           </IconButton>
         </Tooltip>
@@ -466,7 +489,20 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
           <ToggleButtonGroup
             value={angleMode}
             exclusive
-            onChange={(_, value) => value && setAngleMode(value)}
+            onChange={(_, value) => {
+              if (value) {
+                setAngleMode(value);
+                recordInteraction('click');
+                
+                // 角度モード切り替えを記録
+                recordAnswer(true, {
+                  problem: '角度モードの切り替え',
+                  userAnswer: value === 'degree' ? '度数法を選択' : '弧度法を選択',
+                  correctAnswer: '角度表現の理解',
+                  angleMode: value
+                });
+              }
+            }}
             fullWidth
             sx={{ mb: 2 }}
           >
@@ -484,7 +520,20 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
                 <FormControl size="small" sx={{ minWidth: 80, mr: 1 }}>
                   <Select
                     value={func.type}
-                    onChange={(e) => updateFunction(func.id, { type: e.target.value as any })}
+                    onChange={(e) => {
+                      const newType = e.target.value as any;
+                      updateFunction(func.id, { type: newType });
+                      recordInteraction('click');
+                      
+                      // 関数タイプ変更を記録
+                      recordAnswer(true, {
+                        problem: '三角関数の選択',
+                        userAnswer: `${func.type}から${newType}へ変更`,
+                        correctAnswer: '異なる三角関数のグラフの特徴を理解',
+                        functionType: newType,
+                        functionId: func.id
+                      });
+                    }}
                   >
                     <MenuItem value="sin">sin</MenuItem>
                     <MenuItem value="cos">cos</MenuItem>
@@ -509,7 +558,21 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
                   control={
                     <Checkbox
                       checked={func.visible}
-                      onChange={(e) => updateFunction(func.id, { visible: e.target.checked })}
+                      onChange={(e) => {
+                        const visible = e.target.checked;
+                        updateFunction(func.id, { visible });
+                        recordInteraction('click');
+                        
+                        // 関数表示切り替えを記録
+                        recordAnswer(true, {
+                          problem: '関数の表示切り替え',
+                          userAnswer: visible ? '関数を表示' : '関数を非表示',
+                          correctAnswer: '複数関数の比較観察の理解',
+                          functionType: func.type,
+                          functionId: func.id,
+                          visible: visible
+                        });
+                      }}
                       size="small"
                     />
                   }
@@ -519,7 +582,19 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
                 {functions.length > 1 && (
                   <IconButton
                     size="small"
-                    onClick={() => removeFunction(func.id)}
+                    onClick={() => {
+                      removeFunction(func.id);
+                      recordInteraction('click');
+                      
+                      // 関数削除を記録
+                      recordAnswer(true, {
+                        problem: '関数の削除',
+                        userAnswer: `${func.type}関数を削除`,
+                        correctAnswer: '不要な関数の削除',
+                        removedFunction: func.type,
+                        functionId: func.id
+                      });
+                    }}
                     sx={{ ml: 'auto' }}
                   >
                     <DeleteIcon fontSize="small" />
@@ -535,7 +610,21 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
                 <Typography variant="caption">振幅 A = {func.A.toFixed(1)}</Typography>
                 <Slider
                   value={func.A}
-                  onChange={(_, value) => updateFunction(func.id, { A: value as number })}
+                  onChange={(_, value) => {
+                    const newA = value as number;
+                    updateFunction(func.id, { A: newA });
+                    recordInteraction('drag');
+                    
+                    // 振幅変更を記録
+                    recordAnswer(true, {
+                      problem: '振幅Aの調整',
+                      userAnswer: `振幅を${newA.toFixed(1)}に設定`,
+                      correctAnswer: '振幅がグラフの縦の伸縮に影響',
+                      functionType: func.type,
+                      parameter: 'amplitude',
+                      value: newA
+                    });
+                  }}
                   min={0}
                   max={3}
                   step={0.1}
@@ -545,7 +634,22 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
                 <Typography variant="caption">周期係数 B = {func.B.toFixed(1)}</Typography>
                 <Slider
                   value={func.B}
-                  onChange={(_, value) => updateFunction(func.id, { B: value as number })}
+                  onChange={(_, value) => {
+                    const newB = value as number;
+                    updateFunction(func.id, { B: newB });
+                    recordInteraction('drag');
+                    
+                    // 周期係数変更を記録
+                    recordAnswer(true, {
+                      problem: '周期係数Bの調整',
+                      userAnswer: `周期係数を${newB.toFixed(1)}に設定`,
+                      correctAnswer: '周期係数がグラフの横の伸縮に影響',
+                      functionType: func.type,
+                      parameter: 'frequency',
+                      value: newB,
+                      period: 2 * Math.PI / newB
+                    });
+                  }}
                   min={0.1}
                   max={5}
                   step={0.1}
@@ -555,7 +659,22 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
                 <Typography variant="caption">位相 C = {func.C.toFixed(2)}</Typography>
                 <Slider
                   value={func.C}
-                  onChange={(_, value) => updateFunction(func.id, { C: value as number })}
+                  onChange={(_, value) => {
+                    const newC = value as number;
+                    updateFunction(func.id, { C: newC });
+                    recordInteraction('drag');
+                    
+                    // 位相変更を記録
+                    recordAnswer(true, {
+                      problem: '位相Cの調整',
+                      userAnswer: `位相を${newC.toFixed(2)}に設定`,
+                      correctAnswer: '位相がグラフの横方向のシフトに影響',
+                      functionType: func.type,
+                      parameter: 'phase',
+                      value: newC,
+                      phaseShift: -newC / func.B
+                    });
+                  }}
                   min={-Math.PI}
                   max={Math.PI}
                   step={0.1}
@@ -565,7 +684,21 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
                 <Typography variant="caption">縦シフト D = {func.D.toFixed(1)}</Typography>
                 <Slider
                   value={func.D}
-                  onChange={(_, value) => updateFunction(func.id, { D: value as number })}
+                  onChange={(_, value) => {
+                    const newD = value as number;
+                    updateFunction(func.id, { D: newD });
+                    recordInteraction('drag');
+                    
+                    // 縦シフト変更を記録
+                    recordAnswer(true, {
+                      problem: '縦シフトDの調整',
+                      userAnswer: `縦シフトを${newD.toFixed(1)}に設定`,
+                      correctAnswer: '縦シフトがグラフの上下移動に影響',
+                      functionType: func.type,
+                      parameter: 'verticalShift',
+                      value: newD
+                    });
+                  }}
                   min={-2}
                   max={2}
                   step={0.1}
@@ -580,7 +713,18 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
               variant="outlined"
               fullWidth
               startIcon={<AddIcon />}
-              onClick={addFunction}
+              onClick={() => {
+                addFunction();
+                recordInteraction('click');
+                
+                // 関数追加を記録
+                recordAnswer(true, {
+                  problem: '新しい関数の追加',
+                  userAnswer: '複数の三角関数を比較',
+                  correctAnswer: '関数の比較観察の理解',
+                  totalFunctions: functions.length + 1
+                });
+              }}
               sx={{ mb: 2 }}
             >
               関数を追加
@@ -596,7 +740,19 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
               control={
                 <Checkbox
                   checked={showGrid}
-                  onChange={(e) => setShowGrid(e.target.checked)}
+                  onChange={(e) => {
+                    const showGrid = e.target.checked;
+                    setShowGrid(showGrid);
+                    recordInteraction('click');
+                    
+                    // グリッド表示切り替えを記録
+                    recordAnswer(true, {
+                      problem: 'グリッド表示の切り替え',
+                      userAnswer: showGrid ? 'グリッドを表示' : 'グリッドを非表示',
+                      correctAnswer: '読みやすさの調整',
+                      showGrid: showGrid
+                    });
+                  }}
                 />
               }
               label="グリッドを表示"
@@ -605,7 +761,19 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
               control={
                 <Checkbox
                   checked={showUnitCircle}
-                  onChange={(e) => setShowUnitCircle(e.target.checked)}
+                  onChange={(e) => {
+                    const showUnitCircle = e.target.checked;
+                    setShowUnitCircle(showUnitCircle);
+                    recordInteraction('click');
+                    
+                    // 単位円表示切り替えを記録
+                    recordAnswer(true, {
+                      problem: '単位円表示の切り替え',
+                      userAnswer: showUnitCircle ? '単位円を表示' : '単位円を非表示',
+                      correctAnswer: '単位円とグラフの対応関係の理解',
+                      showUnitCircle: showUnitCircle
+                    });
+                  }}
                 />
               }
               label="単位円を表示"
@@ -620,7 +788,20 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
             <Typography variant="caption">X軸: {xScale.toFixed(1)}倍</Typography>
             <Slider
               value={xScale}
-              onChange={(_, value) => setXScale(value as number)}
+              onChange={(_, value) => {
+                const newScale = value as number;
+                setXScale(newScale);
+                recordInteraction('drag');
+                
+                // X軸スケール変更を記録
+                recordAnswer(true, {
+                  problem: 'X軸スケールの調整',
+                  userAnswer: `X軸を${newScale.toFixed(1)}倍に設定`,
+                  correctAnswer: '表示範囲の理解',
+                  scale: newScale,
+                  axis: 'x'
+                });
+              }}
               min={0.5}
               max={3}
               step={0.1}
@@ -629,7 +810,20 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
             <Typography variant="caption">Y軸: {yScale.toFixed(1)}倍</Typography>
             <Slider
               value={yScale}
-              onChange={(_, value) => setYScale(value as number)}
+              onChange={(_, value) => {
+                const newScale = value as number;
+                setYScale(newScale);
+                recordInteraction('drag');
+                
+                // Y軸スケール変更を記録
+                recordAnswer(true, {
+                  problem: 'Y軸スケールの調整',
+                  userAnswer: `Y軸を${newScale.toFixed(1)}倍に設定`,
+                  correctAnswer: '表示範囲の理解',
+                  scale: newScale,
+                  axis: 'y'
+                });
+              }}
               min={0.5}
               max={3}
               step={0.1}
@@ -674,7 +868,18 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
               <Box sx={{ flex: 1 }}>
                 <Button
                   variant="contained"
-                  onClick={() => setIsAnimating(!isAnimating)}
+                  onClick={() => {
+                    setIsAnimating(!isAnimating);
+                    recordInteraction('click');
+                    
+                    // アニメーション切り替えを記録
+                    recordAnswer(true, {
+                      problem: '単位円アニメーションの制御',
+                      userAnswer: isAnimating ? 'アニメーション停止' : 'アニメーション開始',
+                      correctAnswer: '単位円とグラフの対応関係の理解',
+                      isAnimating: !isAnimating
+                    });
+                  }}
                   startIcon={isAnimating ? <PauseIcon /> : <PlayArrowIcon />}
                   fullWidth
                   sx={{ mb: 1 }}
@@ -684,7 +889,22 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
                 
                 <Button
                   variant="outlined"
-                  onClick={handleReset}
+                  onClick={() => {
+                    handleReset();
+                    recordInteraction('click');
+                    
+                    // リセット実行を記録
+                    recordAnswer(true, {
+                      problem: '三角関数グラフのリセット',
+                      userAnswer: '全ての設定を初期化',
+                      correctAnswer: '基本状態への復帰',
+                      resetParameters: {
+                        functionsCount: functions.length,
+                        xScale,
+                        yScale
+                      }
+                    });
+                  }}
                   startIcon={<RefreshIcon />}
                   fullWidth
                 >
@@ -730,6 +950,20 @@ const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({
         </Box>
       </Box>
     </Card>
+  );
+};
+
+// 三角関数グラフ描画ツール（MaterialWrapperでラップ）
+const TrigonometricFunctionGraph: React.FC<TrigonometricFunctionGraphProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="trigonometric-function-graph"
+      materialName="三角関数グラフ描画ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <TrigonometricFunctionGraphContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

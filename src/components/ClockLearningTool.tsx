@@ -17,6 +17,7 @@ import { styled } from '@mui/material/styles';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 const ClockContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
@@ -77,7 +78,9 @@ interface ClockLearningToolProps {
   onClose?: () => void;
 }
 
-const ClockLearningTool: React.FC<ClockLearningToolProps> = ({ onClose }) => {
+// 時計の読み方学習ツール（内部コンポーネント）
+const ClockLearningToolContent: React.FC<ClockLearningToolProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const svgRef = useRef<SVGSVGElement>(null);
@@ -121,6 +124,7 @@ const ClockLearningTool: React.FC<ClockLearningToolProps> = ({ onClose }) => {
   const handlePointerDown = (e: React.PointerEvent, handType: 'hour' | 'minute') => {
     e.preventDefault();
     setIsDragging(handType);
+    recordInteraction('drag');
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -212,6 +216,7 @@ const ClockLearningTool: React.FC<ClockLearningToolProps> = ({ onClose }) => {
   // モード切り替え
   const handleModeChange = (newMode: 'practice' | 'quiz') => {
     setMode(newMode);
+    recordInteraction('click');
     if (newMode === 'quiz') {
       generateQuiz();
       setScore(0);
@@ -227,6 +232,13 @@ const ClockLearningTool: React.FC<ClockLearningToolProps> = ({ onClose }) => {
     const correct = answer === formatTime(quizHour, quizMinute);
     setIsCorrect(correct);
     setTotalQuestions(totalQuestions + 1);
+    
+    // 学習履歴に記録
+    recordAnswer(correct, {
+      problem: `時計の読み取り: ${formatTime(quizHour, quizMinute)}`,
+      userAnswer: answer,
+      correctAnswer: formatTime(quizHour, quizMinute)
+    });
     
     if (correct) {
       setScore(score + 1);
@@ -464,6 +476,20 @@ const ClockLearningTool: React.FC<ClockLearningToolProps> = ({ onClose }) => {
         </CardContent>
       </Card>
     </Container>
+  );
+};
+
+// 時計の読み方学習ツール（MaterialWrapperでラップ）
+const ClockLearningTool: React.FC<ClockLearningToolProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="clock-learning"
+      materialName="時計の読み方学習ツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <ClockLearningToolContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

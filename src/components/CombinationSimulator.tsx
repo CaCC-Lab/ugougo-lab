@@ -25,9 +25,11 @@ import {
   Group as GroupIcon,
   Calculate as CalcIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// 場合の数シミュレーター
-function CombinationSimulator({ onClose }: { onClose: () => void }) {
+// 場合の数シミュレーター（内部コンポーネント）
+function CombinationSimulatorContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const [mode, setMode] = useState<'permutation' | 'combination' | 'tree'>('permutation');
   const [n, setN] = useState(5); // 全体の数
   const [r, setR] = useState(3); // 選ぶ数
@@ -94,14 +96,47 @@ function CombinationSimulator({ onClose }: { onClose: () => void }) {
   
   // 計算を実行
   const handleCalculate = () => {
+    recordInteraction('click');
+    
     const itemsToUse = items.slice(0, n);
     
     if (mode === 'permutation') {
       const perms = generatePermutations(itemsToUse, r);
       setResults(perms.slice(0, 20)); // 最初の20個だけ表示
+      
+      // 順列計算を記録
+      recordAnswer(true, {
+        problem: '順列の計算と列挙',
+        userAnswer: `${n}P${r}の順列を生成`,
+        correctAnswer: `順列${calculatePermutation(n, r)}通りを理解`,
+        permutationCalculation: {
+          n: n,
+          r: r,
+          formula: `${n}P${r} = ${n}!/(${n}-${r})!`,
+          result: calculatePermutation(n, r),
+          itemsUsed: itemsToUse,
+          generatedCount: perms.length,
+          displayedCount: Math.min(perms.length, 20)
+        }
+      });
     } else if (mode === 'combination') {
       const combs = generateCombinations(itemsToUse, r);
       setResults(combs);
+      
+      // 組み合わせ計算を記録
+      recordAnswer(true, {
+        problem: '組み合わせの計算と列挙',
+        userAnswer: `${n}C${r}の組み合わせを生成`,
+        correctAnswer: `組み合わせ${calculateCombination(n, r)}通りを理解`,
+        combinationCalculation: {
+          n: n,
+          r: r,
+          formula: `${n}C${r} = ${n}!/(${r}!(${n}-${r})!)`,
+          result: calculateCombination(n, r),
+          itemsUsed: itemsToUse,
+          generatedCount: combs.length
+        }
+      });
     }
   };
   
@@ -112,9 +147,30 @@ function CombinationSimulator({ onClose }: { onClose: () => void }) {
       : calculateCombination(n, r);
     
     const userNum = parseInt(userAnswer);
+    const isCorrect = userNum === correctAnswer;
+    
+    recordInteraction('click');
     setAttempts(prev => prev + 1);
     
-    if (userNum === correctAnswer) {
+    // クイズ回答を記録
+    recordAnswer(isCorrect, {
+      problem: `${mode === 'permutation' ? '順列' : '組み合わせ'}の計算問題`,
+      userAnswer: `${userAnswer}通り`,
+      correctAnswer: `${correctAnswer}通り`,
+      quizData: {
+        problemType: mode,
+        n: n,
+        r: r,
+        formula: mode === 'permutation' ? `${n}P${r}` : `${n}C${r}`,
+        userInput: userNum,
+        correctValue: correctAnswer,
+        isCorrect: isCorrect,
+        currentScore: score + (isCorrect ? 1 : 0),
+        currentAttempts: attempts + 1
+      }
+    });
+    
+    if (isCorrect) {
       setScore(prev => prev + 1);
       alert(`正解！答えは${correctAnswer}通りです！`);
       // 新しい問題
@@ -128,6 +184,24 @@ function CombinationSimulator({ onClose }: { onClose: () => void }) {
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '場合の数シミュレーターのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousN: n,
+        previousR: r,
+        previousMode: mode,
+        previousScore: score,
+        previousAttempts: attempts,
+        resultsCount: results.length,
+        wasInQuizMode: quizMode
+      }
+    });
+    
     setN(5);
     setR(3);
     setSelectedItems([]);
@@ -206,7 +280,26 @@ function CombinationSimulator({ onClose }: { onClose: () => void }) {
         <ToggleButtonGroup
           value={mode}
           exclusive
-          onChange={(_, value) => value && setMode(value)}
+          onChange={(_, value) => {
+            if (value) {
+              recordInteraction('click');
+              
+              // モード変更を記録
+              recordAnswer(true, {
+                problem: '計算モードの選択',
+                userAnswer: `${value === 'permutation' ? '順列' : value === 'combination' ? '組み合わせ' : '樹形図'}モードを選択`,
+                correctAnswer: 'モード選択の理解',
+                modeChange: {
+                  from: mode,
+                  to: value,
+                  currentN: n,
+                  currentR: r
+                }
+              });
+              
+              setMode(value);
+            }
+          }}
           fullWidth
         >
           <ToggleButton value="permutation">
@@ -225,7 +318,25 @@ function CombinationSimulator({ onClose }: { onClose: () => void }) {
       <Box sx={{ mb: 2, display: 'flex', justifyContent: 'center' }}>
         <Button
           variant={quizMode ? 'contained' : 'outlined'}
-          onClick={() => setQuizMode(!quizMode)}
+          onClick={() => {
+            const newQuizMode = !quizMode;
+            recordInteraction('click');
+            
+            // クイズモード切り替えを記録
+            recordAnswer(true, {
+              problem: 'クイズモードの切り替え',
+              userAnswer: newQuizMode ? '練習モードからクイズモードに切り替え' : 'クイズモードから練習モードに切り替え',
+              correctAnswer: 'モード切り替えの理解',
+              modeSwitch: {
+                from: quizMode ? 'quiz' : 'practice',
+                to: newQuizMode ? 'quiz' : 'practice',
+                currentResults: results.length,
+                currentSettings: { n: n, r: r, mode: mode }
+              }
+            });
+            
+            setQuizMode(newQuizMode);
+          }}
         >
           {quizMode ? '練習モードに戻る' : 'クイズに挑戦'}
         </Button>
@@ -251,7 +362,31 @@ function CombinationSimulator({ onClose }: { onClose: () => void }) {
                         key={num}
                         variant={n === num ? 'contained' : 'outlined'}
                         size="small"
-                        onClick={() => setN(num)}
+                        onClick={() => {
+                          if (n !== num) {
+                            recordInteraction('click');
+                            
+                            // n値変更を記録（重要な変更時のみ）
+                            recordAnswer(true, {
+                              problem: '全体数（n）の調整',
+                              userAnswer: `全体数を${num}に設定`,
+                              correctAnswer: 'パラメータ調整の理解',
+                              parameterChange: {
+                                parameter: 'n',
+                                from: n,
+                                to: num,
+                                currentR: r,
+                                mode: mode
+                              }
+                            });
+                            
+                            setN(num);
+                            // rがnより大きくなったら調整
+                            if (r > num) {
+                              setR(num);
+                            }
+                          }
+                        }}
                       >
                         {num}
                       </Button>
@@ -437,6 +572,20 @@ function CombinationSimulator({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 場合の数シミュレーター（MaterialWrapperでラップ）
+function CombinationSimulator({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="combination-simulator"
+      materialName="場合の数シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <CombinationSimulatorContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

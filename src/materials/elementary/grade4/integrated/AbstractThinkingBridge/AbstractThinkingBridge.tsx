@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Psychology, Functions, Square, BoltOutlined, Celebration } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import { ConceptBridge } from './components/ConceptBridge';
 import { ProportionVisualizer } from './components/ProportionVisualizer';
 import { AreaVolumeExplorer } from './components/AreaVolumeExplorer';
@@ -21,7 +22,9 @@ import { useLearningProgress } from './hooks/useLearningProgress';
 import { useEurekaAnimation } from './hooks/useEurekaAnimation';
 import type { LearningModule } from './types';
 
-const AbstractThinkingBridge: React.FC = () => {
+// 抽象的思考への橋（内部コンポーネント）
+const AbstractThinkingBridgeContent: React.FC = () => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const [activeTab, setActiveTab] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
   const { progress, updateProgress, getRecommendedModule } = useLearningProgress();
@@ -68,11 +71,19 @@ const AbstractThinkingBridge: React.FC = () => {
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
+    recordInteraction('click');
   };
 
   const handleConceptMastered = (conceptId: string) => {
     updateProgress(modules[activeTab].id, conceptId);
     triggerEureka();
+    
+    // 学習成果を記録
+    recordAnswer(true, {
+      module: modules[activeTab].id,
+      concept: conceptId,
+      title: modules[activeTab].title
+    });
   };
 
   const ActiveComponent = modules[activeTab].component;
@@ -90,7 +101,10 @@ const AbstractThinkingBridge: React.FC = () => {
             <Alert 
               severity="info" 
               sx={{ mb: 3 }}
-              onClose={() => setShowIntro(false)}
+              onClose={() => {
+                setShowIntro(false);
+                recordInteraction('click');
+              }}
             >
               <AlertTitle>抽象的思考への橋渡し</AlertTitle>
               ここでは、具体的なものから抽象的な考え方へ少しずつステップアップしていきます。
@@ -184,7 +198,10 @@ const AbstractThinkingBridge: React.FC = () => {
             const recommended = getRecommendedModule(modules);
             if (recommended) {
               const index = modules.findIndex(m => m.id === recommended.id);
-              if (index !== -1) setActiveTab(index);
+              if (index !== -1) {
+                setActiveTab(index);
+                recordInteraction('click');
+              }
             }
           }}
         >
@@ -235,6 +252,20 @@ const AbstractThinkingBridge: React.FC = () => {
         </Box>
       </Box>
     </Container>
+  );
+};
+
+// 抽象的思考への橋（MaterialWrapperでラップ）
+const AbstractThinkingBridge: React.FC = () => {
+  return (
+    <MaterialWrapper
+      materialId="abstract-thinking-bridge"
+      materialName="抽象的思考への橋"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <AbstractThinkingBridgeContent />
+    </MaterialWrapper>
   );
 };
 

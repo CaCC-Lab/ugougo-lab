@@ -12,7 +12,7 @@ import {
   Button,
   Divider
 } from '@mui/material';
-import { MaterialBase } from '../../../../../components/educational/MaterialBase';
+import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import { useFractionLogic } from './hooks/useFractionLogic';
 import {
   FractionVisualizer,
@@ -23,7 +23,9 @@ import {
   LearningHints
 } from './components';
 
-export default function FractionMasterTool() {
+// 分数マスターツール（内部コンポーネント）
+const FractionMasterToolContent: React.FC = () => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const {
     mode,
     visualType,
@@ -49,6 +51,7 @@ export default function FractionMasterTool() {
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: string) => {
     setMode(newValue as any);
+    recordInteraction('click');
   };
 
   const visualTypes = [
@@ -67,17 +70,6 @@ export default function FractionMasterTool() {
   ];
 
   return (
-    <MaterialBase
-      material={{
-        id: 'fraction-master',
-        title: '分数マスターツール',
-        description: '視覚的に分数を理解し、計算方法を段階的に学べる高度な学習ツール',
-        grade: '小学3年生',
-        subject: '算数',
-        type: 'interactive',
-        difficulty: 'medium'
-      }}
-    >
       <Container maxWidth="lg" sx={{ height: '100%', overflow: 'auto' }}>
         <Tabs
           value={mode}
@@ -107,7 +99,12 @@ export default function FractionMasterTool() {
                   <ToggleButtonGroup
                     value={visualType}
                     exclusive
-                    onChange={(_, value) => value && setVisualType(value)}
+                    onChange={(_, value) => {
+                      if (value) {
+                        setVisualType(value);
+                        recordInteraction('change');
+                      }
+                    }}
                     sx={{ mb: 3, flexWrap: 'wrap' }}
                   >
                     {visualTypes.map((type) => (
@@ -137,7 +134,10 @@ export default function FractionMasterTool() {
                   <Box sx={{ mb: 4 }}>
                     <FractionInput
                       fraction={fractions[0]}
-                      onChange={(f) => updateFraction(0, f)}
+                      onChange={(f) => {
+                        updateFraction(0, f);
+                        recordInteraction('input');
+                      }}
                       label="分数の値"
                     />
                   </Box>
@@ -168,8 +168,15 @@ export default function FractionMasterTool() {
         {mode === 'compare' && (
           <FractionComparison
             fractions={fractions}
-            onFractionsChange={updateFraction}
-            compareFractions={compareFractions}
+            onFractionsChange={(index, fraction) => {
+              updateFraction(index, fraction);
+              recordInteraction('input');
+            }}
+            compareFractions={(...args) => {
+              const result = compareFractions(...args);
+              recordInteraction('click');
+              return result;
+            }}
             findCommonDenominator={findCommonDenominator}
           />
         )}
@@ -204,7 +211,12 @@ export default function FractionMasterTool() {
                     <ToggleButtonGroup
                       value={selectedOperation}
                       exclusive
-                      onChange={(_, value) => value && setSelectedOperation(value)}
+                      onChange={(_, value) => {
+                        if (value) {
+                          setSelectedOperation(value);
+                          recordInteraction('change');
+                        }
+                      }}
                       orientation="horizontal"
                     >
                       {operationTypes.map((type) => (
@@ -219,7 +231,10 @@ export default function FractionMasterTool() {
                 <Grid item xs={12} md={4}>
                   <FractionInput
                     fraction={fractions[1]}
-                    onChange={(f) => updateFraction(1, f)}
+                    onChange={(f) => {
+                      updateFraction(1, f);
+                      recordInteraction('input');
+                    }}
                     label="2番目の分数"
                   />
                 </Grid>
@@ -229,7 +244,23 @@ export default function FractionMasterTool() {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={performOperation}
+                  onClick={() => {
+                    performOperation();
+                    recordInteraction('click');
+                    
+                    // 計算結果を記録
+                    const operation = selectedOperation;
+                    const f1 = fractions[0];
+                    const f2 = fractions[1];
+                    const problem = `${f1.numerator}/${f1.denominator} ${operation === 'add' ? '+' : operation === 'subtract' ? '-' : operation === 'multiply' ? '×' : '÷'} ${f2.numerator}/${f2.denominator}`;
+                    
+                    // 演算の種類に応じて学習記録
+                    recordAnswer(true, {
+                      problem: problem,
+                      operation: operation,
+                      fractions: [f1, f2]
+                    });
+                  }}
                   sx={{ px: 4 }}
                 >
                   計算を開始
@@ -242,8 +273,14 @@ export default function FractionMasterTool() {
                 operationType={selectedOperation}
                 steps={operationSteps}
                 currentStep={currentStep}
-                onNextStep={nextStep}
-                onPrevStep={prevStep}
+                onNextStep={() => {
+                  nextStep();
+                  recordInteraction('click');
+                }}
+                onPrevStep={() => {
+                  prevStep();
+                  recordInteraction('click');
+                }}
               />
             )}
           </Box>
@@ -253,10 +290,29 @@ export default function FractionMasterTool() {
         <LearningHints
           hint={currentHint}
           showHint={showHint}
-          onGenerateHint={generateHint}
-          onCloseHint={() => setShowHint(false)}
+          onGenerateHint={() => {
+            generateHint();
+            recordInteraction('click');
+          }}
+          onCloseHint={() => {
+            setShowHint(false);
+            recordInteraction('click');
+          }}
         />
       </Container>
-    </MaterialBase>
+  );
+};
+
+// 分数マスターツール（MaterialWrapperでラップ）
+export default function FractionMasterTool() {
+  return (
+    <MaterialWrapper
+      materialId="fraction-master"
+      materialName="分数マスターツール"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <FractionMasterToolContent />
+    </MaterialWrapper>
   );
 }

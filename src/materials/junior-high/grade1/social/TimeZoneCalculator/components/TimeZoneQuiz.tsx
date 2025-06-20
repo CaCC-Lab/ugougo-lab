@@ -42,6 +42,8 @@ export const TimeZoneQuiz: React.FC<TimeZoneQuizProps> = ({
   const [isCorrect, setIsCorrect] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [hintLevel, setHintLevel] = useState(0);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   const currentQuestion = questions[currentQuestionIndex];
   const baseCity = cities.find(c => c.id === currentQuestion.baseCityId)!;
@@ -80,12 +82,20 @@ export const TimeZoneQuiz: React.FC<TimeZoneQuizProps> = ({
       userMinute === correct.minute;
     
     setIsCorrect(isAnswerCorrect);
-    setShowResult(true);
+    setAttemptCount(prev => prev + 1);
     
     if (isAnswerCorrect) {
+      setShowResult(true);
       setCorrectAnswers(prev => prev + 1);
+    } else {
+      // 不正解の場合、ヒントレベルを上げる
+      if (attemptCount < 2) {
+        setHintLevel(Math.min(hintLevel + 1, 3));
+      } else {
+        setShowResult(true);
+      }
     }
-  }, [answer, calculateCorrectAnswer]);
+  }, [answer, calculateCorrectAnswer, attemptCount, hintLevel]);
 
   // 次の問題へ
   const nextQuestion = useCallback(() => {
@@ -94,6 +104,8 @@ export const TimeZoneQuiz: React.FC<TimeZoneQuizProps> = ({
       setAnswer({ hour: '', minute: '' });
       setShowResult(false);
       setShowHint(false);
+      setHintLevel(0);
+      setAttemptCount(0);
     } else {
       onComplete();
     }
@@ -146,11 +158,13 @@ export const TimeZoneQuiz: React.FC<TimeZoneQuizProps> = ({
           </Grid>
           
           <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 2, bgcolor: 'secondary.light', color: 'secondary.contrastText' }}>
+            <Paper sx={{ p: 2, bgcolor: 'grey.200' }}>
               <Typography variant="subtitle1" gutterBottom>
                 目標都市: {targetCity.nameJa}（{targetCity.countryJa}）
               </Typography>
-              <Typography variant="h4">？？:？？</Typography>
+              <Typography variant="h4" sx={{ color: 'text.secondary' }}>
+                ?
+              </Typography>
               <Typography variant="body2">
                 UTC{targetCity.timezone >= 0 ? '+' : ''}{targetCity.timezone}
               </Typography>
@@ -200,9 +214,12 @@ export const TimeZoneQuiz: React.FC<TimeZoneQuizProps> = ({
               <Button
                 variant="outlined"
                 startIcon={<LightbulbIcon />}
-                onClick={() => setShowHint(!showHint)}
+                onClick={() => {
+                  setShowHint(true);
+                  setHintLevel(Math.min(hintLevel + 1, 3));
+                }}
               >
-                ヒント
+                ヒント {hintLevel > 0 && `(${hintLevel}/3)`}
               </Button>
             </>
           )}
@@ -221,10 +238,35 @@ export const TimeZoneQuiz: React.FC<TimeZoneQuizProps> = ({
 
       <Collapse in={showHint && !showResult}>
         <Alert severity="info" sx={{ mb: 2 }}>
-          <Typography variant="body2">{currentQuestion.hint}</Typography>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            計算式: {baseCity.nameJa}の時刻 + 時差（{targetCity.timezone} - {baseCity.timezone} = {targetCity.timezone - baseCity.timezone}時間）
-          </Typography>
+          {hintLevel >= 1 && (
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              <strong>ヒント1:</strong> {currentQuestion.hint}
+            </Typography>
+          )}
+          
+          {hintLevel >= 2 && (
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              <strong>ヒント2:</strong> 時差を計算しましょう。
+              {targetCity.nameJa}は{baseCity.nameJa}より
+              {Math.abs(targetCity.timezone - baseCity.timezone)}時間
+              {targetCity.timezone > baseCity.timezone ? '進んで' : '遅れて'}います。
+            </Typography>
+          )}
+          
+          {hintLevel >= 3 && (
+            <Typography variant="body2">
+              <strong>ヒント3:</strong> 計算式: 
+              {currentQuestion.baseTime.hour}:{currentQuestion.baseTime.minute.toString().padStart(2, '0')} 
+              {targetCity.timezone > baseCity.timezone ? ' + ' : ' - '}
+              {Math.abs(targetCity.timezone - baseCity.timezone)}時間
+            </Typography>
+          )}
+          
+          {attemptCount >= 2 && hintLevel < 3 && (
+            <Typography variant="body2" sx={{ mt: 1, color: 'warning.main' }}>
+              もう一度チャレンジしてみましょう！
+            </Typography>
+          )}
         </Alert>
       </Collapse>
 

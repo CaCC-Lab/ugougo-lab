@@ -24,6 +24,7 @@ import {
   CheckCircle as CheckIcon,
   Timer as TimerIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 都道府県データ（一部抜粋）
 const prefectures = [
@@ -41,8 +42,9 @@ const prefectures = [
   { id: 'okinawa', name: '沖縄県', capital: '那覇市', region: '九州', x: 20, y: 85, specialty: 'ゴーヤ、サーターアンダギー' }
 ];
 
-// 都道府県パズル
-function PrefecturePuzzle({ onClose }: { onClose: () => void }) {
+// 都道府県パズル（内部コンポーネント）
+function PrefecturePuzzleContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const [mode, setMode] = useState<'learn' | 'puzzle' | 'quiz'>('learn');
   const [selectedPrefecture, setSelectedPrefecture] = useState<typeof prefectures[0] | null>(null);
   const [placedPrefectures, setPlacedPrefectures] = useState<string[]>([]);
@@ -76,7 +78,29 @@ function PrefecturePuzzle({ onClose }: { onClose: () => void }) {
   // ドロップ
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
-    if (draggedPrefecture === targetId) {
+    const isCorrect = draggedPrefecture === targetId;
+    recordInteraction('drag_drop');
+    
+    // 都道府県配置を記録
+    const prefecture = prefectures.find(p => p.id === targetId);
+    recordAnswer(isCorrect, {
+      problem: `都道府県パズル: ${prefecture?.name}の配置`,
+      userAnswer: `${prefectures.find(p => p.id === draggedPrefecture)?.name || '不明'}を${prefecture?.name}の位置に配置`,
+      correctAnswer: `${prefecture?.name}を正しい位置に配置`,
+      puzzleData: {
+        targetPrefecture: prefecture?.name || targetId,
+        draggedPrefecture: prefectures.find(p => p.id === draggedPrefecture)?.name || draggedPrefecture,
+        isCorrect: isCorrect,
+        currentScore: score + (isCorrect ? 1 : 0),
+        currentAttempts: attempts + (isCorrect ? 0 : 1),
+        placedCount: placedPrefectures.length + (isCorrect ? 1 : 0),
+        totalPrefectures: prefectures.length,
+        elapsedTime: elapsedTime,
+        prefectureInfo: prefecture
+      }
+    });
+    
+    if (isCorrect) {
       setPlacedPrefectures(prev => [...prev, targetId]);
       setScore(prev => prev + 1);
       
@@ -104,7 +128,36 @@ function PrefecturePuzzle({ onClose }: { onClose: () => void }) {
   
   // クイズの答えをチェック
   const checkQuizAnswer = (prefectureId: string) => {
-    if (prefectureId === quizPrefecture?.id) {
+    const isCorrect = prefectureId === quizPrefecture?.id;
+    const selectedPref = prefectures.find(p => p.id === prefectureId);
+    
+    recordInteraction('click');
+    
+    // クイズ回答を記録
+    recordAnswer(isCorrect, {
+      problem: `都道府県クイズ: ${quizType === 'location' ? `${quizPrefecture?.name}の位置` : 
+                                quizType === 'capital' ? `県庁所在地が${quizPrefecture?.capital}の都道府県` : 
+                                `特産品が${quizPrefecture?.specialty}の都道府県`}`,
+      userAnswer: selectedPref?.name || '不明',
+      correctAnswer: quizPrefecture?.name || '不明',
+      quizData: {
+        questionType: quizType,
+        targetPrefecture: quizPrefecture?.name || '',
+        selectedPrefecture: selectedPref?.name || '',
+        isCorrect: isCorrect,
+        currentScore: score + (isCorrect ? 1 : 0),
+        currentAttempts: attempts + (isCorrect ? 0 : 1),
+        prefectureInfo: {
+          correct: quizPrefecture,
+          selected: selectedPref
+        },
+        clue: quizType === 'capital' ? quizPrefecture?.capital : 
+              quizType === 'specialty' ? quizPrefecture?.specialty : 
+              '位置'
+      }
+    });
+    
+    if (isCorrect) {
       setScore(prev => prev + 1);
       alert('正解！');
       generateQuiz();
@@ -116,6 +169,24 @@ function PrefecturePuzzle({ onClose }: { onClose: () => void }) {
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '都道府県パズルのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousScore: score,
+        previousAttempts: attempts,
+        previousMode: mode,
+        placedPrefecturesCount: placedPrefectures.length,
+        elapsedTime: elapsedTime,
+        completionRate: (placedPrefectures.length / prefectures.length) * 100,
+        selectedPrefecture: selectedPrefecture?.name || null
+      }
+    });
+    
     setPlacedPrefectures([]);
     setScore(0);
     setAttempts(0);
@@ -130,6 +201,28 @@ function PrefecturePuzzle({ onClose }: { onClose: () => void }) {
   // モード変更
   const handleModeChange = (_: React.MouseEvent<HTMLElement>, newMode: string | null) => {
     if (newMode) {
+      recordInteraction('click');
+      
+      // モード切り替えを記録
+      recordAnswer(true, {
+        problem: '都道府県パズルのモード切り替え',
+        userAnswer: `${newMode === 'learn' ? '学習' : newMode === 'puzzle' ? 'パズル' : 'クイズ'}モードを選択`,
+        correctAnswer: 'モード選択の理解',
+        modeSwitch: {
+          from: mode,
+          to: newMode,
+          currentProgress: {
+            score: score,
+            attempts: attempts,
+            placedCount: placedPrefectures.length,
+            elapsedTime: elapsedTime
+          },
+          modeDescription: newMode === 'learn' ? '都道府県の詳細情報を学習' :
+                          newMode === 'puzzle' ? 'ドラッグ&ドロップで配置ゲーム' :
+                          '県庁所在地や特産品のクイズ'
+        }
+      });
+      
       setMode(newMode as 'learn' | 'puzzle' | 'quiz');
       handleReset();
       if (newMode === 'quiz') {
@@ -261,6 +354,21 @@ function PrefecturePuzzle({ onClose }: { onClose: () => void }) {
                   onClick={() => {
                     if (mode === 'learn') {
                       setSelectedPrefecture(prefecture);
+                      recordInteraction('click');
+                      
+                      // 都道府県詳細確認を記録
+                      recordAnswer(true, {
+                        problem: '都道府県の詳細確認',
+                        userAnswer: `${prefecture.name}の詳細情報を確認`,
+                        correctAnswer: '都道府県情報の理解',
+                        learningData: {
+                          prefectureName: prefecture.name,
+                          capital: prefecture.capital,
+                          region: prefecture.region,
+                          specialty: prefecture.specialty,
+                          interactionType: 'info_view'
+                        }
+                      });
                     } else if (mode === 'quiz') {
                       checkQuizAnswer(prefecture.id);
                     }
@@ -419,6 +527,20 @@ function PrefecturePuzzle({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 都道府県パズル（MaterialWrapperでラップ）
+function PrefecturePuzzle({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="prefecture-puzzle"
+      materialName="都道府県パズル"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <PrefecturePuzzleContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

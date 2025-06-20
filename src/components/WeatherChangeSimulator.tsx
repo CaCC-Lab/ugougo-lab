@@ -24,6 +24,7 @@ import {
   Grain as RainIcon,
   Air as WindIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 天気の種類
 type Weather = '晴れ' | 'くもり' | '雨';
@@ -35,8 +36,9 @@ interface Front {
   speed: number; // 移動速度
 }
 
-// 天気の変化シミュレーター
-function WeatherChangeSimulator({ onClose }: { onClose: () => void }) {
+// 天気の変化シミュレーター（内部コンポーネント）
+function WeatherChangeSimulatorContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [front, setFront] = useState<Front>({ type: '寒冷前線', position: 20, speed: 1 });
   const [weather, setWeather] = useState<Weather[]>(['晴れ', '晴れ', 'くもり', '雨', '雨']);
@@ -223,6 +225,25 @@ function WeatherChangeSimulator({ onClose }: { onClose: () => void }) {
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '天気変化シミュレーターのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousFrontType: front.type,
+        previousFrontPosition: front.position,
+        previousPressure: pressure,
+        previousTemperature: temperature,
+        wasPlaying: isPlaying,
+        currentMode: mode,
+        currentScore: score,
+        currentAttempts: attempts
+      }
+    });
+    
     setFront({ type: '寒冷前線', position: 20, speed: 1 });
     setWeather(['晴れ', '晴れ', 'くもり', '雨', '雨']);
     setIsPlaying(false);
@@ -309,7 +330,30 @@ function WeatherChangeSimulator({ onClose }: { onClose: () => void }) {
         <ToggleButtonGroup
           value={mode}
           exclusive
-          onChange={(_, value) => value && setMode(value)}
+          onChange={(_, value) => {
+            if (value) {
+              recordInteraction('click');
+              
+              // モード切り替えを記録
+              recordAnswer(true, {
+                problem: '天気シミュレーターのモード切り替え',
+                userAnswer: `${value === 'simulation' ? 'シミュレーション' : 'クイズ'}モードを選択`,
+                correctAnswer: 'モード選択の理解',
+                modeSwitch: {
+                  from: mode,
+                  to: value,
+                  currentSettings: {
+                    frontType: front.type,
+                    frontPosition: front.position,
+                    pressure: pressure,
+                    temperature: temperature
+                  }
+                }
+              });
+              
+              setMode(value);
+            }
+          }}
           fullWidth
         >
           <ToggleButton value="simulation">
@@ -344,7 +388,28 @@ function WeatherChangeSimulator({ onClose }: { onClose: () => void }) {
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', mb: 2 }}>
                   <IconButton
                     size="large"
-                    onClick={() => setIsPlaying(!isPlaying)}
+                    onClick={() => {
+                      const newIsPlaying = !isPlaying;
+                      recordInteraction('click');
+                      
+                      // シミュレーション制御を記録
+                      recordAnswer(true, {
+                        problem: '天気変化シミュレーションの制御',
+                        userAnswer: newIsPlaying ? 'シミュレーション開始' : 'シミュレーション停止',
+                        correctAnswer: 'シミュレーション制御の理解',
+                        simulationControl: {
+                          action: newIsPlaying ? 'start' : 'stop',
+                          frontType: front.type,
+                          frontPosition: front.position,
+                          frontSpeed: front.speed,
+                          currentPressure: pressure,
+                          currentTemperature: temperature,
+                          weatherStates: weather
+                        }
+                      });
+                      
+                      setIsPlaying(newIsPlaying);
+                    }}
                     color="primary"
                   >
                     {isPlaying ? <PauseIcon /> : <PlayIcon />}
@@ -359,7 +424,27 @@ function WeatherChangeSimulator({ onClose }: { onClose: () => void }) {
                   <ToggleButtonGroup
                     value={front.type}
                     exclusive
-                    onChange={(_, value) => value && setFront(prev => ({ ...prev, type: value }))}
+                    onChange={(_, value) => {
+                      if (value) {
+                        recordInteraction('click');
+                        
+                        // 前線タイプ変更を記録
+                        recordAnswer(true, {
+                          problem: '前線タイプの選択',
+                          userAnswer: `${value}を選択`,
+                          correctAnswer: '前線の特徴理解',
+                          frontTypeChange: {
+                            from: front.type,
+                            to: value,
+                            characteristics: value === '寒冷前線' ? '急激な天気変化' : '緊やかな天気変化',
+                            speed: value === '寒冷前線' ? '速い' : '遅い',
+                            weatherPattern: value === '寒冷前線' ? '急激に悪化→回復' : '徴々に悪化'
+                          }
+                        });
+                        
+                        setFront(prev => ({ ...prev, type: value }));
+                      }
+                    }}
                     fullWidth
                   >
                     <ToggleButton value="寒冷前線">
@@ -435,8 +520,26 @@ function WeatherChangeSimulator({ onClose }: { onClose: () => void }) {
                       variant="outlined"
                       fullWidth
                       onClick={() => {
+                        const isCorrect = quizQuestion.includes('寒冷前線');
+                        recordInteraction('click');
                         setAttempts(prev => prev + 1);
-                        if (quizQuestion.includes('寒冷前線')) {
+                        
+                        // クイズ回答を記録
+                        recordAnswer(isCorrect, {
+                          problem: `天気変化クイズ: ${quizQuestion}`,
+                          userAnswer: '急激に悪化→回復',
+                          correctAnswer: quizQuestion.includes('寒冷前線') ? '急激に悪化→回復' : '徐々に悪化',
+                          quizData: {
+                            question: quizQuestion,
+                            selectedAnswer: '急激に悪化→回復',
+                            isCorrect: isCorrect,
+                            currentScore: score + (isCorrect ? 1 : 0),
+                            currentAttempts: attempts + 1,
+                            frontType: isCorrect ? '寒冷前線' : '温暖前線'
+                          }
+                        });
+                        
+                        if (isCorrect) {
                           setScore(prev => prev + 1);
                           alert('正解！急激に悪化し、通過後は回復します');
                           generateQuiz();
@@ -453,8 +556,26 @@ function WeatherChangeSimulator({ onClose }: { onClose: () => void }) {
                       variant="outlined"
                       fullWidth
                       onClick={() => {
+                        const isCorrect = quizQuestion.includes('温暖前線');
+                        recordInteraction('click');
                         setAttempts(prev => prev + 1);
-                        if (quizQuestion.includes('温暖前線')) {
+                        
+                        // クイズ回答を記録
+                        recordAnswer(isCorrect, {
+                          problem: `天気変化クイズ: ${quizQuestion}`,
+                          userAnswer: '徐々に悪化',
+                          correctAnswer: quizQuestion.includes('温暖前線') ? '徐々に悪化' : '急激に悪化→回復',
+                          quizData: {
+                            question: quizQuestion,
+                            selectedAnswer: '徐々に悪化',
+                            isCorrect: isCorrect,
+                            currentScore: score + (isCorrect ? 1 : 0),
+                            currentAttempts: attempts + 1,
+                            frontType: isCorrect ? '温暖前線' : '寒冷前線'
+                          }
+                        });
+                        
+                        if (isCorrect) {
                           setScore(prev => prev + 1);
                           alert('正解！徐々に天気が悪化します');
                           generateQuiz();
@@ -486,6 +607,20 @@ function WeatherChangeSimulator({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 天気の変化シミュレーター（MaterialWrapperでラップ）
+function WeatherChangeSimulator({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="weather-change-simulator"
+      materialName="天気の変化シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <WeatherChangeSimulatorContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

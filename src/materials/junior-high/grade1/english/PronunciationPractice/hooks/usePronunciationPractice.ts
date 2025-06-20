@@ -176,20 +176,93 @@ export const usePronunciationPractice = () => {
       const matches = phoneme.examples.some(example => 
         recognizedLower.includes(example.toLowerCase())
       );
-      score = matches ? 80 + Math.random() * 20 : 30 + Math.random() * 30;
+      
+      if (matches) {
+        // 音素の位置を確認してより正確なスコアリング
+        const targetSound = phoneme.soundExample;
+        const exactMatch = phoneme.examples.some(example => 
+          recognizedLower === example.toLowerCase()
+        );
+        
+        if (exactMatch) {
+          score = 95; // 完全一致
+        } else {
+          score = 85; // 部分一致
+        }
+      } else {
+        // 音素の類似度を計算（簡易版）
+        score = calculatePhonemeSimilarity(recognizedLower, phoneme);
+      }
     } else {
       // 単語モード：練習単語と一致するか
       const targetWord = phoneme.practiceWords[0].word.toLowerCase();
+      
       if (recognizedLower === targetWord) {
-        score = 90 + Math.random() * 10;
-      } else if (recognizedLower.includes(targetWord) || targetWord.includes(recognizedLower)) {
-        score = 60 + Math.random() * 20;
+        score = 95; // 完全一致
       } else {
-        score = 20 + Math.random() * 30;
+        // レーベンシュタイン距離を使用した類似度計算
+        const similarity = calculateWordSimilarity(recognizedLower, targetWord);
+        score = Math.round(similarity * 100);
       }
     }
 
-    return Math.round(score);
+    return Math.max(0, Math.min(100, score));
+  };
+
+  // 音素の類似度を計算（簡易版）
+  const calculatePhonemeSimilarity = (recognized: string, phoneme: Phoneme): number => {
+    // ターゲット音素が含まれているかを確認
+    const soundPattern = phoneme.soundExample.toLowerCase();
+    if (recognized.includes(soundPattern)) {
+      return 70;
+    }
+    
+    // 部分的な一致をチェック
+    for (const example of phoneme.examples) {
+      const exampleLower = example.toLowerCase();
+      for (let i = 0; i < Math.min(recognized.length, exampleLower.length); i++) {
+        if (recognized[i] === exampleLower[i]) {
+          return 40 + (i * 10); // 一致する文字数に応じてスコア
+        }
+      }
+    }
+    
+    return 30; // 基本スコア
+  };
+
+  // 単語の類似度を計算（レーベンシュタイン距離）
+  const calculateWordSimilarity = (str1: string, str2: string): number => {
+    const len1 = str1.length;
+    const len2 = str2.length;
+    const dp: number[][] = [];
+
+    // DPテーブルの初期化
+    for (let i = 0; i <= len1; i++) {
+      dp[i] = [];
+      dp[i][0] = i;
+    }
+    for (let j = 0; j <= len2; j++) {
+      dp[0][j] = j;
+    }
+
+    // レーベンシュタイン距離の計算
+    for (let i = 1; i <= len1; i++) {
+      for (let j = 1; j <= len2; j++) {
+        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,      // 削除
+          dp[i][j - 1] + 1,      // 挿入
+          dp[i - 1][j - 1] + cost // 置換
+        );
+      }
+    }
+
+    // 類似度を0-1の範囲で計算
+    const maxLen = Math.max(len1, len2);
+    const similarity = 1 - (dp[len1][len2] / maxLen);
+    
+    // スコアを調整（完全に違う場合でも最低20点）
+    return Math.max(0.2, similarity) * 0.8 + 0.2;
   };
 
   // フィードバックを生成

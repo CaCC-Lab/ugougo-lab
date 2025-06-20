@@ -28,6 +28,7 @@ import {
   Grass as SeedIcon,
   Park as PlantIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 植物の種類
 type PlantType = 'sunflower' | 'asagao' | 'tomato';
@@ -86,8 +87,9 @@ const plantDatabase: Record<PlantType, PlantData> = {
   }
 };
 
-// 植物の成長シミュレーター
-function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
+// 植物の成長シミュレーター（内部コンポーネント）
+function PlantGrowthSimulatorContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedPlant, setSelectedPlant] = useState<PlantType>('sunflower');
   const [currentStage, setCurrentStage] = useState<GrowthStage>('seed');
@@ -100,6 +102,8 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
   const [score, setScore] = useState(0);
   const [harvestCount, setHarvestCount] = useState(0);
   const [fastForward, setFastForward] = useState(false);
+  const [fastForwardUsed, setFastForwardUsed] = useState(0);
+  const [lastFastForwardDay, setLastFastForwardDay] = useState(-1);
   
   const canvasSize = 400;
   const plantData = plantDatabase[selectedPlant];
@@ -338,6 +342,18 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
       setGrowthProgress(prev => {
         const newProgress = prev + (fastForward ? 10 : 1);
         
+        // 早送り使用時の記録
+        if (fastForward && daysPassed !== lastFastForwardDay) {
+          setFastForwardUsed(count => count + 1);
+          setLastFastForwardDay(daysPassed);
+          
+          // 早送りを使いすぎた場合はスコアを減らす
+          if (fastForwardUsed >= 3) {
+            setScore(s => Math.max(0, s - 50));
+            setGrowthHistory(h => [...h, `${daysPassed}日目: 早送りを使いすぎました（スコア-50）`]);
+          }
+        }
+        
         if (newProgress >= 100) {
           // 次の段階へ
           const stages: GrowthStage[] = ['seed', 'sprout', 'growing', 'flower', 'fruit'];
@@ -347,13 +363,48 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
             const nextStage = stages[currentIndex + 1];
             setCurrentStage(nextStage);
             setGrowthHistory(prev => [...prev, `${daysPassed}日目: ${plantData.stages[nextStage].description}`]);
-            setScore(prev => prev + 100);
+            
+            // 早送りを使わずに成長させた場合はボーナススコア
+            const bonusScore = fastForwardUsed === 0 ? 150 : 100;
+            setScore(prev => prev + bonusScore);
+            
+            // 成長段階完了を記録
+            recordAnswer(true, {
+              problem: `${plantData.name}の成長: ${stageData.name}から${plantData.stages[nextStage].name}へ`,
+              userAnswer: '成長段階完了',
+              correctAnswer: plantData.stages[nextStage].description,
+              score: bonusScore,
+              stage: nextStage,
+              fastForwardUsed: fastForwardUsed
+            });
+            
+            if (fastForwardUsed === 0) {
+              setGrowthHistory(h => [...h, `ボーナス！ じっくり観察しました（+50スコア）`]);
+            }
+            
             return 0;
           } else {
             // 収穫完了
             setHarvestCount(prev => prev + 1);
-            setScore(prev => prev + 500);
+            const harvestBonus = fastForwardUsed === 0 ? 700 : 500;
+            setScore(prev => prev + harvestBonus);
             setGrowthHistory(prev => [...prev, `${daysPassed}日目: ${plantData.finalProduct}を収穫しました！`]);
+            
+            // 学習履歴に記録
+            const isPerfect = fastForwardUsed === 0;
+            recordAnswer(true, {
+              problem: `${plantData.name}の栽培`,
+              userAnswer: '収穫完了',
+              correctAnswer: plantData.finalProduct,
+              score: harvestBonus,
+              growthDays: daysPassed,
+              fastForwardUsed: fastForwardUsed,
+              perfect: isPerfect
+            });
+            
+            if (isPerfect) {
+              setGrowthHistory(h => [...h, `パーフェクト！ 早送りを使わずに育てました（+200スコア）`]);
+            }
             setIsPlaying(false);
             return 100;
           }
@@ -372,6 +423,7 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
   // 水やり
   const water = () => {
     setWaterLevel(prev => Math.min(prev + 30, 100));
+    recordInteraction('click');
     if (isPlaying) {
       setGrowthHistory(prev => [...prev, `${daysPassed}日目: 水をあげました`]);
     }
@@ -380,6 +432,7 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
   // 日光調整
   const adjustSunlight = (value: number) => {
     setSunLevel(value);
+    recordInteraction('drag');
   };
   
   // リセット
@@ -392,6 +445,8 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
     setIsPlaying(false);
     setGrowthHistory([]);
     setFastForward(false);
+    setFastForwardUsed(0);
+    setLastFastForwardDay(-1);
   };
   
   // エフェクト
@@ -414,7 +469,10 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
           植物の成長シミュレーター
         </Typography>
         <Box>
-          <IconButton onClick={handleReset} sx={{ mr: 1 }}>
+          <IconButton onClick={() => {
+            handleReset();
+            recordInteraction('click');
+          }} sx={{ mr: 1 }}>
             <RefreshIcon />
           </IconButton>
           <IconButton onClick={onClose}>
@@ -466,6 +524,7 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
             if (value && !isPlaying) {
               setSelectedPlant(value);
               handleReset();
+              recordInteraction('click');
             }
           }}
         >
@@ -536,7 +595,10 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
               <Button
                 variant="contained"
                 fullWidth
-                onClick={() => setIsPlaying(!isPlaying)}
+                onClick={() => {
+                  setIsPlaying(!isPlaying);
+                  recordInteraction('click');
+                }}
                 disabled={currentStage === 'fruit' && growthProgress === 100}
                 sx={{ mb: 1 }}
               >
@@ -545,11 +607,21 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
               <Button
                 variant="outlined"
                 fullWidth
-                onClick={() => setFastForward(!fastForward)}
+                onClick={() => {
+                  setFastForward(!fastForward);
+                  recordInteraction('click');
+                }}
                 startIcon={<TimerIcon />}
+                color={fastForwardUsed >= 3 ? 'warning' : 'primary'}
               >
-                {fastForward ? '通常速度' : '早送り'}
+                {fastForward ? '通常速度' : '早送り'} 
+                {fastForwardUsed > 0 && ` (${fastForwardUsed}回使用)`}
               </Button>
+              {fastForwardUsed >= 2 && (
+                <Typography variant="caption" color="warning.main" sx={{ mt: 0.5, display: 'block' }}>
+                  ⚠️ 早送りの使いすぎはスコアが下がります
+                </Typography>
+              )}
             </Box>
             
             {/* 成長情報 */}
@@ -643,10 +715,25 @@ function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
           • 植物は水と日光が必要です。適切な量をあげましょう<br/>
           • 成長には時間がかかります。毎日観察することが大切です<br/>
           • 植物によって成長の速さや必要な世話が違います<br/>
-          • 種→芽→成長→花→実の順番で成長します
+          • 種→芽→成長→花→実の順番で成長します<br/>
+          • <strong>じっくり観察すると高いスコアがもらえます！早送りの使いすぎには注意しましょう</strong>
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 植物の成長シミュレーター（MaterialWrapperでラップ）
+function PlantGrowthSimulator({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="plant-growth"
+      materialName="植物の成長シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <PlantGrowthSimulatorContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

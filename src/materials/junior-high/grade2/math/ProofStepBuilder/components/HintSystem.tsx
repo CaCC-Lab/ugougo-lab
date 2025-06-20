@@ -10,7 +10,8 @@ import {
   Step,
   StepLabel,
   Collapse,
-  IconButton
+  IconButton,
+  Fade
 } from '@mui/material';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -149,24 +150,93 @@ export const HintSystem: React.FC<HintSystemProps> = ({
         </Button>
       </Box>
 
-      {/* 学習のポイント */}
-      <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
-        <Typography variant="subtitle2" gutterBottom>
-          💡 証明のコツ
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          1. まず「仮定」と「結論」を明確にしましょう
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          2. 図形を見て、使える定理や性質を探しましょう
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          3. 結論から逆算して、必要な条件を考えましょう
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          4. 各ステップに理由を付けて、論理的につなげましょう
-        </Typography>
-      </Box>
+      {/* 学習のポイント（段階的表示） */}
+      <ProofTips 
+        currentHintIndex={currentHintIndex}
+        showHint={showHint}
+      />
     </Paper>
+  );
+};
+
+// 証明のコツを段階的に表示するコンポーネント
+interface ProofTipsProps {
+  currentHintIndex: number;
+  showHint: boolean;
+}
+
+const ProofTips: React.FC<ProofTipsProps> = ({ currentHintIndex, showHint }) => {
+  const [tipsLevel, setTipsLevel] = React.useState(0);
+
+  // 証明のコツを段階的に定義
+  const proofTips = [
+    {
+      level: 0,
+      tip: "証明を始める前に、問題文をよく読んで理解しましょう"
+    },
+    {
+      level: 1,
+      tip: "1. まず「仮定」と「結論」を明確にしましょう"
+    },
+    {
+      level: 2,
+      tip: "2. 図形を見て、使える定理や性質を探しましょう"
+    },
+    {
+      level: 3,
+      tip: "3. 結論から逆算して、必要な条件を考えましょう"
+    },
+    {
+      level: 4,
+      tip: "4. 各ステップに理由を付けて、論理的につなげましょう"
+    }
+  ];
+
+  // ヒントが表示されるたびにコツのレベルを上げる
+  React.useEffect(() => {
+    if (showHint && currentHintIndex >= 0) {
+      // ヒントインデックスに応じてコツのレベルを設定（最大4）
+      const newLevel = Math.min(currentHintIndex + 1, proofTips.length - 1);
+      setTipsLevel(newLevel);
+    }
+  }, [currentHintIndex, showHint]);
+
+  return (
+    <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
+      <Typography variant="subtitle2" gutterBottom>
+        💡 証明のコツ
+      </Typography>
+      
+      {/* 現在のレベルまでのコツを表示 */}
+      {proofTips.slice(0, tipsLevel + 1).map((tipItem, index) => (
+        <Fade in={true} key={index} timeout={600 * (index + 1)}>
+          <Typography 
+            variant="body2" 
+            color="text.secondary" 
+            sx={{ 
+              mb: index < tipsLevel ? 1 : 0,
+              opacity: index === tipsLevel ? 1 : 0.7
+            }}
+          >
+            {tipItem.tip}
+          </Typography>
+        </Fade>
+      ))}
+
+      {/* まだ表示されていないコツがある場合の表示 */}
+      {tipsLevel < proofTips.length - 1 && (
+        <Typography 
+          variant="caption" 
+          color="text.disabled" 
+          sx={{ 
+            display: 'block',
+            mt: 1,
+            fontStyle: 'italic'
+          }}
+        >
+          ヒントを使うと、より多くのコツが表示されます...
+        </Typography>
+      )}
+    </Box>
   );
 };

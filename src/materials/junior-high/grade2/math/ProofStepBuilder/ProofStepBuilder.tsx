@@ -20,6 +20,7 @@ import {
 import SchoolIcon from '@mui/icons-material/School';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import {
   ProblemDisplay,
   ProofCanvas,
@@ -31,7 +32,9 @@ import { useProofBuilder } from './hooks';
 import { proofProblems } from './data/proofProblems';
 import type { ValidationResult } from './types';
 
-export const ProofStepBuilder: React.FC = () => {
+// 証明ステップビルダー（内部コンポーネント）
+const ProofStepBuilderContent: React.FC = () => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const [showProblemSelector, setShowProblemSelector] = useState(true);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   
@@ -52,12 +55,25 @@ export const ProofStepBuilder: React.FC = () => {
     selectProblem(problemId);
     setShowProblemSelector(false);
     setValidationResult(null);
+    recordInteraction('click');
   };
 
   // 証明を検証
   const handleValidate = () => {
     const result = validateProof();
     setValidationResult(result);
+    recordInteraction('click');
+    
+    // 証明の結果を記録
+    if (result) {
+      recordAnswer(result.score >= 70, {
+        problemId: state.problem?.id,
+        problemTitle: state.problem?.title,
+        score: result.score,
+        errors: result.errors,
+        isComplete: state.isComplete
+      });
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -97,7 +113,10 @@ export const ProofStepBuilder: React.FC = () => {
           <Button
             variant="outlined"
             startIcon={<MenuBookIcon />}
-            onClick={() => setShowProblemSelector(true)}
+            onClick={() => {
+              setShowProblemSelector(true);
+              recordInteraction('click');
+            }}
           >
             別の問題を選ぶ
           </Button>
@@ -115,8 +134,14 @@ export const ProofStepBuilder: React.FC = () => {
                 problem={state.problem}
                 showHint={state.showHint}
                 currentHintIndex={state.currentHintIndex}
-                onShowNextHint={showNextHint}
-                onReset={reset}
+                onShowNextHint={() => {
+                  showNextHint();
+                  recordInteraction('click');
+                }}
+                onReset={() => {
+                  reset();
+                  recordInteraction('click');
+                }}
               />
             </Box>
           )}
@@ -126,10 +151,22 @@ export const ProofStepBuilder: React.FC = () => {
         <Grid item xs={12} md={5}>
           <ProofCanvas
             steps={state.steps}
-            onAddStep={addStep}
-            onRemoveStep={removeStep}
-            onUpdateStep={updateStep}
-            onReorderSteps={reorderSteps}
+            onAddStep={(step) => {
+              addStep(step);
+              recordInteraction('click');
+            }}
+            onRemoveStep={(id) => {
+              removeStep(id);
+              recordInteraction('click');
+            }}
+            onUpdateStep={(id, updates) => {
+              updateStep(id, updates);
+              recordInteraction('change');
+            }}
+            onReorderSteps={(startIndex, endIndex) => {
+              reorderSteps(startIndex, endIndex);
+              recordInteraction('drag');
+            }}
           />
           
           {/* 検証ボタンとフィードバック */}
@@ -259,3 +296,20 @@ export const ProofStepBuilder: React.FC = () => {
     </Container>
   );
 };
+
+// 証明ステップビルダー（MaterialWrapperでラップ）
+export const ProofStepBuilder: React.FC = () => {
+  return (
+    <MaterialWrapper
+      materialId="proof-step-builder"
+      materialName="証明ステップビルダー"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <ProofStepBuilderContent />
+    </MaterialWrapper>
+  );
+};
+
+// default exportも追加
+export default ProofStepBuilder;

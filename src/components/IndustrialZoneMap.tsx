@@ -24,6 +24,7 @@ import {
   LocationOn as LocationIcon,
   Quiz as QuizIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 工業地帯データ
 const industrialZones = [
@@ -83,8 +84,9 @@ const industrialZones = [
   }
 ];
 
-// 工業地帯マップ
-function IndustrialZoneMap({ onClose }: { onClose: () => void }) {
+// 工業地帯マップ（内部コンポーネント）
+function IndustrialZoneMapContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const [selectedZone, setSelectedZone] = useState<typeof industrialZones[0] | null>(null);
   const [mode, setMode] = useState<'learn' | 'quiz'>('learn');
   const [quizType, setQuizType] = useState<'location' | 'product' | 'prefecture'>('location');
@@ -106,9 +108,37 @@ function IndustrialZoneMap({ onClose }: { onClose: () => void }) {
   
   // クイズの答えをチェック
   const checkAnswer = (zoneId: string) => {
+    const isCorrect = zoneId === quizZone?.id;
+    const selectedZoneForAnswer = industrialZones.find(zone => zone.id === zoneId);
+    
+    recordInteraction('click');
     setAttempts(prev => prev + 1);
     
-    if (zoneId === quizZone?.id) {
+    // クイズ回答を記録
+    recordAnswer(isCorrect, {
+      problem: `工業地帯クイズ: ${quizType === 'location' ? `${quizZone?.name}の位置` : 
+                              quizType === 'product' ? `${quizZone?.products[0]}の生産が盛んな工業地帯` : 
+                              `${quizZone?.prefectures[0]}県にある工業地帯`}`,
+      userAnswer: selectedZoneForAnswer?.name || '不明',
+      correctAnswer: quizZone?.name || '不明',
+      quizData: {
+        questionType: quizType,
+        targetZone: quizZone?.name || '',
+        selectedZone: selectedZoneForAnswer?.name || '',
+        isCorrect: isCorrect,
+        currentScore: score + (isCorrect ? 1 : 0),
+        currentAttempts: attempts + 1,
+        zoneInfo: {
+          correct: quizZone,
+          selected: selectedZoneForAnswer
+        },
+        clue: quizType === 'product' ? quizZone?.products[0] : 
+              quizType === 'prefecture' ? quizZone?.prefectures[0] : 
+              '位置'
+      }
+    });
+    
+    if (isCorrect) {
       setScore(prev => prev + 1);
       alert('正解！よくできました！');
       generateQuiz();
@@ -119,6 +149,25 @@ function IndustrialZoneMap({ onClose }: { onClose: () => void }) {
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '工業地帯マップのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousSelectedZone: selectedZone?.name || null,
+        previousScore: score,
+        previousAttempts: attempts,
+        previousMode: mode,
+        previousQuizType: quizType,
+        previousQuizZone: quizZone?.name || null,
+        showHint: showHint,
+        currentProgress: Math.min((score / 10) * 100, 100)
+      }
+    });
+    
     setSelectedZone(null);
     setScore(0);
     setAttempts(0);
@@ -131,6 +180,25 @@ function IndustrialZoneMap({ onClose }: { onClose: () => void }) {
   // モード変更
   const handleModeChange = (_: React.MouseEvent<HTMLElement>, newMode: string | null) => {
     if (newMode) {
+      recordInteraction('click');
+      
+      // モード切り替えを記録
+      recordAnswer(true, {
+        problem: '工業地帯学習モードの切り替え',
+        userAnswer: `${newMode === 'learn' ? '学習' : 'クイズ'}モードを選択`,
+        correctAnswer: 'モード選択の理解',
+        modeSwitch: {
+          from: mode,
+          to: newMode,
+          currentProgress: {
+            score: score,
+            attempts: attempts,
+            selectedZone: selectedZone?.name || null
+          },
+          modeDescription: newMode === 'learn' ? '工業地帯の詳細情報を学習' : '工業地帯に関するクイズに挑戦'
+        }
+      });
+      
       setMode(newMode as 'learn' | 'quiz');
       handleReset();
       if (newMode === 'quiz') {
@@ -273,6 +341,21 @@ function IndustrialZoneMap({ onClose }: { onClose: () => void }) {
                   onClick={() => {
                     if (mode === 'learn') {
                       setSelectedZone(zone);
+                      recordInteraction('click');
+                      
+                      // 工業地帯選択を記録
+                      recordAnswer(true, {
+                        problem: '工業地帯の詳細確認',
+                        userAnswer: `${zone.name}を選択して詳細を確認`,
+                        correctAnswer: '工業地帯の特徴理解',
+                        zoneSelection: {
+                          zoneName: zone.name,
+                          prefectures: zone.prefectures,
+                          products: zone.products,
+                          features: zone.features,
+                          interactionType: 'map_click'
+                        }
+                      });
                     } else if (mode === 'quiz') {
                       checkAnswer(zone.id);
                     }
@@ -381,7 +464,24 @@ function IndustrialZoneMap({ onClose }: { onClose: () => void }) {
                 <Button
                   variant="outlined"
                   fullWidth
-                  onClick={() => setShowHint(true)}
+                  onClick={() => {
+                    setShowHint(true);
+                    recordInteraction('click');
+                    
+                    // ヒント表示を記録
+                    recordAnswer(true, {
+                      problem: '工業地帯クイズのヒント表示',
+                      userAnswer: 'ヒントを要求',
+                      correctAnswer: 'ヒント活用の理解',
+                      hintRequest: {
+                        questionType: quizType,
+                        targetZone: quizZone?.name || '',
+                        hint: quizZone?.features || '',
+                        currentScore: score,
+                        currentAttempts: attempts
+                      }
+                    });
+                  }}
                   disabled={showHint}
                   sx={{ mb: 2 }}
                 >
@@ -411,6 +511,20 @@ function IndustrialZoneMap({ onClose }: { onClose: () => void }) {
         </Typography>
       </Paper>
     </Box>
+  );
+}
+
+// 工業地帯マップ（MaterialWrapperでラップ）
+function IndustrialZoneMap({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="industrial-zone-map"
+      materialName="工業地帯マップ"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <IndustrialZoneMapContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 

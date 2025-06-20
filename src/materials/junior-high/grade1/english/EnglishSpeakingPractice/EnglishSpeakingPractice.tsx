@@ -18,7 +18,7 @@ import {
   School as LearnIcon
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MaterialBase } from '../../../../../components/educational/MaterialBase';
+import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import { useSpeakingPractice } from './hooks';
 import {
   ScenarioSelector,
@@ -30,7 +30,9 @@ import { dialogueScenarios } from './data/dialogueScenarios';
 
 type ViewMode = 'menu' | 'practice' | 'complete' | 'guide';
 
-const EnglishSpeakingPractice: React.FC = () => {
+// 英語スピーキング練習（内部コンポーネント）
+const EnglishSpeakingPracticeContent: React.FC = () => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const [viewMode, setViewMode] = useState<ViewMode>('menu');
   const [selectedTab, setSelectedTab] = useState(0);
   
@@ -52,12 +54,14 @@ const EnglishSpeakingPractice: React.FC = () => {
   const handleSelectScenario = (scenario: typeof dialogueScenarios[0]) => {
     startScenario(scenario);
     setViewMode('practice');
+    recordInteraction('click');
   };
 
   const handleOptionSelect = (optionId: string) => {
     const currentTurn = getCurrentTurn();
     if (currentTurn) {
       selectOption(currentTurn.id, optionId);
+      recordInteraction('click');
     }
   };
 
@@ -68,7 +72,16 @@ const EnglishSpeakingPractice: React.FC = () => {
       // 自動的に答え合わせ
       if (words.length === currentTurn.words?.length) {
         setTimeout(() => {
-          checkArrangement(currentTurn.id);
+          const result = checkArrangement(currentTurn.id);
+          // 単語並び替えの結果を記録
+          if (result !== undefined) {
+            recordAnswer(result, {
+              turnId: currentTurn.id,
+              type: 'word-arrangement',
+              words: words.join(' '),
+              correct: currentTurn.words?.join(' ')
+            });
+          }
         }, 500);
       }
     }
@@ -80,6 +93,14 @@ const EnglishSpeakingPractice: React.FC = () => {
     
     if (state.currentScenario && nextIndex >= state.currentScenario.dialogue.length) {
       setViewMode('complete');
+      // シナリオ完了時のスコアを記録
+      recordAnswer(true, {
+        scenarioId: state.currentScenario.id,
+        scenarioTitle: state.currentScenario.titleJa,
+        score: state.score,
+        mistakes: state.mistakes,
+        completed: true
+      });
     } else {
       nextTurn();
     }
@@ -95,6 +116,7 @@ const EnglishSpeakingPractice: React.FC = () => {
   const handleBackToMenu = () => {
     reset();
     setViewMode('menu');
+    recordInteraction('click');
   };
 
   const renderContent = () => {
@@ -105,7 +127,10 @@ const EnglishSpeakingPractice: React.FC = () => {
             <Box>
               <Tabs
                 value={selectedTab}
-                onChange={(_, newValue) => setSelectedTab(newValue)}
+                onChange={(_, newValue) => {
+                  setSelectedTab(newValue);
+                  recordInteraction('click');
+                }}
                 variant="fullWidth"
                 sx={{ mb: 3 }}
               >
@@ -215,7 +240,10 @@ const EnglishSpeakingPractice: React.FC = () => {
                 feedback={state.feedbackMessages[currentTurn.id]}
                 progress={getProgress()}
                 showPronunciationHelp={state.showPronunciationHelp}
-                onToggleHelp={togglePronunciationHelp}
+                onToggleHelp={() => {
+                  togglePronunciationHelp();
+                  recordInteraction('click');
+                }}
               />
             </motion.div>
           </AnimatePresence>
@@ -230,7 +258,10 @@ const EnglishSpeakingPractice: React.FC = () => {
             score={state.score}
             mistakes={state.mistakes}
             timeSpent={0} // TODO: 実際の時間計測
-            onReplay={handleReplay}
+            onReplay={() => {
+              handleReplay();
+              recordInteraction('click');
+            }}
             onBackToMenu={handleBackToMenu}
           />
         );
@@ -241,21 +272,23 @@ const EnglishSpeakingPractice: React.FC = () => {
   };
 
   return (
-    <MaterialBase
-      material={{
-        id: 'english-speaking-practice',
-        title: '英語スピーキング練習',
-        description: '対話形式で英会話を練習しよう！正しい語順と発音を身につけよう。',
-        grade: '中学1年生',
-        subject: '英語',
-        type: 'interactive',
-        difficulty: 'medium'
-      }}
-    >
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {renderContent()}
       </Container>
-    </MaterialBase>
+  );
+};
+
+// 英語スピーキング練習（MaterialWrapperでラップ）
+const EnglishSpeakingPractice: React.FC = () => {
+  return (
+    <MaterialWrapper
+      materialId="english-speaking-practice"
+      materialName="英語スピーキング練習"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <EnglishSpeakingPracticeContent />
+    </MaterialWrapper>
   );
 };
 

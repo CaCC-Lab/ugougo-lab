@@ -23,12 +23,14 @@ import {
   Info as InfoIcon,
   Speed as SpeedIcon
 } from '@mui/icons-material';
-// import { MaterialBase } from '../../../../../components/educational/MaterialBase';
+import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import { useEarthquakeSimulation } from './hooks';
 import { WaveAnimation, SeismographDisplay, LearningPanel } from './components';
 import type { SelectChangeEvent } from '@mui/material';
 
-const EarthquakeWaveSimulator: React.FC = () => {
+// 地震波シミュレーター（内部コンポーネント）
+const EarthquakeWaveSimulatorContent: React.FC = () => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   console.log('EarthquakeWaveSimulator rendering');
   
   try {
@@ -56,6 +58,7 @@ const EarthquakeWaveSimulator: React.FC = () => {
 
   const handlePointSelect = (event: SelectChangeEvent) => {
     selectObservationPoint(event.target.value);
+    recordInteraction('change');
   };
 
   return (
@@ -74,7 +77,10 @@ const EarthquakeWaveSimulator: React.FC = () => {
             <Chip label="初期微動継続時間から震源距離を計算できる" size="small" />
             <Chip label="大森公式の意味と使い方を理解する" size="small" />
           </Box>
-          <Button variant="outlined" size="small" onClick={resetSimulation}>
+          <Button variant="outlined" size="small" onClick={() => {
+            resetSimulation();
+            recordInteraction('click');
+          }}>
             全体リセット
           </Button>
         </Paper>
@@ -95,13 +101,23 @@ const EarthquakeWaveSimulator: React.FC = () => {
                   
                   <ButtonGroup variant="contained" size="small">
                     <Button
-                      onClick={state.isRunning ? stopSimulation : startSimulation}
+                      onClick={() => {
+                        if (state.isRunning) {
+                          stopSimulation();
+                        } else {
+                          startSimulation();
+                        }
+                        recordInteraction('click');
+                      }}
                       startIcon={state.isRunning ? <PauseIcon /> : <PlayIcon />}
                     >
                       {state.isRunning ? '一時停止' : '開始'}
                     </Button>
                     <Button
-                      onClick={resetSimulation}
+                      onClick={() => {
+                        resetSimulation();
+                        recordInteraction('click');
+                      }}
                       startIcon={<ReplayIcon />}
                     >
                       リセット
@@ -109,7 +125,10 @@ const EarthquakeWaveSimulator: React.FC = () => {
                   </ButtonGroup>
 
                   <Tooltip title="使い方">
-                    <IconButton onClick={() => setShowInfo(!showInfo)}>
+                    <IconButton onClick={() => {
+                      setShowInfo(!showInfo);
+                      recordInteraction('click');
+                    }}>
                       <InfoIcon />
                     </IconButton>
                   </Tooltip>
@@ -132,9 +151,18 @@ const EarthquakeWaveSimulator: React.FC = () => {
                 observationPoints={state.observationPoints}
                 waveRadius={state.waveRadius}
                 selectedPointId={state.selectedPointId}
-                onEpicenterDrag={setEpicenter}
-                onAddObservationPoint={addObservationPoint}
-                onSelectPoint={selectObservationPoint}
+                onEpicenterDrag={(point) => {
+                  setEpicenter(point);
+                  recordInteraction('drag');
+                }}
+                onAddObservationPoint={(point) => {
+                  addObservationPoint(point);
+                  recordInteraction('click');
+                }}
+                onSelectPoint={(id) => {
+                  selectObservationPoint(id);
+                  recordInteraction('click');
+                }}
               />
 
               {/* シミュレーション速度調整 */}
@@ -195,6 +223,11 @@ const EarthquakeWaveSimulator: React.FC = () => {
             <LearningPanel
               onQuizComplete={(score) => {
                 console.log(`クイズスコア: ${score}`);
+                recordAnswer(score >= 70, {
+                  type: 'quiz',
+                  score: score,
+                  topic: '地震波の理解'
+                });
               }}
             />
           </Grid>
@@ -227,7 +260,10 @@ const EarthquakeWaveSimulator: React.FC = () => {
                           bgcolor: 'action.hover'
                         }
                       }}
-                      onClick={() => selectObservationPoint(point.id)}
+                      onClick={() => {
+                        selectObservationPoint(point.id);
+                        recordInteraction('click');
+                      }}
                     >
                       <Typography variant="subtitle1" gutterBottom>
                         {point.name}
@@ -277,6 +313,20 @@ const EarthquakeWaveSimulator: React.FC = () => {
       </Box>
     );
   }
+};
+
+// 地震波シミュレーター（MaterialWrapperでラップ）
+const EarthquakeWaveSimulator: React.FC = () => {
+  return (
+    <MaterialWrapper
+      materialId="earthquake-wave-simulator"
+      materialName="地震波シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <EarthquakeWaveSimulatorContent />
+    </MaterialWrapper>
+  );
 };
 
 export default EarthquakeWaveSimulator;

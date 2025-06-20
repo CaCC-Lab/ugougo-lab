@@ -25,6 +25,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import StarIcon from '@mui/icons-material/Star';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 interface WordItem {
   id: string;
@@ -49,8 +50,10 @@ interface PictureWordMatchingProps {
   onClose?: () => void;
 }
 
-const PictureWordMatching: React.FC<PictureWordMatchingProps> = ({ onClose }) => {
+// 絵と言葉のマッチングゲーム（内部コンポーネント）
+const PictureWordMatchingContent: React.FC<PictureWordMatchingProps> = ({ onClose }) => {
   const theme = useTheme();
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   
   // 単語データベース
   const wordDatabase: WordItem[] = [
@@ -176,6 +179,16 @@ const PictureWordMatching: React.FC<PictureWordMatchingProps> = ({ onClose }) =>
       correctAnswers: isCorrect ? prev.correctAnswers + 1 : prev.correctAnswers,
     }));
     
+    // 回答結果を記録
+    recordAnswer(isCorrect, {
+      selectedWord: word.word,
+      correctWord: gameState.currentWord?.word,
+      category: category,
+      difficulty: difficulty,
+      questionNumber: gameState.totalQuestions
+    });
+    recordInteraction('click');
+    
     // 全問正解チェック
     if (isCorrect && gameState.correctAnswers + 1 >= 10) {
       setTimeout(() => setShowSuccessDialog(true), 1000);
@@ -185,6 +198,7 @@ const PictureWordMatching: React.FC<PictureWordMatchingProps> = ({ onClose }) =>
   // 次の問題
   const handleNext = () => {
     generateQuestion();
+    recordInteraction('click');
   };
   
   // リセット
@@ -199,12 +213,14 @@ const PictureWordMatching: React.FC<PictureWordMatchingProps> = ({ onClose }) =>
       isCorrect: false,
     });
     generateQuestion();
+    recordInteraction('click');
   };
   
   // 音声再生（実際の実装では音声ファイルが必要）
   const playSound = (word: string) => {
     // 実際の実装では音声ファイルを再生
     console.log(`Playing sound for: ${word}`);
+    recordInteraction('click');
   };
   
   // 正答率
@@ -219,7 +235,10 @@ const PictureWordMatching: React.FC<PictureWordMatchingProps> = ({ onClose }) =>
           えとことばのマッチングゲーム
         </Typography>
         <Tooltip title="つかいかた">
-          <IconButton onClick={() => setShowExplanation(!showExplanation)}>
+          <IconButton onClick={() => {
+            setShowExplanation(!showExplanation);
+            recordInteraction('click');
+          }}>
             <HelpOutlineIcon />
           </IconButton>
         </Tooltip>
@@ -241,7 +260,10 @@ const PictureWordMatching: React.FC<PictureWordMatchingProps> = ({ onClose }) =>
             <InputLabel>カテゴリ</InputLabel>
             <Select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                recordInteraction('change');
+              }}
               label="カテゴリ"
             >
               <MenuItem value="all">すべて</MenuItem>
@@ -257,7 +279,10 @@ const PictureWordMatching: React.FC<PictureWordMatchingProps> = ({ onClose }) =>
             <InputLabel>なんいど</InputLabel>
             <Select
               value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value as any)}
+              onChange={(e) => {
+                setDifficulty(e.target.value as any);
+                recordInteraction('change');
+              }}
               label="なんいど"
             >
               <MenuItem value="easy">かんたん（3つからえらぶ）</MenuItem>
@@ -440,6 +465,20 @@ const PictureWordMatching: React.FC<PictureWordMatchingProps> = ({ onClose }) =>
         </DialogContent>
       </Dialog>
     </Card>
+  );
+};
+
+// 絵と言葉のマッチングゲーム（MaterialWrapperでラップ）
+const PictureWordMatching: React.FC<PictureWordMatchingProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="picture-word-matching"
+      materialName="絵と言葉のマッチングゲーム"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <PictureWordMatchingContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

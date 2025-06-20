@@ -20,9 +20,15 @@ import {
   Straighten as RulerIcon,
   Quiz as QuizIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// 角度測定器
-function AngleMeasurementTool({ onClose }: { onClose: () => void }) {
+interface AngleMeasurementToolProps {
+  onClose?: () => void;
+}
+
+// 角度測定器（内部コンポーネント）
+const AngleMeasurementToolContent: React.FC<AngleMeasurementToolProps> = ({ onClose }) => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [angle, setAngle] = useState(45); // 現在の角度
   const [showProtractor, setShowProtractor] = useState(true); // 分度器表示
@@ -169,6 +175,7 @@ function AngleMeasurementTool({ onClose }: { onClose: () => void }) {
     if (angle > 180) angle = 180;
     
     setAngle(Math.round(angle));
+    recordInteraction('drag');
   };
   
   // イベントハンドラー
@@ -197,7 +204,18 @@ function AngleMeasurementTool({ onClose }: { onClose: () => void }) {
     setAttempts(prev => prev + 1);
     setShowAnswer(true);
     
-    if (Math.abs(answer - quizAngle) <= 5) { // 5度の誤差を許容
+    const isCorrect = Math.abs(answer - quizAngle) <= 5; // 5度の誤差を許容
+    
+    // 回答結果を記録
+    recordAnswer(isCorrect, {
+      correctAngle: quizAngle,
+      userAngle: answer,
+      difference: Math.abs(answer - quizAngle),
+      attemptNumber: attempts + 1
+    });
+    recordInteraction('click');
+    
+    if (isCorrect) {
       setScore(prev => prev + 1);
       setTimeout(() => {
         generateQuiz();
@@ -214,6 +232,7 @@ function AngleMeasurementTool({ onClose }: { onClose: () => void }) {
     if (mode === 'quiz') {
       generateQuiz();
     }
+    recordInteraction('click');
   };
   
   // エフェクト
@@ -289,7 +308,12 @@ function AngleMeasurementTool({ onClose }: { onClose: () => void }) {
         <ToggleButtonGroup
           value={mode}
           exclusive
-          onChange={(_, value) => value && setMode(value)}
+          onChange={(_, value) => {
+            if (value) {
+              setMode(value);
+              recordInteraction('change');
+            }
+          }}
           fullWidth
         >
           <ToggleButton value="practice">
@@ -327,7 +351,10 @@ function AngleMeasurementTool({ onClose }: { onClose: () => void }) {
               <Box sx={{ textAlign: 'center' }}>
                 <Button
                   variant={showProtractor ? 'contained' : 'outlined'}
-                  onClick={() => setShowProtractor(!showProtractor)}
+                  onClick={() => {
+                    setShowProtractor(!showProtractor);
+                    recordInteraction('click');
+                  }}
                 >
                   {showProtractor ? '分度器を隠す' : '分度器を表示'}
                 </Button>
@@ -439,6 +466,20 @@ function AngleMeasurementTool({ onClose }: { onClose: () => void }) {
       </Paper>
     </Box>
   );
-}
+};
+
+// 角度測定器（MaterialWrapperでラップ）
+const AngleMeasurementTool: React.FC<AngleMeasurementToolProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="angle-measurement-tool"
+      materialName="角度測定器"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <AngleMeasurementToolContent onClose={onClose} />
+    </MaterialWrapper>
+  );
+};
 
 export default AngleMeasurementTool;

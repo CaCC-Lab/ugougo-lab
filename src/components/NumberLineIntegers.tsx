@@ -11,9 +11,15 @@ import {
   ButtonGroup
 } from '@mui/material';
 import { Close as CloseIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
-// 正負の数の数直線教材
-function NumberLineIntegers({ onClose }: { onClose: () => void }) {
+interface NumberLineIntegersProps {
+  onClose?: () => void;
+}
+
+// 正負の数の数直線教材（内部コンポーネント）
+const NumberLineIntegersContent: React.FC<NumberLineIntegersProps> = ({ onClose }) => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const [currentProblem, setCurrentProblem] = useState({ start: 3, operation: '+', value: 5 });
   const [userAnswer, setUserAnswer] = useState<number | null>(null);
   const [showSolution, setShowSolution] = useState(false);
@@ -43,6 +49,7 @@ function NumberLineIntegers({ onClose }: { onClose: () => void }) {
   const startAnimation = () => {
     setAnimationStep(1);
     setSelectedNumber(currentProblem.start);
+    recordInteraction('click');
     
     // 段階的にアニメーション
     setTimeout(() => {
@@ -76,7 +83,18 @@ function NumberLineIntegers({ onClose }: { onClose: () => void }) {
   // 回答チェック
   const checkAnswer = (answer: number) => {
     setUserAnswer(answer);
-    if (answer === correctAnswer) {
+    const isCorrect = answer === correctAnswer;
+    
+    // 回答結果を記録
+    recordAnswer(isCorrect, {
+      problem: `${currentProblem.start} ${currentProblem.operation} ${currentProblem.value}`,
+      correctAnswer: correctAnswer,
+      userAnswer: answer,
+      successCount: successCount
+    });
+    recordInteraction('click');
+    
+    if (isCorrect) {
       setSuccessCount(prev => prev + 1);
       setProgress(prev => Math.min(prev + 10, 100));
       setTimeout(() => {
@@ -90,6 +108,7 @@ function NumberLineIntegers({ onClose }: { onClose: () => void }) {
     setProgress(0);
     setSuccessCount(0);
     generateNewProblem();
+    recordInteraction('click');
   };
 
   // 数直線上の数字を描画
@@ -150,18 +169,43 @@ function NumberLineIntegers({ onClose }: { onClose: () => void }) {
     return numbers;
   };
 
+  // Fisher-Yatesシャッフルアルゴリズム
+  const fisherYatesShuffle = <T,>(array: T[]): T[] => {
+    const result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  };
+
   // 選択肢を生成
   const generateChoices = () => {
     const correct = correctAnswer;
     const choices = [correct];
     
-    // 間違いの選択肢を追加
+    // 教育的な選択肢を追加
+    // 1. 近い値（計算ミス想定）
     [1, -1, 2, -2].forEach(offset => {
       const choice = correct + offset;
       if (choice >= -15 && choice <= 15 && !choices.includes(choice)) {
         choices.push(choice);
       }
     });
+    
+    // 2. 符号の間違い（正負の理解不足想定）
+    const oppositeSign = -correct;
+    if (oppositeSign >= -15 && oppositeSign <= 15 && !choices.includes(oppositeSign) && oppositeSign !== correct) {
+      choices.push(oppositeSign);
+    }
+    
+    // 3. 計算方向の間違い（加算と減算の混同）
+    const wrongOperation = currentProblem.operation === '+' 
+      ? currentProblem.start - currentProblem.value 
+      : currentProblem.start + currentProblem.value;
+    if (wrongOperation >= -15 && wrongOperation <= 15 && !choices.includes(wrongOperation)) {
+      choices.push(wrongOperation);
+    }
     
     // 4つになるまで追加
     while (choices.length < 4) {
@@ -171,7 +215,8 @@ function NumberLineIntegers({ onClose }: { onClose: () => void }) {
       }
     }
     
-    return choices.slice(0, 4).sort((a, b) => a - b);
+    // 4つに調整してFisher-Yatesシャッフル
+    return fisherYatesShuffle(choices.slice(0, 4));
   };
 
   const choices = generateChoices();
@@ -326,6 +371,20 @@ function NumberLineIntegers({ onClose }: { onClose: () => void }) {
       </Box>
     </Box>
   );
-}
+};
+
+// 正負の数の数直線教材（MaterialWrapperでラップ）
+const NumberLineIntegers: React.FC<NumberLineIntegersProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="number-line-integers"
+      materialName="正負の数の数直線"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <NumberLineIntegersContent onClose={onClose} />
+    </MaterialWrapper>
+  );
+};
 
 export default NumberLineIntegers;

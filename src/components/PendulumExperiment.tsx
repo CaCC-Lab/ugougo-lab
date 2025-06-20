@@ -30,6 +30,7 @@ import StraightenIcon from '@mui/icons-material/Straighten';
 import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 実験エリアのスタイル
 const ExperimentArea = styled(Paper)(({ theme }) => ({
@@ -81,7 +82,9 @@ interface PendulumExperimentProps {
   onClose?: () => void;
 }
 
-const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
+// 振り子実験シミュレーター（内部コンポーネント）
+const PendulumExperimentContent: React.FC<PendulumExperimentProps> = ({ onClose }) => {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const animationRef = useRef<number>();
@@ -161,6 +164,9 @@ const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
     // 10往復の時間から周期を計算
     if (oscillationCount === 10) {
       const period = elapsedTime / 10;
+      const theoretical = calculateTheoreticalPeriod(length);
+      const error = Math.abs((period - theoretical) / theoretical * 100);
+      
       const newData: ExperimentData = {
         id: Date.now(),
         length,
@@ -170,6 +176,23 @@ const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
         oscillations: 10,
       };
       setExperimentData([...experimentData, newData]);
+      
+      // 実験完了を学習履歴に記録
+      recordAnswer(true, {
+        problem: '振り子実験の完了',
+        userAnswer: `長さ${length}cm、重さ${weight}g、角度${initialAngle}°での周期測定`,
+        correctAnswer: '振り子の周期を正確に測定',
+        experimentResults: {
+          length: length,
+          weight: weight,
+          angle: initialAngle,
+          measuredPeriod: period,
+          theoreticalPeriod: theoretical,
+          error: error,
+          totalTime: elapsedTime
+        },
+        accuracy: error < 5 ? 'high' : error < 10 ? 'medium' : 'low'
+      });
     }
   };
   
@@ -284,12 +307,48 @@ const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
                 <Button
                   variant="contained"
                   startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-                  onClick={isPlaying ? handleStop : handleStart}
+                  onClick={() => {
+                    if (isPlaying) {
+                      handleStop();
+                    } else {
+                      handleStart();
+                    }
+                    recordInteraction('click');
+                    
+                    // 実験開始/停止を記録
+                    recordAnswer(true, {
+                      problem: '振り子実験の実行',
+                      userAnswer: isPlaying ? '実験停止' : '実験開始',
+                      correctAnswer: '実験手順の理解',
+                      action: isPlaying ? 'stop' : 'start',
+                      conditions: {
+                        length: length,
+                        weight: weight,
+                        initialAngle: initialAngle
+                      }
+                    });
+                  }}
                   disabled={isPlaying && oscillationCount < 10}
                 >
                   {isPlaying ? '測定中...' : '実験開始'}
                 </Button>
-                <IconButton onClick={handleReset} color="default">
+                <IconButton onClick={() => {
+                  handleReset();
+                  recordInteraction('click');
+                  
+                  // リセット実行を記録
+                  recordAnswer(true, {
+                    problem: '振り子実験のリセット',
+                    userAnswer: '実験を初期状態に戻す',
+                    correctAnswer: '新しい実験の準備',
+                    resetData: {
+                      previousLength: length,
+                      previousWeight: weight,
+                      previousAngle: initialAngle,
+                      experimentCount: experimentData.length
+                    }
+                  });
+                }} color="default">
                   <RestartAltIcon />
                 </IconButton>
               </Box>
@@ -308,7 +367,21 @@ const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
                   </Typography>
                   <Slider
                     value={length}
-                    onChange={(_, value) => setLength(value as number)}
+                    onChange={(_, value) => {
+                      const newLength = value as number;
+                      setLength(newLength);
+                      recordInteraction('drag');
+                      
+                      // 振り子の長さ変更を記録
+                      recordAnswer(true, {
+                        problem: '振り子の長さ調整',
+                        userAnswer: `長さを${newLength}cmに設定`,
+                        correctAnswer: '長さが周期に影響することを理解',
+                        parameter: 'length',
+                        value: newLength,
+                        theoreticalPeriod: calculateTheoreticalPeriod(newLength)
+                      });
+                    }}
                     min={10}
                     max={100}
                     step={5}
@@ -324,7 +397,20 @@ const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
                   </Typography>
                   <Slider
                     value={weight}
-                    onChange={(_, value) => setWeight(value as number)}
+                    onChange={(_, value) => {
+                      const newWeight = value as number;
+                      setWeight(newWeight);
+                      recordInteraction('drag');
+                      
+                      // おもりの重さ変更を記録
+                      recordAnswer(true, {
+                        problem: 'おもりの重さ調整',
+                        userAnswer: `重さを${newWeight}gに設定`,
+                        correctAnswer: '重さは周期に影響しないことを理解',
+                        parameter: 'weight',
+                        value: newWeight
+                      });
+                    }}
                     min={10}
                     max={100}
                     step={10}
@@ -340,8 +426,19 @@ const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
                   <Slider
                     value={initialAngle}
                     onChange={(_, value) => {
-                      setInitialAngle(value as number);
-                      if (!isPlaying) setCurrentAngle(value as number);
+                      const newAngle = value as number;
+                      setInitialAngle(newAngle);
+                      if (!isPlaying) setCurrentAngle(newAngle);
+                      recordInteraction('drag');
+                      
+                      // 初期角度変更を記録
+                      recordAnswer(true, {
+                        problem: '初期角度の調整',
+                        userAnswer: `初期角度を${newAngle}°に設定`,
+                        correctAnswer: '初期角度が振り幅に影響することを理解',
+                        parameter: 'initialAngle',
+                        value: newAngle
+                      });
                     }}
                     min={10}
                     max={45}
@@ -409,7 +506,23 @@ const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
                           <TableCell>
                             <IconButton
                               size="small"
-                              onClick={() => deleteExperimentData(data.id)}
+                              onClick={() => {
+                                deleteExperimentData(data.id);
+                                recordInteraction('click');
+                                
+                                // 実験データ削除を記録
+                                recordAnswer(true, {
+                                  problem: '実験データの削除',
+                                  userAnswer: `長さ${data.length}cmのデータを削除`,
+                                  correctAnswer: '不要なデータの整理',
+                                  deletedData: {
+                                    length: data.length,
+                                    weight: data.weight,
+                                    angle: data.angle,
+                                    period: data.period
+                                  }
+                                });
+                              }}
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
@@ -423,7 +536,19 @@ const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
               
               <Button
                 variant="outlined"
-                onClick={() => setShowGraph(!showGraph)}
+                onClick={() => {
+                  setShowGraph(!showGraph);
+                  recordInteraction('click');
+                  
+                  // グラフ表示切り替えを記録
+                  recordAnswer(true, {
+                    problem: '実験データのグラフ化',
+                    userAnswer: showGraph ? 'グラフを非表示' : 'グラフを表示',
+                    correctAnswer: 'データの視覚化の理解',
+                    dataCount: experimentData.length,
+                    showGraph: !showGraph
+                  });
+                }}
                 sx={{ mt: 2 }}
               >
                 {showGraph ? 'グラフを隠す' : 'グラフを表示'}
@@ -452,6 +577,20 @@ const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
         </CardContent>
       </Card>
     </Container>
+  );
+};
+
+// 振り子実験シミュレーター（MaterialWrapperでラップ）
+const PendulumExperiment: React.FC<PendulumExperimentProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="pendulum-experiment"
+      materialName="振り子実験シミュレーター"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <PendulumExperimentContent onClose={onClose} />
+    </MaterialWrapper>
   );
 };
 

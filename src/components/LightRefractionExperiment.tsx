@@ -35,6 +35,7 @@ import {
   TableChart as DataIcon,
   PlayArrow as PlayIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 媒質の屈折率
 const refractiveIndices = {
@@ -66,8 +67,13 @@ interface ExperimentData {
   medium2: string;
 }
 
-// 光の屈折実験器
-function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
+interface LightRefractionExperimentProps {
+  onClose?: () => void;
+}
+
+// 光の屈折実験器（内部コンポーネント）
+const LightRefractionExperimentContent: React.FC<LightRefractionExperimentProps> = ({ onClose }) => {
+  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // 実験設定
@@ -372,6 +378,7 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
         };
         
         setExperimentData(prev => [...prev, newData]);
+        recordInteraction('click');
       }
     }
   };
@@ -417,6 +424,7 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
     setProgress(0);
     setQuizMode(false);
     setIsRecording(false);
+    recordInteraction('click');
   };
   
   // エフェクト
@@ -492,7 +500,12 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
         <ToggleButtonGroup
           value={experimentMode}
           exclusive
-          onChange={(_, value) => value && setExperimentMode(value)}
+          onChange={(_, value) => {
+            if (value) {
+              setExperimentMode(value);
+              recordInteraction('change');
+            }
+          }}
           fullWidth
         >
           <ToggleButton value="refraction">
@@ -522,7 +535,10 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
                 </Typography>
                 <Slider
                   value={incidentAngle}
-                  onChange={(_, value) => setIncidentAngle(value as number)}
+                  onChange={(_, value) => {
+                    setIncidentAngle(value as number);
+                    recordInteraction('drag');
+                  }}
                   min={0}
                   max={90}
                   disabled={quizMode}
@@ -534,7 +550,10 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
                   <InputLabel>上側の媒質</InputLabel>
                   <Select
                     value={medium1}
-                    onChange={(e) => setMedium1(e.target.value)}
+                    onChange={(e) => {
+                      setMedium1(e.target.value);
+                      recordInteraction('change');
+                    }}
                     disabled={quizMode}
                   >
                     {Object.entries(mediaTypes).map(([key, value]) => (
@@ -549,7 +568,10 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
                   <InputLabel>下側の媒質</InputLabel>
                   <Select
                     value={medium2}
-                    onChange={(e) => setMedium2(e.target.value)}
+                    onChange={(e) => {
+                      setMedium2(e.target.value);
+                      recordInteraction('change');
+                    }}
                     disabled={quizMode}
                   >
                     {Object.entries(mediaTypes).map(([key, value]) => (
@@ -579,7 +601,10 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
                 <Button
                   variant={isRecording ? 'contained' : 'outlined'}
                   fullWidth
-                  onClick={() => setIsRecording(!isRecording)}
+                  onClick={() => {
+                    setIsRecording(!isRecording);
+                    recordInteraction('click');
+                  }}
                   startIcon={<DataIcon />}
                   sx={{ mb: 1 }}
                 >
@@ -605,7 +630,10 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
                 </Typography>
                 <Slider
                   value={prismAngle}
-                  onChange={(_, value) => setPrismAngle(value as number)}
+                  onChange={(_, value) => {
+                    setPrismAngle(value as number);
+                    recordInteraction('drag');
+                  }}
                   min={30}
                   max={90}
                   sx={{ mb: 3 }}
@@ -616,7 +644,10 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
                 </Typography>
                 <Slider
                   value={incidentAngle}
-                  onChange={(_, value) => setIncidentAngle(value as number)}
+                  onChange={(_, value) => {
+                    setIncidentAngle(value as number);
+                    recordInteraction('drag');
+                  }}
                   min={-45}
                   max={45}
                   sx={{ mb: 3 }}
@@ -636,14 +667,20 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
               <Button
                 size="small"
                 variant={showRays ? 'contained' : 'outlined'}
-                onClick={() => setShowRays(!showRays)}
+                onClick={() => {
+                  setShowRays(!showRays);
+                  recordInteraction('click');
+                }}
               >
                 光線
               </Button>
               <Button
                 size="small"
                 variant={showAngles ? 'contained' : 'outlined'}
-                onClick={() => setShowAngles(!showAngles)}
+                onClick={() => {
+                  setShowAngles(!showAngles);
+                  recordInteraction('click');
+                }}
               >
                 角度
               </Button>
@@ -654,7 +691,10 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
               <Button
                 variant="outlined"
                 fullWidth
-                onClick={() => setQuizMode(!quizMode)}
+                onClick={() => {
+                  setQuizMode(!quizMode);
+                  recordInteraction('click');
+                }}
                 sx={{ mt: 2 }}
               >
                 {quizMode ? '通常モードへ' : 'クイズモードへ'}
@@ -746,7 +786,10 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
               <Button
                 variant="outlined"
                 fullWidth
-                onClick={() => setExperimentData([])}
+                onClick={() => {
+                  setExperimentData([]);
+                  recordInteraction('click');
+                }}
                 sx={{ mt: 2 }}
               >
                 データクリア
@@ -770,6 +813,20 @@ function LightRefractionExperiment({ onClose }: { onClose: () => void }) {
       </Paper>
     </Box>
   );
-}
+};
+
+// 光の屈折実験器（MaterialWrapperでラップ）
+const LightRefractionExperiment: React.FC<LightRefractionExperimentProps> = ({ onClose }) => {
+  return (
+    <MaterialWrapper
+      materialId="light-refraction-experiment"
+      materialName="光の屈折実験器"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <LightRefractionExperimentContent onClose={onClose} />
+    </MaterialWrapper>
+  );
+};
 
 export default LightRefractionExperiment;

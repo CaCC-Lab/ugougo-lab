@@ -31,6 +31,7 @@ import {
   Quiz as QuizIcon,
   Info as InfoIcon
 } from '@mui/icons-material';
+import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 器官システムの種類
 type OrganSystem = 'circulatory' | 'respiratory' | 'digestive';
@@ -111,8 +112,9 @@ const quizQuestions = [
   }
 ];
 
-// 人体の仕組みアニメーション
-function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
+// 人体の仕組みアニメーション（内部コンポーネント）
+function HumanBodyAnimationContent({ onClose }: { onClose: () => void }) {
+  const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedSystem, setSelectedSystem] = useState<OrganSystem>('circulatory');
   const [selectedOrgan, setSelectedOrgan] = useState<OrganInfo | null>(null);
@@ -287,9 +289,27 @@ function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
   
   // クイズの答えをチェック
   const checkAnswer = (answer: string) => {
+    const isCorrect = answer === quizQuestions[currentQuestion].answer;
+    recordInteraction('click');
     setAttempts(prev => prev + 1);
     
-    if (answer === quizQuestions[currentQuestion].answer) {
+    // クイズ回答を記録
+    recordAnswer(isCorrect, {
+      problem: `人体の仕組みクイズ: ${quizQuestions[currentQuestion].question}`,
+      userAnswer: answer,
+      correctAnswer: quizQuestions[currentQuestion].answer,
+      quizData: {
+        questionNumber: currentQuestion + 1,
+        totalQuestions: quizQuestions.length,
+        organSystem: quizQuestions[currentQuestion].system,
+        selectedAnswer: answer,
+        isCorrect: isCorrect,
+        currentScore: score + (isCorrect ? 1 : 0),
+        currentAttempts: attempts + 1
+      }
+    });
+    
+    if (isCorrect) {
       setScore(prev => prev + 1);
       alert('正解！');
       
@@ -306,6 +326,24 @@ function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
   
   // リセット
   const handleReset = () => {
+    recordInteraction('click');
+    
+    // リセット実行を記録
+    recordAnswer(true, {
+      problem: '人体アニメーションのリセット',
+      userAnswer: 'システムを初期状態に戻す',
+      correctAnswer: 'リセット完了',
+      resetData: {
+        previousSelectedSystem: selectedSystem,
+        previousSelectedOrgan: selectedOrgan?.name || null,
+        previousScore: score,
+        previousAttempts: attempts,
+        previousMode: mode,
+        previousQuestionNumber: currentQuestion + 1,
+        wasAnimating: isAnimating
+      }
+    });
+    
     setSelectedOrgan(null);
     setScore(0);
     setAttempts(0);
@@ -380,7 +418,29 @@ function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
         <ToggleButtonGroup
           value={mode}
           exclusive
-          onChange={(_, value) => value && setMode(value)}
+          onChange={(_, value) => {
+            if (value) {
+              setMode(value);
+              recordInteraction('click');
+              
+              // モード切り替えを記録
+              recordAnswer(true, {
+                problem: '人体学習モードの切り替え',
+                userAnswer: `${value === 'learn' ? '学習' : 'クイズ'}モードを選択`,
+                correctAnswer: 'モード選択の理解',
+                modeSwitch: {
+                  from: mode,
+                  to: value,
+                  currentSystem: selectedSystem,
+                  currentProgress: {
+                    score: score,
+                    attempts: attempts,
+                    selectedOrgan: selectedOrgan?.name || null
+                  }
+                }
+              });
+            }
+          }}
           fullWidth
         >
           <ToggleButton value="learn">
@@ -404,7 +464,28 @@ function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
                   <ToggleButtonGroup
                     value={selectedSystem}
                     exclusive
-                    onChange={(_, value) => value && setSelectedSystem(value)}
+                    onChange={(_, value) => {
+                      if (value) {
+                        setSelectedSystem(value);
+                        setSelectedOrgan(null); // 器官選択をリセット
+                        recordInteraction('click');
+                        
+                        // 器官システム変更を記録
+                        recordAnswer(true, {
+                          problem: '器官システムの選択',
+                          userAnswer: `${value === 'circulatory' ? '循環器系' : value === 'respiratory' ? '呼吸器系' : '消化器系'}を選択`,
+                          correctAnswer: '器官システムの理解',
+                          systemChange: {
+                            from: selectedSystem,
+                            to: value,
+                            systemDescription: value === 'circulatory' ? '血液を全身に送る系統' : 
+                                             value === 'respiratory' ? '呼吸と酸素交換の系統' : 
+                                             '食物の消化と栄養吸収の系統',
+                            mainOrgans: organs.filter(organ => organ.system === value).map(organ => organ.name)
+                          }
+                        });
+                      }
+                    }}
                     fullWidth
                   >
                     <ToggleButton value="circulatory">
@@ -453,6 +534,21 @@ function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
                       if (clickedOrgan) {
                         setSelectedOrgan(clickedOrgan);
                         setShowInfo(true);
+                        recordInteraction('click');
+                        
+                        // 器官選択を記録
+                        recordAnswer(true, {
+                          problem: '器官の詳細確認',
+                          userAnswer: `${clickedOrgan.name}を選択して詳細を確認`,
+                          correctAnswer: '器官の機能理解',
+                          organSelection: {
+                            organName: clickedOrgan.name,
+                            organSystem: clickedOrgan.system,
+                            organFunction: clickedOrgan.function,
+                            interactionType: 'canvas_click',
+                            position: { x, y }
+                          }
+                        });
                       }
                     }}
                   />
@@ -462,7 +558,24 @@ function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                   <Button
                     variant={isAnimating ? 'contained' : 'outlined'}
-                    onClick={() => setIsAnimating(!isAnimating)}
+                    onClick={() => {
+                      const newIsAnimating = !isAnimating;
+                      setIsAnimating(newIsAnimating);
+                      recordInteraction('click');
+                      
+                      // アニメーション制御を記録
+                      recordAnswer(true, {
+                        problem: '人体アニメーションの制御',
+                        userAnswer: newIsAnimating ? 'アニメーション開始' : 'アニメーション停止',
+                        correctAnswer: 'アニメーション制御の理解',
+                        animationControl: {
+                          action: newIsAnimating ? 'start' : 'stop',
+                          selectedSystem: selectedSystem,
+                          selectedOrgan: selectedOrgan?.name || null,
+                          purpose: newIsAnimating ? '器官の動きを視覚的に理解' : '静止画で詳細観察'
+                        }
+                      });
+                    }}
                     startIcon={isAnimating ? <BloodIcon /> : <BloodIcon />}
                   >
                     {isAnimating ? 'アニメーション停止' : 'アニメーション開始'}
@@ -530,6 +643,21 @@ function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
                             onClick={() => {
                               setSelectedOrgan(organ);
                               setShowInfo(true);
+                              recordInteraction('click');
+                              
+                              // リストから器官選択を記録
+                              recordAnswer(true, {
+                                problem: '器官リストからの選択',
+                                userAnswer: `${organ.name}をリストから選択`,
+                                correctAnswer: '器官の機能理解',
+                                organSelection: {
+                                  organName: organ.name,
+                                  organSystem: organ.system,
+                                  organFunction: organ.function,
+                                  interactionType: 'list_selection',
+                                  currentSystem: selectedSystem
+                                }
+                              });
                             }}
                           >
                             <ListItemText
@@ -605,6 +733,20 @@ function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
         </DialogActions>
       </Dialog>
     </Box>
+  );
+}
+
+// 人体の仕組みアニメーション（MaterialWrapperでラップ）
+function HumanBodyAnimation({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="human-body-animation"
+      materialName="人体の仕組みアニメーション"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <HumanBodyAnimationContent onClose={onClose} />
+    </MaterialWrapper>
   );
 }
 
