@@ -84,13 +84,13 @@ function NumberGameSimple() {
           <Chip 
             label={`目標: ${target}`} 
             color="primary" 
-            size="large"
+            size="medium"
             sx={{ mr: 1 }}
           />
           <Chip 
             label={`現在: ${currentSum}`} 
             color={currentSum === target ? 'success' : 'default'} 
-            size="large"
+            size="medium"
           />
         </Box>
 

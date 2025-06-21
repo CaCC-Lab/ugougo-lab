@@ -245,6 +245,7 @@ export const useLearningTracker = ({
     recordInteraction,
     recordAnswer,
     recordHintUsed,
+    recordActivity: recordInteraction, // エイリアス
     
     // セッション管理
     saveSession,
@@ -253,6 +254,8 @@ export const useLearningTracker = ({
     
     // 現在の進捗
     currentProgress,
+    updateProgress: saveSession, // エイリアス（進捗更新として保存機能を使用）
+    getProgress: () => currentProgress, // エイリアス
     
     // 生データへのアクセス（デバッグ用）
     _debug: {

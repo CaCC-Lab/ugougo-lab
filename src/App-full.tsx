@@ -23,7 +23,7 @@ import {
   Alert,
   Paper
 } from '@mui/material';
-import { Close as CloseIcon, Dashboard as DashboardIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Dashboard as DashboardIcon, Settings as SettingsIcon } from '@mui/icons-material';
 import MultiplicationVisualization from './components/MultiplicationVisualization';
 import NumberLineIntegers from './components/NumberLineIntegers';
 import FractionVisualization from './components/FractionVisualization';
@@ -70,14 +70,21 @@ import HumanBodyAnimation from './components/HumanBodyAnimation';
 // 新しい教材のインポート（materials配下から）
 import { AbstractThinkingBridge } from './materials/elementary/grade4/integrated/AbstractThinkingBridge';
 import { FractionMasterTool } from './materials/elementary/grade3/math/FractionMasterTool';
+import DecimalMaster from './materials/elementary/grade3/math/DecimalMaster';
+import PercentageTrainer from './materials/elementary/grade5/math/PercentageTrainer';
 import { EnglishSpeakingPractice, PronunciationPractice } from './materials/junior-high/grade1/english';
 import { AlgebraIntroductionSystem } from './materials/junior-high/grade1/math/AlgebraIntroductionSystem';
+import { EquationBuilder } from './materials/junior-high/grade1/math/EquationBuilder';
+import { FractionTrainer } from './materials/elementary/grade3/math/FractionTrainer';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { EarthquakeWaveSimulator } from './materials/junior-high/grade1/science';
 import { TimeZoneCalculator } from './materials/junior-high/grade1/social';
 import { ProofStepBuilder } from './materials/junior-high/grade2/math';
 import { ElectricityExperiment } from './materials/junior-high/grade2/science';
 import { ProgressDashboard } from './components/dashboard/ProgressDashboard';
 import { MaterialWrapper, useLearningTrackerContext } from './components/wrappers/MaterialWrapper';
+import MaterialSettingsPanel from './components/admin/MaterialSettingsPanel';
+import { useMaterialSettingsStore } from './stores/materialSettingsStore';
 
 // TODO: MaterialComponentPropsの問題を解決後に有効化
 // import { NumberBlocks } from './materials/elementary/grade1/math';
@@ -317,17 +324,17 @@ function NumberBlocksMaterialContent({ onClose }: { onClose: () => void }) {
             <Chip 
               label={`現在の合計: ${currentSum}`} 
               color={currentSum === target && selectedNumbers.length >= 2 ? 'success' : 'default'} 
-              size="large"
+              size="medium"
             />
             <Chip 
               label={`選択した数: ${selectedNumbers.length}個`} 
               color="info" 
-              size="large"
+              size="medium"
             />
             <Chip 
               label={`成功回数: ${successCount}`} 
               color="secondary" 
-              size="large"
+              size="medium"
             />
           </Box>
 
@@ -453,426 +460,23 @@ function AppFull() {
   const [materialOpen, setMaterialOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<string>('');
   const [showDashboard, setShowDashboard] = useState(false);
-
-  const materials = [
-    {
-      id: 'addition-subtraction',
-      title: 'たし算・ひき算ビジュアライザー',
-      description: 'リンゴを使って、たし算とひき算を楽しく学ぼう！数えながら答えを見つけてね。',
-      grade: '小学1年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'hiragana-stroke',
-      title: 'ひらがな書き順アニメーション',
-      description: 'ひらがなの正しい書き順を覚えよう！アニメーションを見て、なぞり書きで練習できます。',
-      grade: '小学1年生',
-      subject: '国語',
-      available: true,
-    },
-    {
-      id: 'picture-word-matching',
-      title: '絵と言葉のマッチングゲーム',
-      description: '絵を見て正しい言葉を選ぼう！動物・果物・乗り物・食べ物から選べます。10問連続正解でごほうびがもらえるよ！',
-      grade: '小学1年生',
-      subject: '国語',
-      available: true,
-    },
-    {
-      id: 'clock-learning',
-      title: '時計の読み方学習ツール',
-      description: '時計の針をドラッグして動かしてみよう！デジタル表示と連動して、時計の読み方をマスターできます。',
-      grade: '小学1年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'number-blocks',
-      title: '数の合成・分解ブロック',
-      description: '1〜10のブロックを使って数の合成・分解を学ぼう！2つ以上の数字を組み合わせて目標の数を作ってください。たくさん組み合わせると高得点！',
-      grade: '小学1年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'multiplication',
-      title: 'かけ算九九の視覚化',
-      description: 'アニメーションでかけ算の仕組みがよくわかる！視覚的にかけ算を理解できます。',
-      grade: '小学2年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'unit-conversion',
-      title: '長さ・かさの単位変換ツール',
-      description: 'cm、m、mm、mL、dL、Lの単位変換を視覚的に学べます。スライダーで数値を変えてみよう！',
-      grade: '小学2年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'plant-growth',
-      title: '植物の成長シミュレーター',
-      description: '植物を育てて、成長の様子を観察しよう！水やりと日光の管理が大切です。',
-      grade: '小学2年生',
-      subject: '生活科',
-      available: true,
-    },
-    {
-      id: 'fraction-visualization',
-      title: '分数の視覚化',
-      description: '分数を円グラフや棒グラフで視覚的に理解しよう！練習モードとクイズモードがあります。',
-      grade: '小学3年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'fraction-pizza',
-      title: '分数ピザカッター',
-      description: 'ピザを切って分数を学ぼう！ピースをクリックして選択できます。',
-      grade: '小学3年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'magnet-experiment',
-      title: '磁石の実験シミュレーター',
-      description: '磁石の性質を体験！N極とS極の働きや、鉄・アルミ・プラスチックへの影響を観察しよう。',
-      grade: '小学3年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'area-calculator',
-      title: '面積計算ツール',
-      description: '図形の頂点をドラッグして面積を計算！正方形、長方形、三角形、平行四辺形の面積を視覚的に学べます。',
-      grade: '小学4年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'water-state',
-      title: '水の三態変化アニメーション',
-      description: '温度による水の状態変化を観察！氷・水・水蒸気の分子の動きをアニメーションで学習できます。',
-      grade: '小学4年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'electric-circuit',
-      title: '電気回路シミュレーター',
-      description: '電池、豆電球、スイッチを使って電気回路を作ろう！直列回路と並列回路の違いを学べます。',
-      grade: '小学4年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'number-line',
-      title: '正負の数の数直線',
-      description: '数直線を使って、マイナスの数も理解しよう！正負の数の計算をマスターできます。',
-      grade: '中学1年生',
-      subject: '数学',
-      available: true,
-    },
-    {
-      id: 'algebraic-expression',
-      title: '文字式変形ツール',
-      description: '文字式の展開、因数分解、同類項の整理をステップごとに学習！計算過程が見える化されます。',
-      grade: '中学1年生',
-      subject: '数学',
-      available: true,
-    },
-    {
-      id: 'light-refraction',
-      title: '光の屈折実験器',
-      description: '光の屈折現象を観察しよう！入射角を変えて、スネルの法則を確認できます。',
-      grade: '中学1年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'linear-function',
-      title: '一次関数グラフ描画ツール',
-      description: '一次関数y=ax+bのグラフを自在に操作！傾きと切片を調整して、グラフの変化を観察しよう。',
-      grade: '中学2年生',
-      subject: '数学',
-      available: true,
-    },
-    {
-      id: 'atom-molecule',
-      title: '原子・分子構造シミュレーション',
-      description: '原子の結合や電子の動きを視覚的に理解しよう！化学の基礎をマスターできます。',
-      grade: '中学2年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'chemical-reaction',
-      title: '化学反応シミュレーター',
-      description: '化学反応を分子モデルで観察！質量保存の法則を確認しながら、燃焼・中和・酸化・化合反応を学べます。',
-      grade: '中学2年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'electricity-experiment',
-      title: '電流・電圧・抵抗の関係実験器',
-      description: 'オームの法則を体験的に学習！回路を組み立てて、電流・電圧・抵抗の関係をリアルタイムで観察。直列・並列回路の特性も理解できます。',
-      grade: '中学2年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'sorting-algorithm',
-      title: 'ソートアルゴリズム可視化',
-      description: '様々なソートアルゴリズムの動作を視覚的に理解しよう！プログラミング思考を身につけます。',
-      grade: '中学3年生',
-      subject: '情報',
-      available: true,
-    },
-    {
-      id: 'function-graph',
-      title: '関数グラフ動的描画ツール',
-      description: '様々な関数のグラフを動的に描画！パラメータの変化による影響を学習できます。',
-      grade: '高校1年生',
-      subject: '数学',
-      available: true,
-    },
-    {
-      id: 'moving-point-p',
-      title: '動く点P - 三角形の面積変化',
-      description: '四角形上を動く点Pによって作られる三角形の面積変化を観察しよう！ドラッグ操作とアニメーションで直感的に理解できます。',
-      grade: '中学1年生',
-      subject: '数学',
-      available: true,
-    },
-    {
-      id: 'element-puzzle',
-      title: '元素記号パズルゲーム',
-      description: '元素記号と元素名をペアで揃えて消そう！パズルボブル風ゲームで楽しく暗記できます。',
-      grade: '中学2年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'inertia-simulation',
-      title: '慣性の法則シミュレーション',
-      description: '電車の中で起こる慣性現象をマリオ風の視覚化で理解しよう！視点を切り替えて物理現象を体験できます。',
-      grade: '中学3年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'typing-puyo',
-      title: 'ぷよぷよ風タイピングゲーム',
-      description: '落ちてくるブロックのアルファベットをタイピングして、連鎖で高得点を狙おう！楽しみながらタイピングスキルを向上できます。',
-      grade: '高校1年生',
-      subject: '情報',
-      available: true,
-    },
-    {
-      id: 'speed-time-distance',
-      title: '速さ・時間・距離の関係シミュレーター',
-      description: '車・自転車・徒歩の動きをアニメーションで観察！追いつき問題も視覚的に理解できます。',
-      grade: '小学5年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'pendulum-experiment',
-      title: '振り子の実験装置',
-      description: '振り子の長さや重さを変えて周期を測定！ガリレオの法則を実験で確認できます。',
-      grade: '小学5年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'proportion-graph',
-      title: '比例・反比例グラフツール',
-      description: 'リアルタイムでグラフが変化！速さと時間、値段と個数など、実生活の例で比例・反比例を学べます。',
-      grade: '小学6年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'lever-principle',
-      title: 'てこの原理実験器',
-      description: 'てこのつり合いを体験！支点・力点・作用点を調整して、力のモーメントの法則を発見しよう。',
-      grade: '小学6年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'quadratic-function',
-      title: '二次関数グラフ変形ツール',
-      description: '係数を変えて放物線の変化を観察！頂点・軸・判別式の関係を視覚的に理解できます。',
-      grade: '中学3年生',
-      subject: '数学',
-      available: true,
-    },
-    {
-      id: 'celestial-motion',
-      title: '天体の動きシミュレーター',
-      description: '地球・月・太陽の位置関係を3Dで観察！日食・月食の条件や月の満ち欠けを体験できます。',
-      grade: '中学3年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'trigonometric-function',
-      title: '三角関数グラフ描画ツール',
-      description: '振幅・周期・位相を自由に調整！単位円との対応をアニメーションで理解できます。',
-      grade: '高校1年生',
-      subject: '数学',
-      available: true,
-    },
-    {
-      id: 'calculus-visualizer',
-      title: '微分積分ビジュアライザー',
-      description: '接線の傾きで微分を、面積で積分を視覚的に理解！極値・変曲点も自動検出します。',
-      grade: '高校2年生',
-      subject: '数学',
-      available: true,
-    },
-    // 新しい教材（0から作成）
-    {
-      id: 'town-exploration-map',
-      title: '町探検マップ',
-      description: '町のいろいろな場所をクリックして、どんな場所か調べてみよう！探検モードとクイズモードで楽しく学習できます。',
-      grade: '小学2年生',
-      subject: '生活科',
-      available: true,
-    },
-    {
-      id: 'insect-metamorphosis',
-      title: '昆虫の変態シミュレーター',
-      description: '昆虫の成長過程を観察しよう！完全変態と不完全変態の違いを、アニメーションで理解できます。',
-      grade: '小学3年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'compass-simulator',
-      title: 'コンパスシミュレーター',
-      description: '方位磁針の使い方を学習！地図と組み合わせて、方角の理解を深めよう。',
-      grade: '小学3年生',
-      subject: '社会',
-      available: true,
-    },
-    {
-      id: 'angle-measurement',
-      title: '角度測定器',
-      description: '分度器の使い方と角度測定を練習！インタラクティブな分度器で、正確な角度の測り方をマスターしよう。',
-      grade: '小学4年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'prefecture-puzzle',
-      title: '都道府県パズル',
-      description: '日本の都道府県を楽しく学習！パズルゲームで位置関係を覚えよう。県庁所在地や特産品も学べます。',
-      grade: '小学4年生',
-      subject: '社会',
-      available: true,
-    },
-    {
-      id: 'weather-change-simulator',
-      title: '天気の変化シミュレーター',
-      description: '気象の変化を観察！前線の動きや気圧配置から、天気の変化を予測してみよう。',
-      grade: '小学5年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'industrial-zone-map',
-      title: '工業地帯マップ',
-      description: '日本の工業地帯を学習！各地域の特色や主要な工業製品を、インタラクティブな地図で確認しよう。',
-      grade: '小学5年生',
-      subject: '社会',
-      available: true,
-    },
-    {
-      id: 'combination-simulator',
-      title: '場合の数シミュレーター',
-      description: '順列と組み合わせを視覚的に学習！樹形図や実例を通して、場合の数の考え方をマスターしよう。',
-      grade: '小学6年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'human-body-animation',
-      title: '人体の仕組みアニメーション',
-      description: '人体の器官と働きを学習！消化器系・呼吸器系・循環器系の動きをアニメーションで理解しよう。',
-      grade: '小学6年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'abstract-thinking-bridge',
-      title: '抽象的思考への橋',
-      description: '10歳の壁を越えよう！具体的な考え方から抽象的な考え方へ、段階的に理解を深める総合学習ツール。比例・面積・電気など複数教科を横断的に学習。',
-      grade: '小学4年生',
-      subject: '総合',
-      available: true,
-    },
-    {
-      id: 'fraction-master',
-      title: '分数マスターツール',
-      description: '分数の概念を視覚的に理解！ピザやケーキを使った分かりやすい表現で、大小比較・通分・四則演算をマスターしよう。',
-      grade: '小学3年生',
-      subject: '算数',
-      available: true,
-    },
-    {
-      id: 'english-speaking-practice',
-      title: '英語スピーキング練習',
-      description: '対話形式で英会話を練習しよう！選択式・並び替え式の問題で、正しい語順と発音を身につけます。日常会話・自己紹介・買い物など実践的なシナリオで学習。',
-      grade: '中学1年生',
-      subject: '英語',
-      available: true,
-    },
-    {
-      id: 'pronunciation-practice',
-      title: '発音練習ツール',
-      description: '英語の音素（母音・子音）から単語まで段階的に発音を練習！音声認識AIがあなたの発音を評価。日本人が苦手な音を重点的に学習できます。',
-      grade: '中学1年生',
-      subject: '英語',
-      available: true,
-    },
-    {
-      id: 'algebra-introduction',
-      title: '代数入門システム',
-      description: '算数から数学へ！具体的な数から文字式へ、天秤メタファーで方程式を理解。3段階の学習ステップで代数的思考を身につけます。',
-      grade: '中学1年生',
-      subject: '数学',
-      available: true,
-    },
-    {
-      id: 'earthquake-wave-simulator',
-      title: '地震波シミュレーター',
-      description: 'P波とS波の違いを視覚的に理解！震源からの距離と揺れの関係、地震波の伝わり方をリアルタイムでシミュレーション。緊急地震速報の仕組みも学習できます。',
-      grade: '中学1年生',
-      subject: '理科',
-      available: true,
-    },
-    {
-      id: 'time-zone-calculator',
-      title: '時差計算ツール',
-      description: '世界の主要都市の時差を視覚的に学習！地球の自転と時差の関係、日付変更線の概念を実践的に理解。クイズモードで理解度をチェックできます。',
-      grade: '中学1年生',
-      subject: '社会',
-      available: true,
-    },
-    {
-      id: 'proof-step-builder',
-      title: '証明ステップビルダー',
-      description: '幾何学的証明を段階的に構築！ドラッグ&ドロップで証明の流れを組み立て、論理的思考力を養います。合同証明から始めて上級問題まで挑戦できます。',
-      grade: '中学2年生',
-      subject: '数学',
-      available: true,
-    },
-  ];
+  const [showSettings, setShowSettings] = useState(false);
+  
+  // 教材表示設定ストアから取得
+  const getVisibleMaterials = useMaterialSettingsStore(state => state.getVisibleMaterials);
+  
+  // 表示可能な教材を取得
+  const visibleMaterials = getVisibleMaterials();
+  
+  // レガシー互換性のための変換（既存のコードに影響を与えないため）
+  const materials = visibleMaterials.map(material => ({
+    id: material.id,
+    title: material.title,
+    description: material.description,
+    grade: material.gradeJapanese,
+    subject: material.subjectJapanese,
+    available: material.enabled && (material.status === 'published' || material.status === 'testing'),
+  }));
 
   return (
     <ThemeProvider theme={themes[currentTheme]}>
@@ -892,6 +496,15 @@ function AppFull() {
             sx={{ mr: 2 }}
           >
             {showDashboard ? '教材一覧' : 'ダッシュボード'}
+          </Button>
+          
+          <Button
+            color="inherit"
+            startIcon={<SettingsIcon />}
+            onClick={() => setShowSettings(true)}
+            sx={{ mr: 2 }}
+          >
+            設定
           </Button>
           
           <FormControl size="small" sx={{ minWidth: 120, mr: 2 }}>
@@ -923,9 +536,24 @@ function AppFull() {
             学年を選択してテーマを変更できます。
           </Typography>
 
-          <Typography variant="h4" component="h2" gutterBottom sx={{ mt: 4 }}>
-            {currentTheme === 'elementary' ? '小学生' : currentTheme === 'juniorHigh' ? '中学生' : '高校生'}向けの教材
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 4, mb: 2 }}>
+            <Typography variant="h4" component="h2">
+              {currentTheme === 'elementary' ? '小学生' : currentTheme === 'juniorHigh' ? '中学生' : '高校生'}向けの教材
+            </Typography>
+            <Chip 
+              label={`${materials.filter((material) => {
+                if (currentTheme === 'elementary') {
+                  return material.grade.includes('小学');
+                } else if (currentTheme === 'juniorHigh') {
+                  return material.grade.includes('中学');
+                } else if (currentTheme === 'highSchool') {
+                  return material.grade.includes('高校');
+                }
+                return true;
+              }).length} 教材`}
+              color="primary"
+            />
+          </Box>
           
           <Grid container spacing={3}>
           {materials
@@ -1263,6 +891,22 @@ function AppFull() {
           {selectedMaterial === 'fraction-master' && (
             <FractionMasterTool />
           )}
+          {selectedMaterial === 'decimal-master' && (
+            <DecimalMaster />
+          )}
+          {selectedMaterial === 'percentage-trainer' && (
+            <PercentageTrainer />
+          )}
+          {selectedMaterial === 'equation-builder' && (
+            <ErrorBoundary onError={(error, info) => console.error('EquationBuilder Error:', error, info)}>
+              <EquationBuilder />
+            </ErrorBoundary>
+          )}
+          {selectedMaterial === 'fraction-trainer' && (
+            <ErrorBoundary onError={(error, info) => console.error('FractionTrainer Error:', error, info)}>
+              <FractionTrainer />
+            </ErrorBoundary>
+          )}
           {selectedMaterial === 'english-speaking-practice' && (
             <EnglishSpeakingPractice />
           )}
@@ -1311,6 +955,12 @@ function AppFull() {
           )} */}
         </DialogContent>
       </Dialog>
+      
+      {/* 教材表示設定パネル */}
+      <MaterialSettingsPanel
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </ThemeProvider>
   );
 }
