@@ -9,7 +9,9 @@ import {
   Fab,
   Zoom,
   Alert,
-  AlertTitle
+  AlertTitle,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Psychology, Functions, Square, BoltOutlined, Celebration } from '@mui/icons-material';
@@ -25,6 +27,8 @@ import type { LearningModule } from './types';
 // 抽象的思考への橋（内部コンポーネント）
 const AbstractThinkingBridgeContent: React.FC = () => {
   const { recordInteraction, recordAnswer } = useLearningTrackerContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [activeTab, setActiveTab] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
   const { progress, updateProgress, getRecommendedModule } = useLearningProgress();
@@ -100,7 +104,10 @@ const AbstractThinkingBridgeContent: React.FC = () => {
           >
             <Alert 
               severity="info" 
-              sx={{ mb: 3 }}
+              sx={{ 
+                mb: 3,
+                mx: { xs: 1, sm: 0 }
+              }}
               onClose={() => {
                 setShowIntro(false);
                 recordInteraction('click');
@@ -140,7 +147,7 @@ const AbstractThinkingBridgeContent: React.FC = () => {
               id={`module-tab-${index}`}
               aria-controls={`module-tabpanel-${index}`}
               sx={{
-                minHeight: 80,
+                minHeight: { xs: 60, sm: 80 },
                 '& .MuiTab-iconWrapper': {
                   mb: 1
                 }
@@ -191,7 +198,7 @@ const AbstractThinkingBridgeContent: React.FC = () => {
           variant="extended"
           sx={{
             position: 'fixed',
-            bottom: 16,
+            bottom: { xs: 80, sm: 16 },
             right: 16,
           }}
           onClick={() => {

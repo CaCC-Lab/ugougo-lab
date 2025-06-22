@@ -10,7 +10,9 @@ import {
   Slider,
   Grid,
   Card,
-  CardContent
+  CardContent,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { 
   Close as CloseIcon, 
@@ -25,6 +27,8 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
   const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
   const [pointPosition, setPointPosition] = useState(0); // 0-1の範囲で点Pの位置
   const [isAnimating, setIsAnimating] = useState(false);
@@ -39,12 +43,18 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
   const [observations, setObservations] = useState<string[]>([]);
   const [discoveredPatterns, setDiscoveredPatterns] = useState<Set<string>>(new Set());
   
-  // 四角形の座標設定（キャンバス上の座標）
+  // 四角形の座標設定（キャンバス上の座標）- レスポンシブ対応
+  const getCanvasSize = () => {
+    const width = isMobile ? Math.min(350, window.innerWidth - 60) : 700;
+    const height = isMobile ? 200 : 250;
+    return { width, height };
+  };
+
   const rect = {
-    x: 50,
-    y: 50,
-    width: 300,
-    height: 200
+    x: isMobile ? 25 : 50,
+    y: isMobile ? 25 : 50,
+    width: isMobile ? Math.min(300, (window.innerWidth - 120)) : 300,
+    height: isMobile ? 120 : 150
   };
   
   // 探索チャレンジ
@@ -306,6 +316,74 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
         problem: 'ドラッグ操作の完了',
         userAnswer: `点Pの位置を${(pointPosition * 100).toFixed(1)}%に設定`,
         correctAnswer: 'ドラッグ操作完了',
+        finalPosition: pointPosition,
+        finalArea: currentArea,
+        explorationMode: explorationMode
+      });
+    }
+    setIsDragging(false);
+  };
+
+  // タッチイベントハンドラー
+  const handleCanvasTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (e.touches.length !== 1) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const rect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    // 点Pの近くをタップしたかチェック
+    const pointP = calculatePointP(pointPosition);
+    const distance = Math.sqrt((x - pointP.x) ** 2 + (y - pointP.y) ** 2);
+    
+    if (distance < 30) { // タッチの場合は少し大きめの判定エリア
+      setIsDragging(true);
+      setIsAnimating(false);
+      recordInteraction('drag');
+    }
+  };
+
+  const handleCanvasTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (!isDragging || e.touches.length !== 1) return;
+    
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const canvasRect = canvas.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - canvasRect.left;
+    const y = touch.clientY - canvasRect.top;
+    
+    // タッチ位置から四角形の周囲の最も近い点を見つける
+    const newPosition = findNearestPositionOnRectangle(x, y);
+    setPointPosition(newPosition);
+    
+    // タッチによる位置変更を記録
+    if (Math.random() < 0.1) {
+      recordAnswer(true, {
+        problem: 'タッチドラッグによる点Pの位置調整',
+        userAnswer: `位置${(newPosition * 100).toFixed(1)}%に移動`,
+        correctAnswer: '手動操作による探索',
+        dragPosition: newPosition,
+        currentArea: currentArea
+      });
+    }
+  };
+
+  const handleCanvasTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (isDragging) {
+      // タッチドラッグ完了時の記録
+      recordAnswer(true, {
+        problem: 'タッチドラッグ操作の完了',
+        userAnswer: `点Pの位置を${(pointPosition * 100).toFixed(1)}%に設定`,
+        correctAnswer: 'タッチドラッグ操作完了',
         finalPosition: pointPosition,
         finalArea: currentArea,
         explorationMode: explorationMode
@@ -651,7 +729,16 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
               max={50}
               valueLabelDisplay="auto"
               valueLabelFormat={(value) => `${value}x`}
-              sx={{ mb: 2 }}
+              sx={{ 
+                mb: 2,
+                '& .MuiSlider-track': {
+                  height: isMobile ? 6 : 4
+                },
+                '& .MuiSlider-thumb': {
+                  width: isMobile ? 24 : 20,
+                  height: isMobile ? 24 : 20
+                }
+              }}
             />
 
             {/* 手動位置調整 */}
@@ -668,7 +755,16 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
               max={100}
               valueLabelDisplay="auto"
               valueLabelFormat={(value) => `${value}%`}
-              sx={{ mb: 2 }}
+              sx={{ 
+                mb: 2,
+                '& .MuiSlider-track': {
+                  height: isMobile ? 6 : 4
+                },
+                '& .MuiSlider-thumb': {
+                  width: isMobile ? 24 : 20,
+                  height: isMobile ? 24 : 20
+                }
+              }}
             />
 
             {/* 観察記録ボタン */}
@@ -748,19 +844,24 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
             
             <canvas
               ref={canvasRef}
-              width={700}
-              height={250}
+              width={isMobile ? Math.min(350, window.innerWidth - 60) : 700}
+              height={isMobile ? 200 : 250}
               style={{
                 border: '1px solid #ddd',
                 borderRadius: '8px',
                 display: 'block',
                 margin: '0 auto',
-                cursor: isDragging ? 'grabbing' : 'grab'
+                cursor: isDragging ? 'grabbing' : 'grab',
+                maxWidth: '100%',
+                touchAction: 'none' // タッチ操作の最適化
               }}
               onMouseDown={handleCanvasMouseDown}
               onMouseMove={handleCanvasMouseMove}
               onMouseUp={handleCanvasMouseUp}
               onMouseLeave={handleCanvasMouseUp}
+              onTouchStart={handleCanvasTouchStart}
+              onTouchMove={handleCanvasTouchMove}
+              onTouchEnd={handleCanvasTouchEnd}
             />
 
             {/* 操作説明 */}

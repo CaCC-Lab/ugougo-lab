@@ -454,6 +454,20 @@ function NumberBlocksMaterial({ onClose }: { onClose: () => void }) {
   );
 }
 
+// たし算・ひき算ビジュアライザー（MaterialWrapperでラップ）
+function AdditionSubtractionMaterial({ onClose }: { onClose: () => void }) {
+  return (
+    <MaterialWrapper
+      materialId="addition-subtraction"
+      materialName="たし算・ひき算ビジュアライザー"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <AdditionSubtractionVisualizer onClose={onClose} />
+    </MaterialWrapper>
+  );
+}
+
 // メインアプリ
 function AppFull() {
   const [currentTheme, setCurrentTheme] = useState<'elementary' | 'juniorHigh' | 'highSchool'>('elementary');
@@ -624,7 +638,7 @@ function AppFull() {
       >
         <DialogContent sx={{ p: 0 }}>
           {selectedMaterial === 'addition-subtraction' && (
-            <AdditionSubtractionVisualizer onClose={() => {
+            <AdditionSubtractionMaterial onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />

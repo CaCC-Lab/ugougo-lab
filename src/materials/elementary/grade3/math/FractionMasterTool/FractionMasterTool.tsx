@@ -10,7 +10,9 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Button,
-  Divider
+  Divider,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import { useFractionLogic } from './hooks/useFractionLogic';
@@ -26,6 +28,8 @@ import {
 // 分数マスターツール（内部コンポーネント）
 const FractionMasterToolContent: React.FC = () => {
   const { recordInteraction, recordAnswer } = useLearningTrackerContext();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const {
     mode,
     visualType,
@@ -70,7 +74,14 @@ const FractionMasterToolContent: React.FC = () => {
   ];
 
   return (
-      <Container maxWidth="lg" sx={{ height: '100%', overflow: 'auto' }}>
+      <Container 
+        maxWidth={isMobile ? "sm" : "lg"} 
+        sx={{ 
+          height: '100%', 
+          overflow: 'auto',
+          px: { xs: 1, sm: 3 }
+        }}
+      >
         <Tabs
           value={mode}
           onChange={handleTabChange}
@@ -90,8 +101,8 @@ const FractionMasterToolContent: React.FC = () => {
               分数の視覚的理解
             </Typography>
 
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+            <Grid container spacing={isMobile ? 2 : 3}>
+              <Grid item xs={12} sm={6}>
                 <Paper elevation={3} sx={{ p: 3 }}>
                   <Typography variant="subtitle1" sx={{ mb: 2 }}>
                     視覚表現を選択
@@ -105,7 +116,16 @@ const FractionMasterToolContent: React.FC = () => {
                         recordInteraction('change');
                       }
                     }}
-                    sx={{ mb: 3, flexWrap: 'wrap' }}
+                    size={isMobile ? "small" : "medium"}
+                    sx={{ 
+                      mb: 3, 
+                      flexWrap: 'wrap',
+                      width: isMobile ? '100%' : 'auto',
+                      '& .MuiToggleButton-root': {
+                        minWidth: isMobile ? '48px' : '64px',
+                        fontSize: isMobile ? '0.75rem' : '0.875rem'
+                      }
+                    }}
                   >
                     {visualTypes.map((type) => (
                       <ToggleButton key={type.value} value={type.value}>
@@ -118,14 +138,14 @@ const FractionMasterToolContent: React.FC = () => {
                     <FractionVisualizer
                       fraction={fractions[0]}
                       visualType={visualType}
-                      size={250}
+                      size={isMobile ? Math.min(200, window.innerWidth - 100) : 250}
                       animated={true}
                     />
                   </Box>
                 </Paper>
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} sm={6}>
                 <Paper elevation={3} sx={{ p: 3 }}>
                   <Typography variant="subtitle1" sx={{ mb: 3 }}>
                     分数を調整
@@ -197,8 +217,8 @@ const FractionMasterToolContent: React.FC = () => {
                 計算の設定
               </Typography>
 
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
+              <Grid container spacing={isMobile ? 2 : 3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <FractionInput
                     fraction={fractions[0]}
                     onChange={(f) => updateFraction(0, f)}
@@ -206,7 +226,7 @@ const FractionMasterToolContent: React.FC = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} sm={12} md={4}>
                   <Box sx={{ textAlign: 'center', pt: 3 }}>
                     <ToggleButtonGroup
                       value={selectedOperation}
@@ -228,7 +248,7 @@ const FractionMasterToolContent: React.FC = () => {
                   </Box>
                 </Grid>
 
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} sm={6} md={4}>
                   <FractionInput
                     fraction={fractions[1]}
                     onChange={(f) => {
