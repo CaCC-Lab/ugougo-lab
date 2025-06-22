@@ -637,13 +637,29 @@ function AppFull() {
         sx={{ '& .MuiDialog-paper': { height: '90vh' } }}
       >
         <DialogContent sx={{ p: 0 }}>
+          {/* 選択された教材が本当に利用可能かチェック */}
+          {(() => {
+            const material = materials.find(m => m.id === selectedMaterial);
+            if (!material || !material.available) {
+              return (
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                  <Alert severity="warning">
+                    この教材は現在開発中のため利用できません。
+                  </Alert>
+                </Box>
+              );
+            }
+            return null;
+          })()}
+          
+          {/* 以下、各教材のレンダリング */}
           {selectedMaterial === 'addition-subtraction' && (
             <AdditionSubtractionMaterial onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
           )}
-          {selectedMaterial === 'hiragana-stroke' && (
+          {selectedMaterial === 'hiragana-stroke' && materials.find(m => m.id === 'hiragana-stroke')?.available && (
             <HiraganaStrokeOrder onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
