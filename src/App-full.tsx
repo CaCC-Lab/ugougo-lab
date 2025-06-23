@@ -74,10 +74,10 @@ import DecimalMaster from './materials/elementary/grade3/math/DecimalMaster';
 import PercentageTrainer from './materials/elementary/grade5/math/PercentageTrainer';
 import { EnglishSpeakingPractice, PronunciationPractice } from './materials/junior-high/grade1/english';
 import { AlgebraIntroductionSystem } from './materials/junior-high/grade1/math/AlgebraIntroductionSystem';
-import { EquationBuilder } from './materials/junior-high/grade1/math/EquationBuilder';
+// import { EquationBuilder } from './materials/junior-high/grade1/math/EquationBuilder';
 import { FractionTrainer } from './materials/elementary/grade3/math/FractionTrainer';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { EarthquakeWaveSimulator } from './materials/junior-high/grade1/science';
+// import { EarthquakeWaveSimulator } from './materials/junior-high/grade1/science';
 import { TimeZoneCalculator } from './materials/junior-high/grade1/social';
 import { ProofStepBuilder } from './materials/junior-high/grade2/math';
 import { ElectricityExperiment } from './materials/junior-high/grade2/science';
@@ -142,7 +142,7 @@ function NumberBlocksMaterialContent({ onClose }: { onClose: () => void }) {
   const [successCount, setSuccessCount] = useState(0);
   const [message, setMessage] = useState('');
   const [totalScore, setTotalScore] = useState(0);
-  const [lastBonus, setLastBonus] = useState(0);
+  const [_lastBonus, setLastBonus] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
 
@@ -928,9 +928,14 @@ function AppFull() {
             <PercentageTrainer />
           )}
           {selectedMaterial === 'equation-builder' && (
-            <ErrorBoundary onError={(error, info) => console.error('EquationBuilder Error:', error, info)}>
-              <EquationBuilder />
-            </ErrorBoundary>
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                一次方程式構築ツール（メンテナンス中）
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                この教材は現在メンテナンス中です。しばらくお待ちください。
+              </Typography>
+            </Box>
           )}
           {selectedMaterial === 'fraction-trainer' && (
             <ErrorBoundary onError={(error, info) => console.error('FractionTrainer Error:', error, info)}>
@@ -947,7 +952,14 @@ function AppFull() {
             <AlgebraIntroductionSystem />
           )}
           {selectedMaterial === 'earthquake-wave-simulator' && (
-            <EarthquakeWaveSimulator />
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="h5" sx={{ mb: 2 }}>
+                地震波シミュレーター（メンテナンス中）
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                この教材は現在メンテナンス中です。しばらくお待ちください。
+              </Typography>
+            </Box>
           )}
           {selectedMaterial === 'time-zone-calculator' && (
             <TimeZoneCalculator />

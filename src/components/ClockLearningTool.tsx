@@ -30,7 +30,7 @@ const ClockContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const ClockFace = styled('svg')(({ theme }) => ({
+const ClockFace = styled('svg')(({ theme: _theme }) => ({
   width: '100%',
   height: '100%',
   backgroundColor: '#fff9e6',
@@ -79,7 +79,7 @@ interface ClockLearningToolProps {
 }
 
 // 時計の読み方学習ツール（内部コンポーネント）
-const ClockLearningToolContent: React.FC<ClockLearningToolProps> = ({ onClose }) => {
+const ClockLearningToolContent: React.FC<ClockLearningToolProps> = ({ onClose: _onClose }) => {
   const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -145,9 +145,6 @@ const ClockLearningToolContent: React.FC<ClockLearningToolProps> = ({ onClose })
     }
   };
 
-  const handlePointerUp = () => {
-    setIsDragging(null);
-  };
 
   // グローバルイベントリスナー
   useEffect(() => {
@@ -354,7 +351,7 @@ const ClockLearningToolContent: React.FC<ClockLearningToolProps> = ({ onClose })
                     y1="150"
                     x2={150 + 100 * Math.cos(minuteAngle * Math.PI / 180)}
                     y2={150 + 100 * Math.sin(minuteAngle * Math.PI / 180)}
-                    onPointerDown={(e) => mode === 'practice' && handlePointerDown(e, 'minute')}
+                    onPointerDown={(e: any) => mode === 'practice' && handlePointerDown(e, 'minute')}
                     style={{ pointerEvents: mode === 'practice' ? 'auto' : 'none' }}
                   />
                   
@@ -365,7 +362,7 @@ const ClockLearningToolContent: React.FC<ClockLearningToolProps> = ({ onClose })
                     y1="150"
                     x2={150 + 70 * Math.cos(hourAngle * Math.PI / 180)}
                     y2={150 + 70 * Math.sin(hourAngle * Math.PI / 180)}
-                    onPointerDown={(e) => mode === 'practice' && handlePointerDown(e, 'hour')}
+                    onPointerDown={(e: any) => mode === 'practice' && handlePointerDown(e, 'hour')}
                     style={{ pointerEvents: mode === 'practice' ? 'auto' : 'none' }}
                   />
                 </ClockFace>

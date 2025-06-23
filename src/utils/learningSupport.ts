@@ -201,7 +201,7 @@ export function generateAdaptiveProblem(
     }
   };
   
-  return problems[concept]?.[difficulty] || problems['文字式']['easy'];
+  return problems[concept as keyof typeof problems]?.[difficulty] || problems['文字式']['easy'];
 }
 
 // 視覚的説明の生成

@@ -9,7 +9,6 @@ import {
   Step,
   StepLabel,
   StepContent,
-  IconButton,
   Chip,
   Grid,
   Alert

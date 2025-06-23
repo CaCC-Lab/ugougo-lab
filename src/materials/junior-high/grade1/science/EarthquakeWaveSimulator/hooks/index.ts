@@ -1,1 +1,0 @@
-export { useEarthquakeSimulation } from './useEarthquakeSimulation';

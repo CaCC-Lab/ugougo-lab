@@ -11,14 +11,12 @@ import {
   Card,
   CardContent,
   Slider,
-  ToggleButton,
-  ToggleButtonGroup
 } from '@mui/material';
 import { 
   Close as CloseIcon, 
   Refresh as RefreshIcon,
   Navigation as CompassIcon,
-  North as NorthIcon,
+  North as _NorthIcon,
   Quiz as QuizIcon
 } from '@mui/icons-material';
 import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
@@ -199,7 +197,11 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
     recordAnswer(isCorrect, {
       problem: `方位クイズ: ${quizDirection.name}の方向`,
       userAnswer: `${userAnswer}度`,
-      correctAnswer: `${quizDirection.angle}度（${quizDirection.name}）`,
+      correctAnswer: `${quizDirection.angle}度（${quizDirection.name}）`
+    });
+    
+    // クイズ回答の詳細を別途記録
+    console.log('Quiz answer details:', {
       angleDifference: diff,
       tolerance: 22.5,
       directionData: {
@@ -233,16 +235,18 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: 'コンパスシミュレーターのリセット',
       userAnswer: 'シミュレーターを初期状態に戻す',
-      correctAnswer: 'リセット完了',
-      resetData: {
-        previousRotation: rotation,
-        previousMagneticDeclination: magneticDeclination,
-        previousScore: score,
-        previousAttempts: attempts,
-        previousProgress: progress,
-        wasInQuizMode: quizMode,
-        wasShowingMap: showMap
-      }
+      correctAnswer: 'リセット完了'
+    });
+    
+    // リセット詳細情報を別途記録
+    console.log('Reset data:', {
+      previousRotation: rotation,
+      previousMagneticDeclination: magneticDeclination,
+      previousScore: score,
+      previousAttempts: attempts,
+      previousProgress: progress,
+      wasInQuizMode: quizMode,
+      wasShowingMap: showMap
     });
     
     setRotation(0);
@@ -264,15 +268,17 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: 'コンパス方位クイズの開始',
       userAnswer: 'クイズモードを開始',
-      correctAnswer: 'クイズモード開始',
-      modeSwitch: {
-        from: 'learning',
-        to: 'quiz',
-        currentKnowledge: {
-          rotation: rotation,
-          magneticDeclination: magneticDeclination,
-          mapWasVisible: showMap
-        }
+      correctAnswer: 'クイズモード開始'
+    });
+    
+    // モード切り替えの詳細を別途記録
+    console.log('Mode switch:', {
+      from: 'learning',
+      to: 'quiz',
+      currentKnowledge: {
+        rotation: rotation,
+        magneticDeclination: magneticDeclination,
+        mapWasVisible: showMap
       }
     });
     
@@ -348,16 +354,18 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
               recordAnswer(true, {
                 problem: 'コンパス学習モードへの切り替え',
                 userAnswer: 'クイズモードから学習モードに切り替え',
-                correctAnswer: 'モード切り替えの理解',
-                modeSwitch: {
-                  from: 'quiz',
-                  to: 'learning',
-                  quizResults: {
-                    finalScore: score,
-                    totalAttempts: attempts,
-                    progress: progress,
-                    successRate: attempts > 0 ? (score / attempts * 100).toFixed(1) : '0'
-                  }
+                correctAnswer: 'モード切り替えの理解'
+              });
+              
+              // モード切り替えの詳細を別途記録
+              console.log('Mode switch:', {
+                from: 'quiz',
+                to: 'learning',
+                quizResults: {
+                  finalScore: score,
+                  totalAttempts: attempts,
+                  progress: progress,
+                  successRate: attempts > 0 ? (score / attempts * 100).toFixed(1) : '0'
                 }
               });
               
@@ -378,7 +386,7 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：コンパス */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
               <canvas
@@ -405,7 +413,7 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
                     onChange={(_, value) => {
                       const newRotation = value as number;
                       setRotation(newRotation);
-                      recordInteraction('slider');
+                      recordInteraction('drag');
                       
                       // 主要な方位で記録
                       const majorDirections = [0, 90, 180, 270];
@@ -414,13 +422,7 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
                         recordAnswer(true, {
                           problem: 'コンパスの主要方位設定',
                           userAnswer: `${newRotation}度（${direction?.name}）に調整`,
-                          correctAnswer: '正確な方位の理解',
-                          compassSettings: {
-                            angle: newRotation,
-                            direction: direction?.name,
-                            shortName: direction?.shortName,
-                            magneticDeclination: magneticDeclination
-                          }
+                          correctAnswer: '正確な方位の理解'
                         });
                       }
                     }}
@@ -446,19 +448,14 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
                     onChange={(_, value) => {
                       const newDeclination = value as number;
                       setMagneticDeclination(newDeclination);
-                      recordInteraction('slider');
+                      recordInteraction('drag');
                       
                       // 磁気偏角設定を記録（0以外の値）
                       if (newDeclination !== 0) {
                         recordAnswer(true, {
                           problem: '磁気偏角の理解と設定',
                           userAnswer: `磁気偏角を${newDeclination}度に設定`,
-                          correctAnswer: '磁北と真北の違いの理解',
-                          magneticDeclinationData: {
-                            value: newDeclination,
-                            compassRotation: rotation,
-                            effectDescription: newDeclination > 0 ? '磁北が真北より東にずれている' : '磁北が真北より西にずれている'
-                          }
+                          correctAnswer: '磁北と真北の違いの理解'
                         });
                       }
                     }}
@@ -481,13 +478,7 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
                     recordAnswer(true, {
                       problem: 'コンパスと地図の連携表示',
                       userAnswer: newShowMap ? '地図を表示して場所との関係を確認' : '地図を非表示にしてコンパスに集中',
-                      correctAnswer: '地図とコンパスの関係理解',
-                      mapSettings: {
-                        isVisible: newShowMap,
-                        compassRotation: rotation,
-                        magneticDeclination: magneticDeclination,
-                        availableLocations: locations.map(loc => loc.name)
-                      }
+                      correctAnswer: '地図とコンパスの関係理解'
                     });
                   }}
                   fullWidth
@@ -510,7 +501,7 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
                     onChange={(_, value) => {
                       const newAnswer = value as number;
                       setUserAnswer(newAnswer);
-                      recordInteraction('slider');
+                      recordInteraction('drag');
                       
                       // 主要方位への調整を記録
                       const targetDirection = directions.find(d => d.angle === newAnswer);
@@ -518,14 +509,7 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
                         recordAnswer(true, {
                           problem: 'クイズ回答スライダーの調整',
                           userAnswer: `${newAnswer}度（${targetDirection.name}）に調整`,
-                          correctAnswer: '方位の選択と調整',
-                          quizInteraction: {
-                            questionDirection: quizDirection.name,
-                            questionAngle: quizDirection.angle,
-                            currentAnswer: newAnswer,
-                            selectedDirection: targetDirection.name,
-                            isOnMajorDirection: directions.some(d => d.angle === newAnswer)
-                          }
+                          correctAnswer: '方位の選択と調整'
                         });
                       }
                     }}
@@ -550,7 +534,7 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：情報 */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -558,7 +542,7 @@ function CompassSimulatorContent({ onClose }: { onClose: () => void }) {
               </Typography>
               <Grid container spacing={2}>
                 {directions.filter(d => d.angle % 90 === 0).map(dir => (
-                  <Grid size={6} key={dir.angle}>
+                  <Grid item xs={6} key={dir.angle}>
                     <Paper 
                       elevation={1} 
                       sx={{ 

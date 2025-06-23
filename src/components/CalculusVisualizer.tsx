@@ -13,12 +13,6 @@ import {
   Tooltip,
   ToggleButton,
   ToggleButtonGroup,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   FormControlLabel,
   Switch,
 } from '@mui/material';
@@ -26,13 +20,7 @@ import { useTheme } from '@mui/material/styles';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
-
-interface Point {
-  x: number;
-  y: number;
-}
 
 interface CriticalPoint {
   x: number;
@@ -45,7 +33,7 @@ interface CalculusVisualizerProps {
 }
 
 // 微分積分可視化ツール（内部コンポーネント）
-const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose }) => {
+const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = () => {
   const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -59,12 +47,12 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
   const [rectangleCount, setRectangleCount] = useState<number>(10);
   const [showExplanation, setShowExplanation] = useState<boolean>(false);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
-  const [animationProgress, setAnimationProgress] = useState<number>(0);
+  const [_animationProgress, setAnimationProgress] = useState<number>(0);
   
   // 表示設定
   const [showDerivative, setShowDerivative] = useState<boolean>(true);
   const [showTangent, setShowTangent] = useState<boolean>(true);
-  const [showArea, setShowArea] = useState<boolean>(true);
+  const [showArea] = useState<boolean>(true);
   const [showCriticalPoints, setShowCriticalPoints] = useState<boolean>(true);
   const [showTaylorExpansion, setShowTaylorExpansion] = useState<boolean>(false);
   const [taylorOrder, setTaylorOrder] = useState<number>(3);
@@ -458,16 +446,7 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
     recordAnswer(true, {
       problem: '微分積分ビジュアライザーのリセット',
       userAnswer: 'システムを初期状態に戻す',
-      correctAnswer: 'リセット完了',
-      resetData: {
-        previousFunction: functionStr,
-        previousMode: mode,
-        previousTangentPoint: tangentPoint,
-        previousIntegralBounds: integralBounds,
-        previousRectangleCount: rectangleCount,
-        previousTaylorOrder: taylorOrder,
-        wasAnimating: isAnimating
-      }
+      correctAnswer: 'リセット完了'
     });
     
     setFunctionStr('x^2');
@@ -494,15 +473,7 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
             recordAnswer(true, {
               problem: 'ヘルプ・使い方の表示',
               userAnswer: newShowExplanation ? 'ヘルプを表示' : 'ヘルプを非表示',
-              correctAnswer: 'ツールの使用方法理解',
-              helpAction: {
-                isShowing: newShowExplanation,
-                currentSettings: {
-                  function: functionStr,
-                  mode: mode,
-                  tangentPoint: tangentPoint
-                }
-              }
+              correctAnswer: 'ツールの使用方法理解'
             });
           }}>
             <HelpOutlineIcon />
@@ -528,19 +499,14 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
             onChange={(e) => {
               const newFunction = e.target.value;
               setFunctionStr(newFunction);
-              recordInteraction('input');
+              recordInteraction('key');
               
               // 関数変更を記録（入力完了時）
               if (newFunction.length > 0 && !newFunction.includes('undefined')) {
                 recordAnswer(true, {
                   problem: '数学関数の入力',
                   userAnswer: `関数f(x) = ${newFunction}を入力`,
-                  correctAnswer: '関数の定義と理解',
-                  functionInput: {
-                    function: newFunction,
-                    mode: mode,
-                    isValidFunction: true // 基本的な妥当性チェック
-                  }
+                  correctAnswer: '関数の定義と理解'
                 });
               }
             }}
@@ -552,7 +518,7 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
           <ToggleButtonGroup
             value={mode}
             exclusive
-            onChange={(_, value) => {
+            onChange={(_event, value) => {
               if (value) {
                 setMode(value);
                 recordInteraction('click');
@@ -561,12 +527,7 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
                 recordAnswer(true, {
                   problem: '微分積分モードの選択',
                   userAnswer: `${value === 'derivative' ? '微分' : value === 'integral' ? '積分' : '両方'}モードを選択`,
-                  correctAnswer: 'モード選択の理解',
-                  modeChange: {
-                    from: mode,
-                    to: value,
-                    function: functionStr
-                  }
+                  correctAnswer: 'モード選択の理解'
                 });
               }
             }}
@@ -589,24 +550,18 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
               </Typography>
               <Slider
                 value={tangentPoint}
-                onChange={(_, value) => {
+                onChange={(_event, value) => {
                   const newTangentPoint = value as number;
                   setTangentPoint(newTangentPoint);
-                  recordInteraction('slider');
+                  recordInteraction('drag');
                   
                   // 接線点変更を記録（主要な値で）
                   if (Math.abs(newTangentPoint) % 0.5 < 0.1) {
-                    const slope = derivative(parseFunction(functionStr), newTangentPoint);
+                    // const slope = derivative(parseFunction(functionStr), newTangentPoint);
                     recordAnswer(true, {
                       problem: '接線の点の調整',
                       userAnswer: `x = ${newTangentPoint.toFixed(1)}での接線を表示`,
-                      correctAnswer: '微分の幾何学的意味の理解',
-                      tangentPoint: {
-                        x: newTangentPoint,
-                        function: functionStr,
-                        slope: slope,
-                        y: parseFunction(functionStr)(newTangentPoint)
-                      }
+                      correctAnswer: '微分の幾何学的意味の理解'
                     });
                   }
                 }}
@@ -629,12 +584,7 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
                       recordAnswer(true, {
                         problem: '接線表示の切り替え',
                         userAnswer: showTangentLine ? '接線を表示' : '接線を非表示',
-                        correctAnswer: '微分の視覚化理解',
-                        tangentDisplay: {
-                          isVisible: showTangentLine,
-                          currentPoint: tangentPoint,
-                          function: functionStr
-                        }
+                        correctAnswer: '微分の視覚化理解'
                       });
                     }}
                   />
@@ -665,24 +615,17 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
               <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
                 <Slider
                   value={[integralBounds.a, integralBounds.b]}
-                  onChange={(_, value) => {
+                  onChange={(_event, value) => {
                     const [a, b] = value as number[];
                     setIntegralBounds({ a, b });
-                    recordInteraction('slider');
+                    recordInteraction('drag');
                     
                     // 積分区間変更を記録
-                    const integralVal = integrate(parseFunction(functionStr), a, b);
+                    // const integralVal = integrate(parseFunction(functionStr), a, b);
                     recordAnswer(true, {
                       problem: '積分区間の調整',
                       userAnswer: `積分区間を[${a.toFixed(1)}, ${b.toFixed(1)}]に設定`,
-                      correctAnswer: '定積分の区間理解',
-                      integralBounds: {
-                        from: a,
-                        to: b,
-                        function: functionStr,
-                        integralValue: integralVal,
-                        width: b - a
-                      }
+                      correctAnswer: '定積分の区間理解'
                     });
                   }}
                   min={-5}
@@ -697,25 +640,18 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
               </Typography>
               <Slider
                 value={rectangleCount}
-                onChange={(_, value) => {
+                onChange={(_event, value) => {
                   const newCount = value as number;
                   setRectangleCount(newCount);
-                  recordInteraction('slider');
+                  recordInteraction('drag');
                   
                   // 分割数変更を記録（重要な値で）
                   if ([1, 5, 10, 20, 50, 100].includes(newCount)) {
-                    const integralVal = integrate(parseFunction(functionStr), integralBounds.a, integralBounds.b, newCount);
+                    // const integralVal = integrate(parseFunction(functionStr), integralBounds.a, integralBounds.b, newCount);
                     recordAnswer(true, {
                       problem: 'リーマン和の分割数調整',
                       userAnswer: `分割数を${newCount}に設定`,
-                      correctAnswer: '積分近似の精度理解',
-                      rectangleApproximation: {
-                        count: newCount,
-                        function: functionStr,
-                        bounds: integralBounds,
-                        approximateValue: integralVal,
-                        accuracy: newCount > 50 ? 'high' : newCount > 10 ? 'medium' : 'low'
-                      }
+                      correctAnswer: '積分近似の精度理解'
                     });
                   }
                 }}
@@ -748,11 +684,7 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
                     recordAnswer(true, {
                       problem: '極値・変曲点表示の切り替え',
                       userAnswer: showCritical ? '極値・変曲点を表示' : '極値・変曲点を非表示',
-                      correctAnswer: '関数の特徴点理解',
-                      criticalPointsDisplay: {
-                        isVisible: showCritical,
-                        function: functionStr
-                      }
+                      correctAnswer: '関数の特徴点理解'
                     });
                   }}
                 />
@@ -775,7 +707,7 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
                 </Typography>
                 <Slider
                   value={taylorOrder}
-                  onChange={(_, value) => setTaylorOrder(value as number)}
+                  onChange={(_event, value) => setTaylorOrder(value as number)}
                   min={1}
                   max={10}
                   step={1}
@@ -799,13 +731,7 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = ({ onClose 
                 recordAnswer(true, {
                   problem: '微分積分アニメーションの制御',
                   userAnswer: newIsAnimating ? 'アニメーション開始' : 'アニメーション停止',
-                  correctAnswer: 'アニメーション制御の理解',
-                  animationControl: {
-                    action: newIsAnimating ? 'start' : 'stop',
-                    function: functionStr,
-                    mode: mode,
-                    currentTangentPoint: tangentPoint
-                  }
+                  correctAnswer: 'アニメーション制御の理解'
                 });
               }}
               startIcon={<PlayArrowIcon />}

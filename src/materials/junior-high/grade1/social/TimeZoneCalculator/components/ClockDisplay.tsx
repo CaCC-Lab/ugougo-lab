@@ -1,6 +1,6 @@
 // 時計表示コンポーネント
 import React from 'react';
-import { Box, Paper, Typography, Grid } from '@mui/material';
+import { Box, Paper, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import type { City } from '../data/cityData';
 

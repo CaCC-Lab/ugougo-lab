@@ -29,7 +29,12 @@ export default tseslint.config(
         fixStyle: 'inline-type-imports',
         disallowTypeAnnotations: true
       }],
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        ignoreRestSiblings: true
+      }],
+      'no-unused-vars': 'off', // TypeScript版を使用
     },
   },
 )

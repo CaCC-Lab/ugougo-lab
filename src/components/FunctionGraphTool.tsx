@@ -264,14 +264,7 @@ function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: '関数グラフアニメーションの制御',
       userAnswer: newIsAnimating ? 'グラフ描画アニメーション開始' : 'グラフ描画アニメーション停止',
-      correctAnswer: 'アニメーション制御の理解',
-      animationControl: {
-        action: newIsAnimating ? 'start' : 'stop',
-        functionType: functionType,
-        parameters: { a: paramA, b: paramB, c: paramC },
-        functionFormula: getFunctionText(functionType, paramA, paramB, paramC),
-        purpose: newIsAnimating ? 'グラフの描画過程を視覚化' : '完成したグラフを観察'
-      }
+      correctAnswer: 'アニメーション制御の理解'
     });
     
     if (!newIsAnimating) {
@@ -305,17 +298,7 @@ function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
     recordAnswer(isCorrect, {
       problem: `関数グラフクイズ: ${functionTypes[quizQuestion.type as keyof typeof functionTypes].name}の関数式`,
       userAnswer: answer,
-      correctAnswer: correct,
-      quizData: {
-        functionType: quizQuestion.type,
-        functionName: functionTypes[quizQuestion.type as keyof typeof functionTypes].name,
-        parameters: { a: quizQuestion.a, b: quizQuestion.b, c: quizQuestion.c },
-        userFormula: answer,
-        correctFormula: correct,
-        isCorrect: isCorrect,
-        currentProgress: progress + (isCorrect ? 10 : 0),
-        successCount: successCount + (isCorrect ? 1 : 0)
-      }
+      correctAnswer: correct
     });
     
     if (isCorrect) {

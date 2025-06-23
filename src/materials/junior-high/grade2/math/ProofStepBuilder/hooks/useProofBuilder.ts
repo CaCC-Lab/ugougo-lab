@@ -1,6 +1,6 @@
 // 証明ビルダーのロジックを管理するカスタムフック
 import { useState, useCallback } from 'react';
-import type { ProofStep, ProofProblem, ProofState, ValidationResult } from '../types';
+import type { ProofStep, ProofState, ValidationResult } from '../types';
 import { proofProblems } from '../data/proofProblems';
 import { theorems } from '../data/theorems';
 

@@ -32,7 +32,7 @@ const CityMarker = styled('g')<{
   selected: boolean; 
   isBase: boolean;
   isTarget: boolean;
-}>(({ theme, selected, isBase, isTarget }) => ({
+}>(({ theme: _theme, selected, isBase, isTarget }) => ({
   cursor: 'pointer',
   '& circle': {
     fill: isBase ? '#ff5722' : isTarget ? '#4caf50' : selected ? '#2196f3' : '#666',
@@ -53,7 +53,7 @@ const CityMarker = styled('g')<{
   }
 }));
 
-const DateLine = styled('line')(({ theme }) => ({
+const DateLine = styled('line')(({ theme: _theme }) => ({
   stroke: '#f44336',
   strokeWidth: 2,
   strokeDasharray: '5,5',

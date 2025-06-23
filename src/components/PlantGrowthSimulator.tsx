@@ -25,7 +25,6 @@ import {
   WbSunny as SunIcon,
   Timer as TimerIcon,
   LocalFlorist as FlowerIcon,
-  Grass as SeedIcon,
   Park as PlantIcon
 } from '@mui/icons-material';
 import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
@@ -545,7 +544,7 @@ function PlantGrowthSimulatorContent({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：コントロール */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 2, height: 'fit-content' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               お世話をしよう
@@ -647,7 +646,7 @@ function PlantGrowthSimulatorContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 中央：植物表示 */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 2 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               {plantData.name}の様子
@@ -680,7 +679,7 @@ function PlantGrowthSimulatorContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：成長記録 */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 2, height: '100%', overflow: 'auto' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               成長日記

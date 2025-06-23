@@ -17,7 +17,6 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -32,9 +31,8 @@ interface CelestialMotionSimulatorProps {
 }
 
 // 天体の動きシミュレーター（内部コンポーネント）
-const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> = ({ onClose }) => {
+const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> = ({ onClose: _onClose }) => {
   const { recordAnswer, recordInteraction } = useLearningTrackerContext();
-  const theme = useTheme();
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -303,21 +301,23 @@ const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> =
     // リセット実行を記録
     recordAnswer(true, {
       problem: '天体シミュレーターのリセット',
-      userAnswer: 'システムを初期状態に戻す',
-      correctAnswer: 'リセット完了',
-      resetData: {
-        previousTimeSpeed: timeSpeed,
-        previousViewMode: viewMode,
-        previousCurrentTime: currentTime,
-        previousEarthRotation: earthRotation,
-        previousEarthOrbitAngle: earthOrbitAngle,
-        previousMoonOrbitAngle: moonOrbitAngle,
-        wasPlaying: isPlaying,
-        observationPoint: observationPoint,
-        displaySettings: {
-          showOrbits: showOrbits,
-          showAxes: showAxes
-        }
+      userAnswer: `システムを初期状態に戻す`,
+      correctAnswer: 'リセット完了'
+    });
+    
+    // リセット詳細情報を別途記録
+    console.log('Reset data:', {
+      previousTimeSpeed: timeSpeed,
+      previousViewMode: viewMode,
+      previousCurrentTime: currentTime,
+      previousEarthRotation: earthRotation,
+      previousEarthOrbitAngle: earthOrbitAngle,
+      previousMoonOrbitAngle: moonOrbitAngle,
+      wasPlaying: isPlaying,
+      observationPoint: observationPoint,
+      displaySettings: {
+        showOrbits: showOrbits,
+        showAxes: showAxes
       }
     });
     
@@ -360,16 +360,18 @@ const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> =
             // ヘルプ表示切り替えを記録
             recordAnswer(true, {
               problem: 'ヘルプ・使い方の表示',
-              userAnswer: newShowExplanation ? 'ヘルプを表示' : 'ヘルプを非表示',
-              correctAnswer: 'ツールの使用方法理解',
-              helpAction: {
-                isShowing: newShowExplanation,
-                currentSettings: {
-                  viewMode: viewMode,
-                  timeSpeed: timeSpeed,
-                  observationPoint: observationPoint,
-                  isPlaying: isPlaying
-                }
+              userAnswer: `ヘルプを${newShowExplanation ? '表示' : '非表示'}`,
+              correctAnswer: 'ツールの使用方法理解'
+            });
+            
+            // ヘルプ操作の詳細を別途記録
+            console.log('Help action:', {
+              isShowing: newShowExplanation,
+              currentSettings: {
+                viewMode: viewMode,
+                timeSpeed: timeSpeed,
+                observationPoint: observationPoint,
+                isPlaying: isPlaying
               }
             });
           }}>
@@ -404,20 +406,22 @@ const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> =
                   // シミュレーション制御を記録
                   recordAnswer(true, {
                     problem: '天体シミュレーションの制御',
-                    userAnswer: newIsPlaying ? 'シミュレーション開始' : 'シミュレーション停止',
-                    correctAnswer: 'シミュレーション制御の理解',
-                    simulationControl: {
-                      action: newIsPlaying ? 'start' : 'stop',
-                      timeSpeed: timeSpeed,
-                      viewMode: viewMode,
-                      earthRotation: earthRotation,
-                      earthOrbitAngle: earthOrbitAngle,
-                      moonOrbitAngle: moonOrbitAngle,
-                      currentTime: currentTime,
-                      showSettings: {
-                        showOrbits: showOrbits,
-                        showAxes: showAxes
-                      }
+                    userAnswer: `シミュレーション${newIsPlaying ? '開始' : '停止'} - 速度: ${timeSpeed}倍速, 視点: ${viewMode}`,
+                    correctAnswer: 'シミュレーション制御の理解'
+                  });
+                  
+                  // シミュレーション制御の詳細を別途記録
+                  console.log('Simulation control:', {
+                    action: newIsPlaying ? 'start' : 'stop',
+                    timeSpeed: timeSpeed,
+                    viewMode: viewMode,
+                    earthRotation: earthRotation,
+                    earthOrbitAngle: earthOrbitAngle,
+                    moonOrbitAngle: moonOrbitAngle,
+                    currentTime: currentTime,
+                    showSettings: {
+                      showOrbits: showOrbits,
+                      showAxes: showAxes
                     }
                   });
                   
@@ -444,25 +448,27 @@ const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> =
               onChange={(_, value) => {
                 const newTimeSpeed = value as number;
                 setTimeSpeed(newTimeSpeed);
-                recordInteraction('slider');
+                recordInteraction('drag');
                 
                 // 時間速度変更を記録（主要な値で）
                 if ([0.1, 0.5, 1, 5, 10, 50, 100].includes(Math.round(newTimeSpeed * 10) / 10)) {
                   recordAnswer(true, {
                     problem: '時間速度の調整',
                     userAnswer: `時間速度を${newTimeSpeed}倍速に設定`,
-                    correctAnswer: '天体運動の時間スケール理解',
-                    timeSpeedAdjustment: {
-                      newSpeed: newTimeSpeed,
-                      isRealTime: newTimeSpeed === 1,
-                      isFastForward: newTimeSpeed > 1,
-                      isSlowMotion: newTimeSpeed < 1,
-                      currentSimulationState: {
-                        earthRotation: earthRotation,
-                        earthOrbitAngle: earthOrbitAngle,
-                        moonOrbitAngle: moonOrbitAngle,
-                        currentTime: currentTime
-                      }
+                    correctAnswer: '天体運動の時間スケール理解'
+                  });
+                  
+                  // 時間速度調整の詳細を別途記録
+                  console.log('Time speed adjustment:', {
+                    newSpeed: newTimeSpeed,
+                    isRealTime: newTimeSpeed === 1,
+                    isFastForward: newTimeSpeed > 1,
+                    isSlowMotion: newTimeSpeed < 1,
+                    currentSimulationState: {
+                      earthRotation: earthRotation,
+                      earthOrbitAngle: earthOrbitAngle,
+                      moonOrbitAngle: moonOrbitAngle,
+                      currentTime: currentTime
                     }
                   });
                 }
@@ -496,16 +502,18 @@ const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> =
                   recordAnswer(true, {
                     problem: '視点モードの切り替え',
                     userAnswer: `${value === 'space' ? '宇宙視点' : '地球視点'}に変更`,
-                    correctAnswer: '異なる視点からの天体観察理解',
-                    viewModeChange: {
-                      from: viewMode,
-                      to: value,
-                      description: value === 'space' ? '太陽系全体を俯瞰する視点' : '地球から見た視点',
-                      currentState: {
-                        earthPosition: { earthOrbitAngle: earthOrbitAngle },
-                        moonPosition: { moonOrbitAngle: moonOrbitAngle },
-                        timeSpeed: timeSpeed
-                      }
+                    correctAnswer: '異なる視点からの天体観察理解'
+                  });
+                  
+                  // 視点変更の詳細を別途記録
+                  console.log('View mode change:', {
+                    from: viewMode,
+                    to: value,
+                    description: value === 'space' ? '太陽系全体を俯瞰する視点' : '地球から見た視点',
+                    currentState: {
+                      earthPosition: { earthOrbitAngle: earthOrbitAngle },
+                      moonPosition: { moonOrbitAngle: moonOrbitAngle },
+                      timeSpeed: timeSpeed
                     }
                   });
                 }
@@ -530,16 +538,18 @@ const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> =
                   recordAnswer(true, {
                     problem: '観測地点の選択',
                     userAnswer: `観測地点を${newObservationPoint === 'tokyo' ? '東京（北緯35度）' : newObservationPoint === 'equator' ? '赤道' : '北極'}に設定`,
-                    correctAnswer: '地球上の位置による天体観測の違い理解',
-                    observationPointChange: {
-                      from: observationPoint,
-                      to: newObservationPoint,
-                      latitude: newObservationPoint === 'tokyo' ? 35 : newObservationPoint === 'equator' ? 0 : 90,
-                      description: newObservationPoint === 'tokyo' ? '中緯度地域の観測' : 
-                                  newObservationPoint === 'equator' ? '赤道での観測' : '極地での観測',
-                      astronomicalFeatures: newObservationPoint === 'pole' ? '白夜・極夜の現象' : 
-                                           newObservationPoint === 'equator' ? '年中安定した日照' : '四季の変化明確'
-                    }
+                    correctAnswer: '地球上の位置による天体観測の違い理解'
+                  });
+                  
+                  // 観測地点変更の詳細を別途記録
+                  console.log('Observation point change:', {
+                    from: observationPoint,
+                    to: newObservationPoint,
+                    latitude: newObservationPoint === 'tokyo' ? 35 : newObservationPoint === 'equator' ? 0 : 90,
+                    description: newObservationPoint === 'tokyo' ? '中緯度地域の観測' : 
+                                newObservationPoint === 'equator' ? '赤道での観測' : '極地での観測',
+                    astronomicalFeatures: newObservationPoint === 'pole' ? '白夜・極夜の現象' : 
+                                         newObservationPoint === 'equator' ? '年中安定した日照' : '四季の変化明確'
                   });
                 }}
                 label="観測地点"
@@ -563,12 +573,14 @@ const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> =
                   recordAnswer(true, {
                     problem: '軌道線表示の切り替え',
                     userAnswer: newShowOrbits ? '軌道線を表示' : '軌道線を非表示',
-                    correctAnswer: '天体軌道の視覚化理解',
-                    orbitDisplay: {
-                      isVisible: newShowOrbits,
-                      purpose: '地球と月の公転軌道の可視化',
-                      educationalValue: newShowOrbits ? '軌道の形と大きさの理解' : 'シンプルな表示'
-                    }
+                    correctAnswer: '天体軌道の視覚化理解'
+                  });
+                  
+                  // 軌道線表示の詳細を別途記録
+                  console.log('Orbit display:', {
+                    isVisible: newShowOrbits,
+                    purpose: '地球と月の公転軌道の可視化',
+                    educationalValue: newShowOrbits ? '軌道の形と大きさの理解' : 'シンプルな表示'
                   });
                 }}
                 fullWidth
@@ -588,13 +600,15 @@ const CelestialMotionSimulatorContent: React.FC<CelestialMotionSimulatorProps> =
                   recordAnswer(true, {
                     problem: '地軸表示の切り替え',
                     userAnswer: newShowAxes ? '地軸を表示' : '地軸を非表示',
-                    correctAnswer: '地軸の傾きと季節変化の理解',
-                    axisDisplay: {
-                      isVisible: newShowAxes,
-                      earthTilt: EARTH_TILT * 180 / Math.PI, // 度数に変換
-                      seasonalEffect: '23.5度の傾きによる季節の変化',
-                      educationalValue: newShowAxes ? '地軸の傾きが季節に与える影響の理解' : 'シンプルな表示'
-                    }
+                    correctAnswer: '地軸の傾きと季節変化の理解'
+                  });
+                  
+                  // 地軸表示の詳細を別途記録
+                  console.log('Axis display:', {
+                    isVisible: newShowAxes,
+                    earthTilt: EARTH_TILT * 180 / Math.PI, // 度数に変換
+                    seasonalEffect: '23.5度の傾きによる季節の変化',
+                    educationalValue: newShowAxes ? '地軸の傾きが季節に与える影響の理解' : 'シンプルな表示'
                   });
                 }}
                 fullWidth

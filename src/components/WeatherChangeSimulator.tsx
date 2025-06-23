@@ -231,17 +231,7 @@ function WeatherChangeSimulatorContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: '天気変化シミュレーターのリセット',
       userAnswer: 'システムを初期状態に戻す',
-      correctAnswer: 'リセット完了',
-      resetData: {
-        previousFrontType: front.type,
-        previousFrontPosition: front.position,
-        previousPressure: pressure,
-        previousTemperature: temperature,
-        wasPlaying: isPlaying,
-        currentMode: mode,
-        currentScore: score,
-        currentAttempts: attempts
-      }
+      correctAnswer: 'リセット完了'
     });
     
     setFront({ type: '寒冷前線', position: 20, speed: 1 });
@@ -338,17 +328,7 @@ function WeatherChangeSimulatorContent({ onClose }: { onClose: () => void }) {
               recordAnswer(true, {
                 problem: '天気シミュレーターのモード切り替え',
                 userAnswer: `${value === 'simulation' ? 'シミュレーション' : 'クイズ'}モードを選択`,
-                correctAnswer: 'モード選択の理解',
-                modeSwitch: {
-                  from: mode,
-                  to: value,
-                  currentSettings: {
-                    frontType: front.type,
-                    frontPosition: front.position,
-                    pressure: pressure,
-                    temperature: temperature
-                  }
-                }
+                correctAnswer: 'モード選択の理解'
               });
               
               setMode(value);
@@ -367,7 +347,7 @@ function WeatherChangeSimulatorContent({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：天気図 */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid xs={12} md={8}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
               <canvas
@@ -396,16 +376,7 @@ function WeatherChangeSimulatorContent({ onClose }: { onClose: () => void }) {
                       recordAnswer(true, {
                         problem: '天気変化シミュレーションの制御',
                         userAnswer: newIsPlaying ? 'シミュレーション開始' : 'シミュレーション停止',
-                        correctAnswer: 'シミュレーション制御の理解',
-                        simulationControl: {
-                          action: newIsPlaying ? 'start' : 'stop',
-                          frontType: front.type,
-                          frontPosition: front.position,
-                          frontSpeed: front.speed,
-                          currentPressure: pressure,
-                          currentTemperature: temperature,
-                          weatherStates: weather
-                        }
+                        correctAnswer: 'シミュレーション制御の理觨'
                       });
                       
                       setIsPlaying(newIsPlaying);
@@ -432,14 +403,7 @@ function WeatherChangeSimulatorContent({ onClose }: { onClose: () => void }) {
                         recordAnswer(true, {
                           problem: '前線タイプの選択',
                           userAnswer: `${value}を選択`,
-                          correctAnswer: '前線の特徴理解',
-                          frontTypeChange: {
-                            from: front.type,
-                            to: value,
-                            characteristics: value === '寒冷前線' ? '急激な天気変化' : '緊やかな天気変化',
-                            speed: value === '寒冷前線' ? '速い' : '遅い',
-                            weatherPattern: value === '寒冷前線' ? '急激に悪化→回復' : '徴々に悪化'
-                          }
+                          correctAnswer: '前線の特徴理觨'
                         });
                         
                         setFront(prev => ({ ...prev, type: value }));
@@ -477,7 +441,7 @@ function WeatherChangeSimulatorContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：情報 */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           {mode === 'simulation' ? (
             <Card>
               <CardContent>
@@ -515,7 +479,7 @@ function WeatherChangeSimulatorContent({ onClose }: { onClose: () => void }) {
                   {quizQuestion}
                 </Typography>
                 <Grid container spacing={1}>
-                  <Grid size={12}>
+                  <Grid xs={12}>
                     <Button
                       variant="outlined"
                       fullWidth
@@ -551,7 +515,7 @@ function WeatherChangeSimulatorContent({ onClose }: { onClose: () => void }) {
                       急激に悪化→回復
                     </Button>
                   </Grid>
-                  <Grid size={12}>
+                  <Grid xs={12}>
                     <Button
                       variant="outlined"
                       fullWidth

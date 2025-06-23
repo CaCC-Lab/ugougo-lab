@@ -302,9 +302,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
       recordAnswer(true, {
         problem: 'ドラッグによる点Pの位置調整',
         userAnswer: `位置${(newPosition * 100).toFixed(1)}%に移動`,
-        correctAnswer: '手動操作による探索',
-        dragPosition: newPosition,
-        currentArea: currentArea
+        correctAnswer: '手動操作による探索'
       });
     }
   };
@@ -315,10 +313,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
       recordAnswer(true, {
         problem: 'ドラッグ操作の完了',
         userAnswer: `点Pの位置を${(pointPosition * 100).toFixed(1)}%に設定`,
-        correctAnswer: 'ドラッグ操作完了',
-        finalPosition: pointPosition,
-        finalArea: currentArea,
-        explorationMode: explorationMode
+        correctAnswer: 'ドラッグ操作完了'
       });
     }
     setIsDragging(false);
@@ -369,9 +364,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
       recordAnswer(true, {
         problem: 'タッチドラッグによる点Pの位置調整',
         userAnswer: `位置${(newPosition * 100).toFixed(1)}%に移動`,
-        correctAnswer: '手動操作による探索',
-        dragPosition: newPosition,
-        currentArea: currentArea
+        correctAnswer: '手動操作による探索'
       });
     }
   };
@@ -383,10 +376,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
       recordAnswer(true, {
         problem: 'タッチドラッグ操作の完了',
         userAnswer: `点Pの位置を${(pointPosition * 100).toFixed(1)}%に設定`,
-        correctAnswer: 'タッチドラッグ操作完了',
-        finalPosition: pointPosition,
-        finalArea: currentArea,
-        explorationMode: explorationMode
+        correctAnswer: 'タッチドラッグ操作完了'
       });
     }
     setIsDragging(false);
@@ -429,10 +419,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: 'アニメーション制御',
       userAnswer: `アニメーション${!isAnimating ? '開始' : '停止'}`,
-      correctAnswer: 'アニメーション状態変更完了',
-      animationState: !isAnimating ? 'started' : 'stopped',
-      currentPosition: pointPosition,
-      currentArea: currentArea
+      correctAnswer: 'アニメーション状態変更完了'
     });
   };
   
@@ -445,11 +432,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: '動く点Pの観察記録',
       userAnswer: observation,
-      correctAnswer: '観察完了',
-      pointPosition: pointPosition,
-      currentArea: currentArea,
-      maxArea: maxArea,
-      explorationMode: explorationMode
+      correctAnswer: '観察完了'
     });
     
     // パターンを検出
@@ -458,9 +441,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
       recordAnswer(true, {
         problem: 'パターン発見: 面積が0になる条件',
         userAnswer: '面積が最小値に到達',
-        correctAnswer: '面積最小パターンの発見',
-        pattern: 'zero_area',
-        pointPosition: pointPosition
+        correctAnswer: '面積最小パターンの発見'
       });
     }
     if (currentArea > maxArea * 0.95 && currentArea > 100) {
@@ -468,10 +449,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
       recordAnswer(true, {
         problem: 'パターン発見: 最大面積の発見',
         userAnswer: '面積が最大値に到達',
-        correctAnswer: '面積最大パターンの発見',
-        pattern: 'max_area',
-        pointPosition: pointPosition,
-        maxAreaValue: currentArea
+        correctAnswer: '面積最大パターンの発見'
       });
     }
     if (pointPosition < 0.02 || Math.abs(pointPosition - 0.25) < 0.02 || 
@@ -480,9 +458,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
       recordAnswer(true, {
         problem: 'パターン発見: 特殊な位置での探索',
         userAnswer: '四隅や辺の中点での観察',
-        correctAnswer: '重要な位置パターンの発見',
-        pattern: 'corners',
-        pointPosition: pointPosition
+        correctAnswer: '重要な位置パターンの発見'
       });
     }
   };
@@ -499,12 +475,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
         recordAnswer(true, {
           problem: `ガイド付きチャレンジ ${currentChallenge + 1}`,
           userAnswer: challenge.title,
-          correctAnswer: 'チャレンジ達成',
-          challengeId: challenge.id,
-          challengeTitle: challenge.title,
-          pointPosition: pointPosition,
-          currentArea: currentArea,
-          successCount: successCount + 1
+          correctAnswer: 'チャレンジ達成'
         });
         
         // 自動的に観察を記録
@@ -532,14 +503,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: '動く点P探索のリセット',
       userAnswer: '探索状態をリセット',
-      correctAnswer: 'リセット完了',
-      beforeReset: {
-        progress: progress,
-        successCount: successCount,
-        observationsCount: observations.length,
-        discoveredPatterns: discoveredPatterns.size,
-        maxAreaFound: maxArea
-      }
+      correctAnswer: 'リセット完了'
     });
     
     setPointPosition(0);

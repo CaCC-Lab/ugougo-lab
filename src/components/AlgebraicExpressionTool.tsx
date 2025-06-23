@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -27,7 +27,6 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { LearningAssistant } from './common/LearningAssistant';
 import { LearningMetrics } from './common/LearningMetrics';
-import { useLearningStore } from '../stores/learningStore';
 import { algebraicExpressionConcepts } from '../utils/learningSupport';
 import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
@@ -64,7 +63,7 @@ interface AlgebraicExpressionToolProps {
 }
 
 // 文字式変形ツール（内部コンポーネント）
-const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = ({ onClose }) => {
+const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = () => {
   const { recordAnswer, recordInteraction, recordHintUsed } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -76,7 +75,7 @@ const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = (
   const [error, setError] = useState('');
   
   // 学習支援機能
-  const [hintsUsed, setHintsUsed] = useState(0);
+  const [_hintsUsed, setHintsUsed] = useState(0);
   
   // サンプル問題
   const sampleProblems = {
@@ -199,7 +198,8 @@ const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = (
       
       // ステップ3: 各項に分配
       const terms = innerExpr.match(/[+-]?[^+-]+/g) || [];
-      const expandedTerms = terms.map(term => {
+      const expandedTerms = terms.map((_term, index) => {
+        const term = terms[index];
         const trimmedTerm = term.trim();
         const sign = trimmedTerm.startsWith('+') ? '+' : 
                     trimmedTerm.startsWith('-') ? '-' : '+';
@@ -212,7 +212,7 @@ const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = (
           const variable = termMatch[2];
           const resultCoef = parseInt(coefficient) * termCoef * (sign === '-' ? -1 : 1);
           
-          return resultCoef >= 0 && terms.indexOf(term) > 0 ? 
+          return resultCoef >= 0 && index > 0 ? 
             `+${resultCoef}${variable}` : `${resultCoef}${variable}`;
         }
         return term;
@@ -277,7 +277,7 @@ const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = (
       });
       
       // ステップ3: 因数分解
-      const factorizedTerms = terms.map((term, index) => {
+      const factorizedTerms = terms.map((_term, index) => {
         const newCoef = coefficients[index] / commonFactor;
         const sign = newCoef >= 0 && index > 0 ? '+' : '';
         return sign + newCoef + variables[index].replace('1', '');
@@ -299,7 +299,7 @@ const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = (
   };
   
   // 操作モードの変更時に記録
-  const handleOperationChange = (newOperation: 'simplify' | 'expand' | 'factorize' | null) => {
+  const handleOperationChange = (_event: React.MouseEvent<HTMLElement>, newOperation: 'simplify' | 'expand' | 'factorize' | null) => {
     if (newOperation && newOperation !== operation) {
       setOperation(newOperation);
       recordInteraction('click');
@@ -375,7 +375,7 @@ const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = (
                 <ToggleButtonGroup
                   value={operation}
                   exclusive
-                  onChange={(_, value) => handleOperationChange(value)}
+                  onChange={handleOperationChange}
                   aria-label="操作の種類"
                   size={isMobile ? 'small' : 'medium'}
                   fullWidth
@@ -476,7 +476,7 @@ const AlgebraicExpressionToolContent: React.FC<AlgebraicExpressionToolProps> = (
                   {sampleProblems[operation].map((sample, index) => (
                     <ListItem
                       key={index}
-                      button
+                      component="div"
                       onClick={() => selectSample(sample)}
                       sx={{
                         mb: 1,

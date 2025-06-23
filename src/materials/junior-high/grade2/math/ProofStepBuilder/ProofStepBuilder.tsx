@@ -67,11 +67,9 @@ const ProofStepBuilderContent: React.FC = () => {
     // 証明の結果を記録
     if (result) {
       recordAnswer(result.score >= 70, {
-        problemId: state.problem?.id,
-        problemTitle: state.problem?.title,
-        score: result.score,
-        errors: result.errors,
-        isComplete: state.isComplete
+        problem: `証明問題: ${state.problem?.title || '未設定'}`,
+        userAnswer: `スコア: ${result.score}点, エラー数: ${result.errors.length}`,
+        correctAnswer: 'スコア70点以上で合格'
       });
     }
   };
@@ -161,7 +159,7 @@ const ProofStepBuilderContent: React.FC = () => {
             }}
             onUpdateStep={(id, updates) => {
               updateStep(id, updates);
-              recordInteraction('change');
+              recordInteraction('drag');
             }}
             onReorderSteps={(startIndex, endIndex) => {
               reorderSteps(startIndex, endIndex);

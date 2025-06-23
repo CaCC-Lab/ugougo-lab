@@ -26,7 +26,7 @@ import { useLearningTrackerContext } from './wrappers/MaterialWrapper';
 // たし算・ひき算ビジュアライザー
 function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
   // 学習追跡の取得
-  const { recordAnswer, recordHintUsed, recordInteraction } = useLearningTrackerContext();
+  const { recordAnswer } = useLearningTrackerContext();
   
   const [operation, setOperation] = useState<'addition' | 'subtraction'>('addition');
   const [firstNumber, setFirstNumber] = useState(3);
@@ -145,7 +145,7 @@ function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
   };
   
   // 操作タイプを変更
-  const handleOperationChange = (_: React.MouseEvent<HTMLElement>, newOperation: 'addition' | 'subtraction' | null) => {
+  const handleOperationChange = (_event: React.MouseEvent<HTMLElement>, newOperation: 'addition' | 'subtraction' | null) => {
     if (newOperation !== null) {
       setOperation(newOperation);
       generateNewProblem();
@@ -260,7 +260,7 @@ function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：問題と入力 */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 3, height: 'fit-content' }}>
             <Typography variant="h5" sx={{ mb: 3, textAlign: 'center' }}>
               もんだい
@@ -328,7 +328,7 @@ function AdditionSubtractionVisualizer({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：ビジュアル表示 */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           <Paper elevation={2} sx={{ p: 3, minHeight: 400 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               リンゴをかぞえてみよう！

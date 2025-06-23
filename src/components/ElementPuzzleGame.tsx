@@ -260,15 +260,7 @@ function ElementPuzzleGameContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: 'パズルボールの発射',
       userAnswer: `${currentBall.type === 'symbol' ? element?.symbol : element?.name}ボールを発射`,
-      correctAnswer: '適切な位置への発射',
-      ballType: currentBall.type,
-      element: currentBall.element,
-      shootAngle: angle * (180 / Math.PI), // 度数で記録
-      gameState: {
-        score: gameState.score,
-        combo: gameState.combo,
-        level: gameState.level
-      }
+      correctAnswer: '適切な位置への発射'
     });
   };
   
@@ -359,16 +351,7 @@ function ElementPuzzleGameContent({ onClose }: { onClose: () => void }) {
         recordAnswer(true, {
           problem: '元素ペアの成功マッチ',
           userAnswer: `${matchedElements.join(', ')}の元素ペアを${matchedGroups.length}個消去`,
-          correctAnswer: '元素記号と名前の正しい対応',
-          matchedElements: matchedElements,
-          matchedCount: matchedGroups.length,
-          earnedPoints: points,
-          combo: prev.combo + 1,
-          gameProgress: {
-            beforeScore: prev.score,
-            afterScore: prev.score + points,
-            level: prev.level
-          }
+          correctAnswer: '元素記号と名前の正しい対応'
         });
         
         return {
@@ -434,25 +417,14 @@ function ElementPuzzleGameContent({ onClose }: { onClose: () => void }) {
       recordAnswer(true, {
         problem: '元素パズルゲームの開始',
         userAnswer: 'ゲームを開始',
-        correctAnswer: 'ゲーム開始',
-        gameMode: 'element-puzzle',
-        startConditions: {
-          availableElements: elements.slice(0, 10).length,
-          startLevel: gameState.level
-        }
+        correctAnswer: 'ゲーム開始'
       });
     } else {
       // ゲーム中断を記録
       recordAnswer(true, {
         problem: '元素パズルゲームの中断',
         userAnswer: 'ゲームを中断',
-        correctAnswer: 'ゲーム中断',
-        gameResults: {
-          finalScore: gameState.score,
-          maxCombo: gameState.combo,
-          level: gameState.level,
-          ballsRemaining: gameState.balls.length
-        }
+        correctAnswer: 'ゲーム中断'
       });
     }
   };
@@ -465,14 +437,7 @@ function ElementPuzzleGameContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: '元素パズルゲームのリセット',
       userAnswer: 'ゲームをリセット',
-      correctAnswer: 'ゲームの初期化',
-      resetData: {
-        previousScore: gameState.score,
-        previousCombo: gameState.combo,
-        previousLevel: gameState.level,
-        previousProgress: progress,
-        previousSuccessCount: successCount
-      }
+      correctAnswer: 'ゲームの初期化'
     });
     
     setIsPlaying(false);
@@ -507,11 +472,7 @@ function ElementPuzzleGameContent({ onClose }: { onClose: () => void }) {
           recordAnswer(true, {
             problem: '高コンボ達成',
             userAnswer: `${gameState.combo}コンボを達成`,
-            correctAnswer: '連続的な元素ペア発見の成功',
-            comboLevel: gameState.combo,
-            achievementLevel: gameState.combo > 5 ? 'excellent' : gameState.combo > 3 ? 'good' : 'normal',
-            currentScore: gameState.score,
-            successCount: newCount
+            correctAnswer: '連続的な元素ペア発見の成功'
           });
           
           return newCount;
@@ -523,34 +484,25 @@ function ElementPuzzleGameContent({ onClose }: { onClose: () => void }) {
         recordAnswer(true, {
           problem: '学習進捗マイルストーン',
           userAnswer: '25%進捗を達成',
-          correctAnswer: '元素学習の基礎習得',
-          milestone: '25%',
-          currentScore: gameState.score
+          correctAnswer: '元素学習の基礎習得'
         });
       } else if (newProgress >= 50 && progress < 50) {
         recordAnswer(true, {
           problem: '学習進捗マイルストーン',
           userAnswer: '50%進捗を達成',
-          correctAnswer: '元素学習の中級習得',
-          milestone: '50%',
-          currentScore: gameState.score
+          correctAnswer: '元素学習の中級習得'
         });
       } else if (newProgress >= 75 && progress < 75) {
         recordAnswer(true, {
           problem: '学習進捗マイルストーン',
           userAnswer: '75%進捗を達成',
-          correctAnswer: '元素学習の上級習得',
-          milestone: '75%',
-          currentScore: gameState.score
+          correctAnswer: '元素学習の上級習得'
         });
       } else if (newProgress >= 100 && progress < 100) {
         recordAnswer(true, {
           problem: '学習進捗完了',
           userAnswer: '100%進捗を達成',
-          correctAnswer: '元素学習の完全習得',
-          milestone: '100%',
-          finalScore: gameState.score,
-          totalSuccessCount: successCount
+          correctAnswer: '元素学習の完全習得'
         });
       }
     }

@@ -89,7 +89,7 @@ interface UnitConversionToolProps {
 }
 
 // 単位変換ツール（内部コンポーネント）
-const UnitConversionToolContent: React.FC<UnitConversionToolProps> = ({ onClose }) => {
+const UnitConversionToolContent: React.FC<UnitConversionToolProps> = ({ onClose: _onClose }) => {
   const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));

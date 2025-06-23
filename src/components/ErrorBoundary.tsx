@@ -3,7 +3,7 @@
  * Reactコンポーネントのエラーをキャッチして詳細情報を表示
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import { Box, Typography, Alert, Button, Paper, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 

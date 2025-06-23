@@ -586,7 +586,7 @@ function ElectricCircuitSimulatorContent({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：部品とコントロール */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 2, height: 'fit-content' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               {quizMode ? 'クイズ' : '部品ボックス'}
@@ -757,7 +757,7 @@ function ElectricCircuitSimulatorContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：回路キャンバス */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid xs={12} md={8}>
           <Paper elevation={2} sx={{ p: 2 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               回路を組み立てよう

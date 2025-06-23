@@ -11,7 +11,6 @@ import type {
 import {
   validateCircuit,
   analyzeCircuit,
-  calculateOhmsLaw,
   generateGraphData
 } from '../utils/circuitCalculations';
 

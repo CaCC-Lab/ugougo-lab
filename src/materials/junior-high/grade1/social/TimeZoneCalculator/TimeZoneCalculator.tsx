@@ -77,9 +77,9 @@ const TimeZoneCalculatorContent: React.FC = () => {
     setTabValue(0);
     if (score !== undefined) {
       recordAnswer(score >= 70, {
-        type: 'quiz',
-        score: score,
-        topic: '時差計算'
+        problem: '時差計算クイズ',
+        userAnswer: `スコア: ${score}%`,
+        correctAnswer: '70%以上で合格'
       });
     }
   };

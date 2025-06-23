@@ -330,7 +330,7 @@ function PrefecturePuzzleContent({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：地図 */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid xs={12} md={8}>
           <Paper 
             elevation={2} 
             sx={{ 
@@ -424,7 +424,7 @@ function PrefecturePuzzleContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：情報/パズルピース */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           {mode === 'learn' && selectedPrefecture && (
             <Card>
               <CardContent>
@@ -465,7 +465,7 @@ function PrefecturePuzzleContent({ onClose }: { onClose: () => void }) {
                   {prefectures.map(prefecture => {
                     const isPlaced = placedPrefectures.includes(prefecture.id);
                     return (
-                      <Grid size={6} key={prefecture.id}>
+                      <Grid xs={6} key={prefecture.id}>
                         <Paper
                           draggable={!isPlaced}
                           onDragStart={() => handleDragStart(prefecture.id)}

@@ -1,5 +1,5 @@
 // 証明構築エリアのコンポーネント
-import React, { useState, DragEvent } from 'react';
+import React, { useState, type DragEvent } from 'react';
 import { 
   Box, 
   Paper, 

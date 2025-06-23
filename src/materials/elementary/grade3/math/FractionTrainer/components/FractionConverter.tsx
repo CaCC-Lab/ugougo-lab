@@ -8,7 +8,7 @@
  * - 最大公約数・最小公倍数の視覚化
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Paper,

@@ -229,12 +229,12 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({
   onMoveComponent,
   onSelectComponent,
   onRemoveComponent,
-  onAddWire,
+  onAddWire: _onAddWire,
   isSimulating
 }) => {
   const stageRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
-  const [isDrawingWire, setIsDrawingWire] = useState(false);
-  const [wireStart, setWireStart] = useState<{ componentId: string; port: string } | null>(null);
+  const [_isDrawingWire, _setIsDrawingWire] = useState(false);
+  const [_wireStart, _setWireStart] = useState<{ componentId: string; port: string } | null>(null);
   
   // 部品パレット
   const componentTypes: Array<{ type: ComponentType; icon: React.ReactNode; label: string }> = [

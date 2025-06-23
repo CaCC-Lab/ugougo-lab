@@ -455,7 +455,7 @@ function HumanBodyAnimationContent({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：アニメーション */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid xs={12} md={8}>
           <Paper elevation={2} sx={{ p: 3 }}>
             {mode === 'learn' ? (
               <>
@@ -593,7 +593,7 @@ function HumanBodyAnimationContent({ onClose }: { onClose: () => void }) {
                 </Typography>
                 <Grid container spacing={2}>
                   {quizQuestions[currentQuestion].options.map((option, index) => (
-                    <Grid size={6} key={index}>
+                    <Grid xs={6} key={index}>
                       <Button
                         variant="outlined"
                         fullWidth
@@ -612,7 +612,7 @@ function HumanBodyAnimationContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：情報 */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           {mode === 'learn' ? (
             <Card>
               <CardContent>

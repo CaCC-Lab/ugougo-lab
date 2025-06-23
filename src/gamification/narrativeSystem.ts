@@ -175,7 +175,7 @@ export class DynamicStoryGenerator {
     const interests = learnerProfile.interests;
     
     // 興味に基づくテーマ選択
-    let selectedTheme = this.selectThemeByInterests(interests);
+    const selectedTheme = this.selectThemeByInterests(interests);
     
     // 年齢適正チェック
     const availableStories = this.getStoriesByTheme(selectedTheme)

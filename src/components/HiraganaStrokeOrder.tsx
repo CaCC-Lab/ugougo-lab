@@ -541,7 +541,7 @@ function HiraganaStrokeOrderContent({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：書き順アニメーション */}
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               かきじゅん
@@ -597,7 +597,7 @@ function HiraganaStrokeOrderContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：なぞり書き練習 */}
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid item xs={12} md={6}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               なぞりがきれんしゅう

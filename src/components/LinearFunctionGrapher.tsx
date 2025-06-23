@@ -560,7 +560,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：コントロール */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 2, height: 'fit-content' }}>
             {mode === 'free' && (
               <>
@@ -1005,7 +1005,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：グラフ表示 */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           <Paper elevation={2} sx={{ p: 2 }}>
             <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
               <ChartIcon sx={{ mr: 1 }} />

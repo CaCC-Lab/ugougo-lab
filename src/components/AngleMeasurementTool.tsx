@@ -208,10 +208,9 @@ const AngleMeasurementToolContent: React.FC<AngleMeasurementToolProps> = ({ onCl
     
     // 回答結果を記録
     recordAnswer(isCorrect, {
-      correctAngle: quizAngle,
-      userAngle: answer,
-      difference: Math.abs(answer - quizAngle),
-      attemptNumber: attempts + 1
+      problem: `角度測定クイズ: ${quizAngle}度の角度を当てる`,
+      userAnswer: `${answer}度`,
+      correctAnswer: `${quizAngle}度`
     });
     recordInteraction('click');
     
@@ -308,10 +307,10 @@ const AngleMeasurementToolContent: React.FC<AngleMeasurementToolProps> = ({ onCl
         <ToggleButtonGroup
           value={mode}
           exclusive
-          onChange={(_, value) => {
+          onChange={(_event, value) => {
             if (value) {
               setMode(value);
-              recordInteraction('change');
+              recordInteraction('click');
             }
           }}
           fullWidth
@@ -328,7 +327,7 @@ const AngleMeasurementToolContent: React.FC<AngleMeasurementToolProps> = ({ onCl
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：分度器 */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           <Paper elevation={2} sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
               <canvas
@@ -407,7 +406,7 @@ const AngleMeasurementToolContent: React.FC<AngleMeasurementToolProps> = ({ onCl
         </Grid>
 
         {/* 右側：ヒント */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -433,7 +432,7 @@ const AngleMeasurementToolContent: React.FC<AngleMeasurementToolProps> = ({ onCl
               </Typography>
               <Grid container spacing={1}>
                 {[30, 45, 60, 90, 120, 135, 150, 180].map(a => (
-                  <Grid size={3} key={a}>
+                  <Grid item xs={3} key={a}>
                     <Paper 
                       elevation={1} 
                       sx={{ 

@@ -20,7 +20,7 @@ const MeterContainer = styled(Paper)(({ theme }) => ({
   overflow: 'hidden'
 }));
 
-const MeterScale = styled(Box)(({ theme }) => ({
+const MeterScale = styled(Box)(({ theme: _theme }) => ({
   position: 'relative',
   height: 100,
   display: 'flex',

@@ -13,10 +13,10 @@ import {
   Divider
 } from '@mui/material';
 import {
-  PlayArrow as StartIcon,
-  Stop as StopIcon,
+  PlayArrow as _StartIcon,
+  Stop as _StopIcon,
   Refresh as ResetIcon,
-  Science as ExperimentIcon,
+  Science as _ExperimentIcon,
   Help as HelpIcon
 } from '@mui/icons-material';
 
@@ -25,7 +25,7 @@ const ElectricityExperiment: React.FC = () => {
   const [resistance, setResistance] = useState(5); // Ω
   const [current, setCurrent] = useState(2); // A
   const [mode, setMode] = useState<'series' | 'parallel'>('series');
-  const [isRunning, setIsRunning] = useState(false);
+  const [_isRunning, setIsRunning] = useState(false);
 
   // オームの法則で電流を計算
   React.useEffect(() => {
@@ -34,11 +34,11 @@ const ElectricityExperiment: React.FC = () => {
     }
   }, [voltage, resistance]);
 
-  const handleVoltageChange = (event: Event, newValue: number | number[]) => {
+  const handleVoltageChange = (_event: Event, newValue: number | number[]) => {
     setVoltage(newValue as number);
   };
 
-  const handleResistanceChange = (event: Event, newValue: number | number[]) => {
+  const handleResistanceChange = (_event: Event, newValue: number | number[]) => {
     setResistance(newValue as number);
   };
 

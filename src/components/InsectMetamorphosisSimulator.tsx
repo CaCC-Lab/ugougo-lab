@@ -378,7 +378,7 @@ function InsectMetamorphosisSimulatorContent({ onClose }: { onClose: () => void 
       {quizMode ? (
         // クイズモード
         <Grid container spacing={3} sx={{ flexGrow: 1 }}>
-          <Grid size={12}>
+          <Grid xs={12}>
             <Card>
               <CardContent>
                 <Typography variant="h5" gutterBottom>
@@ -419,7 +419,7 @@ function InsectMetamorphosisSimulatorContent({ onClose }: { onClose: () => void 
         // 観察モード
         <Grid container spacing={3} sx={{ flexGrow: 1 }}>
           {/* 左側：ステージ表示 */}
-          <Grid size={{ xs: 12, md: 8 }}>
+          <Grid xs={12} md={8}>
             <Paper elevation={2} sx={{ p: 3, height: '100%' }}>
               {/* 昆虫選択 */}
               <Box sx={{ mb: 3 }}>
@@ -578,7 +578,7 @@ function InsectMetamorphosisSimulatorContent({ onClose }: { onClose: () => void 
           </Grid>
 
           {/* 右側：情報 */}
-          <Grid size={{ xs: 12, md: 4 }}>
+          <Grid xs={12} md={4}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>

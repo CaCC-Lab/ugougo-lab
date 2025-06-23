@@ -1,4 +1,4 @@
-import type { Circuit, CircuitComponent, Wire, Measurement, CircuitError } from '../types';
+import type { Circuit, Measurement, CircuitError } from '../types';
 
 // オームの法則による計算
 export const calculateOhmsLaw = (
@@ -73,10 +73,11 @@ export const validateCircuit = (circuit: Circuit): CircuitError | null => {
   }
   
   // ショート回路の検出（電池の両端が直接接続）
-  const batteryConnections = batteries.map(b => {
-    const connections = wires.filter(w => w.from === b.id || w.to === b.id);
-    return connections;
-  });
+  // TODO: ショート回路検出の実装
+  // batteries.map(b => {
+  //   const connections = wires.filter(w => w.from === b.id || w.to === b.id);
+  //   return connections;
+  // });
   
   // より詳細な検証はここに追加
   

@@ -1,1 +1,1 @@
-export { default as EarthquakeWaveSimulator } from './EarthquakeWaveSimulator';
+// export { default as EarthquakeWaveSimulator } from './EarthquakeWaveSimulator';

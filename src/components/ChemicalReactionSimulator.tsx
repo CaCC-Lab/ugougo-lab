@@ -134,7 +134,7 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
   
   // クイズモード
   const [quizMode, setQuizMode] = useState(false);
-  const [quizAnswer, setQuizAnswer] = useState({ reactant1: '', reactant2: '', product1: '', product2: '' });
+  const [_quizAnswer, _setQuizAnswer] = useState({ reactant1: '', reactant2: '', product1: '', product2: '' });
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -143,18 +143,6 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
   const centerX = canvasSize / 2;
   const centerY = canvasSize / 2;
   
-  // 分子を描画する位置を計算
-  const calculateMoleculePositions = (molecules: Molecule[], startX: number, startY: number, spacing: number) => {
-    const positions: { x: number; y: number }[] = [];
-    let currentX = startX;
-    
-    molecules.forEach((molecule, index) => {
-      positions.push({ x: currentX, y: startY });
-      currentX += spacing;
-    });
-    
-    return positions;
-  };
   
   // 分子を作成
   const createMolecule = (formula: string): Molecule => {
@@ -452,7 +440,7 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
       
       // 原子を描画
       molecule.atoms.forEach(atom => {
-        const atomInfo = atomTypes[atom.type];
+        const atomInfo = atomTypes[atom.type as keyof typeof atomTypes];
         
         // 原子の円
         ctx.fillStyle = atomInfo.color;
@@ -488,7 +476,7 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
     fromX: number,
     fromY: number,
     toX: number,
-    toY: number,
+    _toY: number,
     alpha: number
   ) => {
     ctx.globalAlpha = alpha;
@@ -529,8 +517,12 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
     const currentReaction = presetReactions[reactionType];
     recordAnswer(true, {
       problem: '化学反応アニメーションの開始',
-      userAnswer: `${currentReaction.name}のアニメーションを開始`,
-      correctAnswer: '化学反応の過程を視覚的に理解',
+      userAnswer: `${currentReaction.name}のアニメーションを開始 - ${currentReaction.equation}`,
+      correctAnswer: '化学反応の過程を視覚的に理解'
+    });
+    
+    // アニメーション開始の詳細を別途記録
+    console.log('Animation start:', {
       reactionType: reactionType,
       reactionName: currentReaction.name,
       equation: currentReaction.equation,
@@ -547,7 +539,11 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
           recordAnswer(true, {
             problem: '化学反応アニメーションの完了',
             userAnswer: `${currentReaction.name}の反応過程を完全に観察`,
-            correctAnswer: '化学反応の理解完了',
+            correctAnswer: '化学反応の理解完了'
+          });
+          
+          // アニメーション完了の詳細を別途記録
+          console.log('Animation complete:', {
             reactionType: reactionType,
             reactionName: currentReaction.name,
             completionTime: Date.now()
@@ -574,16 +570,18 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
     
     // リセット実行を記録
     recordAnswer(true, {
-      problem: '化学反応シミュレーターのリセット',
-      userAnswer: 'シミュレーターを初期状態に戻す',
-      correctAnswer: 'リセット完了',
-      resetData: {
-        previousReactionType: reactionType,
-        previousProgress: animationProgress,
-        previousScore: score,
-        previousAttempts: attempts,
-        quizModeActive: quizMode
-      }
+    problem: '化学反応シミュレーターのリセット',
+    userAnswer: 'シミュレーターを初期状態に戻す',
+    correctAnswer: 'リセット完了'
+  });
+    
+    // リセット詳細情報を別途記録
+    console.log('Reset data:', {
+      previousReactionType: reactionType,
+      previousProgress: animationProgress,
+      previousScore: score,
+      previousAttempts: attempts,
+      quizModeActive: quizMode
     });
     
     setAnimationProgress(0);
@@ -668,11 +666,15 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
               recordInteraction('click');
               
               // 反応タイプ変更を記録
-              const newReaction = presetReactions[value];
+              const newReaction = presetReactions[value as keyof typeof presetReactions];
               recordAnswer(true, {
                 problem: '化学反応タイプの選択',
                 userAnswer: `${newReaction.name}を選択`,
-                correctAnswer: '反応の種類の理解',
+                correctAnswer: '反応の種類の理解'
+              });
+              
+              // 反応タイプ変更の詳細を別途記録
+              console.log('Reaction type change:', {
                 newReactionType: value,
                 reactionName: newReaction.name,
                 equation: newReaction.equation,
@@ -718,9 +720,13 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
                   
                   // アニメーション停止を記録
                   recordAnswer(true, {
-                    problem: '化学反応アニメーションの停止',
-                    userAnswer: 'アニメーションを一時停止',
-                    correctAnswer: 'アニメーション制御の理解',
+    problem: '化学反応アニメーションの停止',
+    userAnswer: 'アニメーションを一時停止',
+    correctAnswer: 'アニメーション制御の理解'
+  });
+                  
+                  // アニメーション停止の詳細を別途記録
+                  console.log('Animation stop:', {
                     stopProgress: animationProgress,
                     reactionType: reactionType
                   });
@@ -757,11 +763,10 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
                   
                   // 分子モデル表示切り替えを記録
                   recordAnswer(true, {
-                    problem: '分子モデル表示の切り替え',
-                    userAnswer: showMolecularView ? '分子モデルを非表示' : '分子モデルを表示',
-                    correctAnswer: '表示設定の調整',
-                    showMolecularView: !showMolecularView
-                  });
+    problem: '分子モデル表示の切り替え',
+    userAnswer: showMolecularView ? '分子モデルを非表示' : '分子モデルを表示',
+    correctAnswer: '表示設定の調整'
+  });
                 }}
               >
                 分子モデル
@@ -775,11 +780,10 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
                   
                   // 化学式表示切り替えを記録
                   recordAnswer(true, {
-                    problem: '化学式表示の切り替え',
-                    userAnswer: showEquation ? '化学式を非表示' : '化学式を表示',
-                    correctAnswer: '表示設定の調整',
-                    showEquation: !showEquation
-                  });
+    problem: '化学式表示の切り替え',
+    userAnswer: showEquation ? '化学式を非表示' : '化学式を表示',
+    correctAnswer: '表示設定の調整'
+  });
                 }}
               >
                 化学反応式
@@ -891,7 +895,7 @@ function ChemicalReactionSimulatorContent({ onClose }: { onClose: () => void }) 
                     {Object.entries(atomCounts).map(([atom, counts]) => (
                       <TableRow key={atom}>
                         <TableCell>
-                          {atomTypes[atom]?.name || atom}
+                          {atomTypes[atom as keyof typeof atomTypes]?.name || atom}
                         </TableCell>
                         <TableCell align="center">{counts.before}</TableCell>
                         <TableCell 

@@ -190,10 +190,9 @@ const FractionPizzaCutterContent: React.FC<FractionPizzaCutterProps> = ({ onClos
     
     // 回答結果を記録
     recordAnswer(isAnswerCorrect, {
-      problemFraction: `${quizNumerator}/${quizDenominator}`,
-      selectedSlices: selectedSlices.length,
-      correctSlices: correctSlices,
-      attemptNumber: attempts + 1
+      problem: `分数パズル: ${quizNumerator}/${quizDenominator}を選択`,
+      userAnswer: `${selectedSlices.length}個選択`,
+      correctAnswer: `${correctSlices}個選択`
     });
     recordInteraction('click');
     
@@ -325,7 +324,7 @@ const FractionPizzaCutterContent: React.FC<FractionPizzaCutterProps> = ({ onClos
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：コントロール */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Paper elevation={2} sx={{ p: 2, height: 'fit-content' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               {mode === 'practice' ? 'ピザの切り分け' : 'クイズ'}
@@ -465,7 +464,7 @@ const FractionPizzaCutterContent: React.FC<FractionPizzaCutterProps> = ({ onClos
         </Grid>
 
         {/* 右側：ピザ表示 */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           <Paper elevation={2} sx={{ p: 2 }}>
             <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
               <PizzaIcon sx={{ mr: 1 }} />
@@ -489,7 +488,7 @@ const FractionPizzaCutterContent: React.FC<FractionPizzaCutterProps> = ({ onClos
             {/* 分数の比較（練習モード） */}
             {mode === 'practice' && selectedSlices.length > 0 && (
               <Grid container spacing={2} sx={{ mt: 2 }}>
-                <Grid size={6}>
+                <Grid item xs={6}>
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -511,7 +510,7 @@ const FractionPizzaCutterContent: React.FC<FractionPizzaCutterProps> = ({ onClos
                     </CardContent>
                   </Card>
                 </Grid>
-                <Grid size={6}>
+                <Grid item xs={6}>
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="subtitle2" sx={{ mb: 1 }}>

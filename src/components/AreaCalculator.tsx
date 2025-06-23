@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Box,
   Card,
@@ -11,13 +11,11 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Grid,
-  Chip,
   Alert,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Slider,
   useTheme,
   useMediaQuery,
 } from '@mui/material';
@@ -47,7 +45,7 @@ const CanvasContainer = styled(Paper)(({ theme }) => ({
 }));
 
 // グリッドのスタイル
-const GridOverlay = styled(Box)(({ theme }) => ({
+const GridOverlay = styled(Box)(() => ({
   position: 'absolute',
   top: 0,
   left: 0,
@@ -89,7 +87,7 @@ interface AreaCalculatorProps {
 }
 
 // 面積計算ツール（内部コンポーネント）
-const AreaCalculatorContent: React.FC<AreaCalculatorProps> = ({ onClose }) => {
+const AreaCalculatorContent: React.FC<AreaCalculatorProps> = () => {
   const { recordAnswer, recordInteraction } = useLearningTrackerContext();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -504,7 +502,7 @@ const AreaCalculatorContent: React.FC<AreaCalculatorProps> = ({ onClose }) => {
   };
   
   // 図形タイプの変更
-  const handleShapeTypeChange = (_: React.MouseEvent<HTMLElement>, newType: Shape['type'] | null) => {
+  const handleShapeTypeChange = (_event: React.MouseEvent<HTMLElement>, newType: Shape['type'] | null) => {
     if (newType) {
       setShapeType(newType);
       recordInteraction('click');

@@ -319,7 +319,7 @@ function TownExplorationMapContent({ onClose }: { onClose: () => void }) {
 
       <Grid container spacing={3} sx={{ flexGrow: 1 }}>
         {/* 左側：マップ */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid xs={12} md={8}>
           <Paper 
             ref={mapRef}
             elevation={2} 
@@ -428,7 +428,7 @@ function TownExplorationMapContent({ onClose }: { onClose: () => void }) {
         </Grid>
 
         {/* 右側：情報 */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid xs={12} md={4}>
           {quizMode ? (
             <Card>
               <CardContent>

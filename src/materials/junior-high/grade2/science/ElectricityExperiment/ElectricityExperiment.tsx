@@ -20,9 +20,9 @@ import {
 } from '@mui/material';
 import {
   PlayArrow as StartIcon,
-  Stop as StopIcon,
+  Stop as _StopIcon,
   Refresh as ResetIcon,
-  Science as ExperimentIcon,
+  Science as _ExperimentIcon,
   Assignment as TemplateIcon,
   Help as HelpIcon
 } from '@mui/icons-material';
@@ -40,12 +40,11 @@ import type { ExperimentMode } from './types';
 
 // 電流・電圧・抵抗の関係実験器（内部コンポーネント）
 const ElectricityExperimentContent: React.FC = () => {
-  const { recordInteraction, recordAnswer } = useLearningTrackerContext();
-  console.log('ElectricityExperiment rendering');
+  const { recordInteraction, recordAnswer: _recordAnswer } = useLearningTrackerContext();
   
   try {
   const [showHelp, setShowHelp] = useState(false);
-  const [activeChallenge, setActiveChallenge] = useState(0);
+  const [activeChallenge, _setActiveChallenge] = useState(0);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   
   const {
@@ -61,13 +60,13 @@ const ElectricityExperimentContent: React.FC = () => {
     updateComponentValue,
     selectComponent,
     addWire,
-    removeWire,
+    removeWire: _removeWire,
     setMode,
     runSimulation,
     resetCircuit,
     loadTemplate,
-    setPrediction,
-    checkPredictions
+    setPrediction: _setPrediction,
+    checkPredictions: _checkPredictions
   } = useCircuitSimulation();
   
   // 実験モードのステップ
@@ -218,8 +217,8 @@ const ElectricityExperimentContent: React.FC = () => {
                 height={500}
                 components={circuit.components}
                 selectedComponent={selectedComponent}
-                onAddComponent={(component) => {
-                  addComponent(component);
+                onAddComponent={(type, position) => {
+                  addComponent(type, position);
                   recordInteraction('click');
                 }}
                 onMoveComponent={(id, position) => {
@@ -234,8 +233,8 @@ const ElectricityExperimentContent: React.FC = () => {
                   removeComponent(id);
                   recordInteraction('click');
                 }}
-                onAddWire={(wire) => {
-                  addWire(wire);
+                onAddWire={(from, to, fromPort, toPort) => {
+                  addWire(from, to, fromPort, toPort);
                   recordInteraction('click');
                 }}
                 isSimulating={mode === 'measure'}
@@ -281,7 +280,7 @@ const ElectricityExperimentContent: React.FC = () => {
                     selectedComponent={selectedComponent}
                     onUpdateValue={(id, value) => {
                       updateComponentValue(id, value);
-                      recordInteraction('change');
+                      recordInteraction('drag');
                     }}
                     onSelectComponent={selectComponent}
                     isSimulating={mode === 'measure'}

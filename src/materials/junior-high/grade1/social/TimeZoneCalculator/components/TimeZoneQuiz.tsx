@@ -19,7 +19,7 @@ import {
   NavigateNext as NavigateNextIcon
 } from '@mui/icons-material';
 import type { TimeZoneQuizQuestion } from '../data/cityData';
-import type { City } from '../data/cityData';
+// import type { City } from '../data/cityData';
 import { cities } from '../data/cityData';
 
 interface TimeZoneQuizProps {

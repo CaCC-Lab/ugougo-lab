@@ -295,7 +295,7 @@ export const FormulaDisplay: React.FC<FormulaDisplayProps> = ({ onCalculate }) =
                     variant="outlined"
                     size="small"
                     startIcon={answer === '0.3A' ? <CheckIcon /> : <CancelIcon />}
-                    color={answer === '0.3A' ? 'success' : 'default'}
+                    color={answer === '0.3A' ? 'success' : 'inherit'}
                   >
                     {answer}
                   </Button>
