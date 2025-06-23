@@ -712,7 +712,7 @@ function TypingPuyoGameContent({ onClose }: { onClose: () => void }) {
         <Chip 
           label={`スコア: ${gameState.score}`}
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`WPM: ${gameState.wpm}`} 

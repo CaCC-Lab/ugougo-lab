@@ -524,7 +524,7 @@ function InertiaSimulationContent({ onClose }: { onClose: () => void }) {
         <Chip 
           label={scenarios[scenario].name}
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`視点: ${viewMode === 'inside' ? '電車内' : '電車外'}`} 

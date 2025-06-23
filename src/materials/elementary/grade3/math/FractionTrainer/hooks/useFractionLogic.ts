@@ -96,7 +96,9 @@ export const useFractionLogic = (initialProblem?: FractionProblem) => {
     recommendations: [],
     adaptiveDifficulty: 'normal',
     hintsUsed: 0,
-    lastUpdated: Date.now()
+    lastUpdated: Date.now(),
+    timeSpent: 0,
+    lastAccessed: new Date().toISOString()
   };
 
   // 学習進捗

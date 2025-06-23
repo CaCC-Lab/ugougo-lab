@@ -575,7 +575,7 @@ function MovingPointPContent({ onClose }: { onClose: () => void }) {
         <Chip 
           label={`現在の面積: ${currentArea.toFixed(1)}`}
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`最大面積: ${maxArea.toFixed(1)}`} 

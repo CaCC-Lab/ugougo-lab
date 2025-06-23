@@ -88,8 +88,8 @@ const NumberLineIntegersContent: React.FC<NumberLineIntegersProps> = ({ onClose 
     // 回答結果を記録
     recordAnswer(isCorrect, {
       problem: `${currentProblem.start} ${currentProblem.operation} ${currentProblem.value}`,
-      correctAnswer: correctAnswer,
-      userAnswer: answer,
+      correctAnswer: correctAnswer.toString(),
+      userAnswer: answer.toString(),
       successCount: successCount
     });
     recordInteraction('click');
@@ -247,7 +247,7 @@ const NumberLineIntegersContent: React.FC<NumberLineIntegersProps> = ({ onClose 
         <Chip 
           label={`問題: ${currentProblem.start} ${currentProblem.operation} ${currentProblem.value}`} 
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`成功回数: ${successCount}`} 
@@ -286,7 +286,7 @@ const NumberLineIntegersContent: React.FC<NumberLineIntegersProps> = ({ onClose 
           {animationStep === 0 && (
             <Button 
               variant="contained" 
-              size="large" 
+              size="medium" 
               onClick={startAnimation}
               sx={{ fontSize: '1.2rem', px: 4, py: 2 }}
             >

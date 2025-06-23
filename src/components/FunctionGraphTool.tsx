@@ -292,7 +292,7 @@ function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
     const normalizeFormula = (formula: string) => formula.replace(/\s/g, '').replace(/\+\-/g, '-');
     const isCorrect = normalizeFormula(answer) === normalizeFormula(correct);
     
-    recordInteraction('text_input');
+    recordInteraction('key');
     
     // クイズ回答を記録
     recordAnswer(isCorrect, {
@@ -318,16 +318,7 @@ function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
     recordAnswer(true, {
       problem: '関数グラフツールのリセット',
       userAnswer: 'システムを初期状態に戻す',
-      correctAnswer: 'リセット完了',
-      resetData: {
-        previousFunctionType: functionType,
-        previousParameters: { a: paramA, b: paramB, c: paramC },
-        previousProgress: progress,
-        previousSuccessCount: successCount,
-        wasAnimating: isAnimating,
-        wasInQuizMode: quizMode,
-        currentFunction: getFunctionText(functionType, paramA, paramB, paramC)
-      }
+      correctAnswer: 'リセット完了'
     });
     
     setProgress(0);
@@ -397,7 +388,7 @@ function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
         <Chip 
           label={quizMode ? `クイズ: ${functionTypes[quizQuestion.type as keyof typeof functionTypes].name}` : `表示中: ${functionTypes[functionType as keyof typeof functionTypes].name}`}
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`成功回数: ${successCount}`} 
@@ -533,7 +524,7 @@ function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
                     onChange={(_, value) => {
                       const newParamA = value as number;
                       setParamA(newParamA);
-                      recordInteraction('slider');
+                      recordInteraction('drag');
                       
                       // パラメータa変更を記録（主要な値で）
                       if ([-5, -2, -1, 0, 1, 2, 5].includes(Math.round(newParamA * 10) / 10)) {
@@ -570,7 +561,7 @@ function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
                     onChange={(_, value) => {
                       const newParamB = value as number;
                       setParamB(newParamB);
-                      recordInteraction('slider');
+                      recordInteraction('drag');
                       
                       // パラメータb変更を記録（主要な値で）
                       if ([-5, -2, -1, 0, 1, 2, 5].includes(Math.round(newParamB * 10) / 10)) {
@@ -608,7 +599,7 @@ function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
                       onChange={(_, value) => {
                         const newParamC = value as number;
                         setParamC(newParamC);
-                        recordInteraction('slider');
+                        recordInteraction('drag');
                         
                         // パラメータc変更を記録（主要な値で）
                         if ([-5, -2, -1, 0, 1, 2, 5].includes(Math.round(newParamC * 10) / 10)) {
@@ -698,7 +689,7 @@ function FunctionGraphToolContent({ onClose }: { onClose: () => void }) {
                   value={userAnswer}
                   onChange={(e) => {
                     setUserAnswer(e.target.value);
-                    recordInteraction('text_input');
+                    recordInteraction('key');
                   }}
                   placeholder="例: y = 2x + 1"
                   fullWidth

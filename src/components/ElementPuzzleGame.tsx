@@ -534,7 +534,7 @@ function ElementPuzzleGameContent({ onClose }: { onClose: () => void }) {
         <Chip 
           label={`スコア: ${gameState.score}`}
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`コンボ: ${gameState.combo}`} 

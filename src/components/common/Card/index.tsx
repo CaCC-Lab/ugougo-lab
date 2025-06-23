@@ -19,9 +19,9 @@ interface CardProps extends Omit<MuiCardProps, 'component'> {
   disableAnimation?: boolean;
 }
 
-type MotionCardProps = HTMLMotionProps<'div'> & MuiCardProps;
+type MotionCardProps = HTMLMotionProps<'div'> & Omit<MuiCardProps, 'onDrag' | 'onDragStart' | 'onDragEnd'>;
 
-const MotionCard = motion<MotionCardProps>(MuiCard);
+const MotionCard = motion(MuiCard as any) as any;
 
 export const Card = ({ 
   children, 

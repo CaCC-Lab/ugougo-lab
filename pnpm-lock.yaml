@@ -27,8 +27,8 @@ importers:
         specifier: ^0.177.0
         version: 0.177.0
       axios:
-        specifier: 1.4.0
-        version: 1.4.0
+        specifier: 1.10.0
+        version: 1.10.0
       canvas-confetti:
         specifier: ^1.9.3
         version: 1.9.3
@@ -922,8 +922,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  axios@1.4.0:
-    resolution: {integrity: sha512-S4XCWMEmzvo64T9GfvQDOXgYRDJ/wsSZc7Jvdgx5u1sd0JwsuPLqb3SYmusag+edF6ziyMensPVqLTSc1PiSEA==}
+  axios@1.10.0:
+    resolution: {integrity: sha512-/1xYAC4MP/HEG+3duIhFr4ZQXR4sQXOIe+o6sdqzeykGLx6Upp/1p8MHqhINOvGeP7xyNHe7tsiJByc4SSVUxw==}
 
   babel-plugin-macros@3.1.0:
     resolution: {integrity: sha512-Cg7TFGpIr01vOQNODXOOaGz2NpCU5gl8x1qJFbb6hbZxR7XrcE2vtbAsTAbJ7/xwJtUuJEw8K8Zr/AE0LHlesg==}
@@ -1266,8 +1266,8 @@ packages:
       debug:
         optional: true
 
-  form-data@4.0.2:
-    resolution: {integrity: sha512-hGfm/slu0ZabnNt4oaRZ6uREyfCj6P4fT/n6A1rGV+Z0VdGXjfOhVUpkn6qVQONHGIFwmveGXyDs75+nr6FM8w==}
+  form-data@4.0.3:
+    resolution: {integrity: sha512-qsITQPfmvMOSAdeyZ+12I1c+CKSstAFAwu+97zrnWAbIr5u8wfsExUzCesVLC8NgHuRUqNN4Zy6UPWUTRGslcA==}
     engines: {node: '>= 6'}
 
   framer-motion@10.12.16:
@@ -2773,10 +2773,10 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  axios@1.4.0:
+  axios@1.10.0:
     dependencies:
       follow-redirects: 1.15.9
-      form-data: 4.0.2
+      form-data: 4.0.3
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
@@ -3140,11 +3140,12 @@ snapshots:
 
   follow-redirects@1.15.9: {}
 
-  form-data@4.0.2:
+  form-data@4.0.3:
     dependencies:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       es-set-tostringtag: 2.1.0
+      hasown: 2.0.2
       mime-types: 2.1.35
 
   framer-motion@10.12.16(react-dom@18.2.0(react@18.2.0))(react@18.2.0):

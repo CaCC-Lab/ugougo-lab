@@ -165,7 +165,7 @@ export const usePercentageLogic = () => {
   const [graphData, setGraphData] = useState<GraphData | null>(null);
   
   // Zustandストアとの連携
-  const { recordActivity } = useLearningStore();
+  // const { recordActivity } = useLearningStore(); // TODO: recordActivityメソッドが未実装
   
   /**
    * 答えの検証

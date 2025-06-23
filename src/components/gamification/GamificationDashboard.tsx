@@ -42,7 +42,7 @@ import {
   Psychology as BrainIcon,
   Speed as SpeedIcon,
   Favorite as HeartIcon,
-  Auto_Awesome as MagicIcon
+  AutoAwesome as MagicIcon
 } from '@mui/icons-material';
 import { styled, keyframes } from '@mui/material/styles';
 
@@ -320,7 +320,7 @@ const GamificationDashboard: React.FC<GamificationDashboardProps> = ({ userId, o
           />
           <Tab 
             label="ストーリー" 
-            icon={<Auto_Awesome />}
+            icon={<MagicIcon />}
             iconPosition="start"
           />
         </Tabs>
@@ -747,7 +747,7 @@ const StoryProgress: React.FC<{
     <Card>
       <CardContent>
         <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
-          <Auto_Awesome sx={{ mr: 1, color: '#9C27B0' }} />
+          <MagicIcon sx={{ mr: 1, color: '#9C27B0' }} />
           {storyContinuation.title}
         </Typography>
         

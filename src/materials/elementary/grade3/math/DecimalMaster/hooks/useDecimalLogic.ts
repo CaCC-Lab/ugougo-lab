@@ -95,7 +95,7 @@ export const useDecimalLogic = () => {
   });
   
   // Zustandストアとの連携
-  const { recordActivity } = useLearningStore();
+  // const { recordActivity } = useLearningStore(); // TODO: recordActivityメソッドが未実装
   
   /**
    * 小数の加算（筆算アルゴリズム）
@@ -147,16 +147,16 @@ export const useDecimalLogic = () => {
       }));
       
       // 学習履歴に記録
-      recordActivity({
-        materialId: 'decimal-master',
-        action: 'answered',
-        data: {
-          problem: currentProblem,
-          userAnswer: userValue,
-          correct: true,
-          attempts: attempts + 1
-        }
-      });
+      // recordActivity({
+      //   materialId: 'decimal-master',
+      //   action: 'answered',
+      //   data: {
+      //     problem: currentProblem,
+      //     userAnswer: userValue,
+      //     correct: true,
+      //     attempts: attempts + 1
+      //   }
+      // }); // TODO: recordActivityメソッドが未実装
       
       return true;
     } else {
@@ -171,7 +171,7 @@ export const useDecimalLogic = () => {
       
       return false;
     }
-  }, [currentProblem, attempts, recordActivity]);
+  }, [currentProblem, attempts]); // recordActivity removed: method not implemented
   
   /**
    * 誤答パターンの分析

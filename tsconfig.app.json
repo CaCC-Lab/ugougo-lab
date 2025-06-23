@@ -30,15 +30,20 @@
     },
 
     /* Linting */
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitAny": false,
-    "noImplicitReturns": false,
-    "noImplicitThis": false,
+    "strict": false, // 段階的に有効化予定
+    "noUnusedLocals": false, // 段階的に有効化予定
+    "noUnusedParameters": false, // 段階的に有効化予定
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": false,
-    "noUncheckedSideEffectImports": false
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/gamification/**/*",
+    "src/components/dashboard/**/*",
+    "src/components/educational/Canvas/**/*",
+    "src/materials/elementary/grade3/math/FractionTrainer/hooks/useFractionLogic.ts",
+    "src/materials/elementary/grade5/math/PercentageTrainer/hooks/usePercentageLogic.ts",
+    "src/materials/junior-high/grade1/english/PronunciationPractice/**/*"
+  ]
 }

@@ -698,7 +698,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                       点1の座標
                     </Typography>
                     <Grid container spacing={2} sx={{ mb: 2 }}>
-                      <Grid size={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="x₁"
                           type="number"
@@ -708,7 +708,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                           size="small"
                         />
                       </Grid>
-                      <Grid size={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="y₁"
                           type="number"
@@ -724,7 +724,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                       点2の座標
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid size={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="x₂"
                           type="number"
@@ -734,7 +734,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                           size="small"
                         />
                       </Grid>
-                      <Grid size={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="y₂"
                           type="number"
@@ -826,7 +826,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                           y = ax + b の形で答えてください
                         </Typography>
                         <Grid container spacing={2}>
-                          <Grid size={6}>
+                          <Grid xs={6}>
                             <TextField
                               label="a（傾き）"
                               value={quizAnswer.a}
@@ -835,7 +835,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                               size="small"
                             />
                           </Grid>
-                          <Grid size={6}>
+                          <Grid xs={6}>
                             <TextField
                               label="b（切片）"
                               value={quizAnswer.b}
@@ -858,7 +858,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                           赤: y = {a2}x {b2 >= 0 ? '+' : ''} {b2}
                         </Typography>
                         <Grid container spacing={2}>
-                          <Grid size={6}>
+                          <Grid xs={6}>
                             <TextField
                               label="x座標"
                               value={quizAnswer.a}
@@ -867,7 +867,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                               size="small"
                             />
                           </Grid>
-                          <Grid size={6}>
+                          <Grid xs={6}>
                             <TextField
                               label="y座標"
                               value={quizAnswer.b}
@@ -1028,7 +1028,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
             {/* グラフの情報 */}
             {mode === 'free' && !showSecondLine && (
               <Grid container spacing={2} sx={{ mt: 2 }}>
-                <Grid size={4}>
+                <Grid xs={4}>
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -1040,7 +1040,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                     </CardContent>
                   </Card>
                 </Grid>
-                <Grid size={4}>
+                <Grid xs={4}>
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -1052,7 +1052,7 @@ function LinearFunctionGrapherContent({ onClose }: { onClose: () => void }) {
                     </CardContent>
                   </Card>
                 </Grid>
-                <Grid size={4}>
+                <Grid xs={4}>
                   <Card variant="outlined">
                     <CardContent>
                       <Typography variant="subtitle2" sx={{ mb: 1 }}>

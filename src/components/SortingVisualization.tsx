@@ -52,7 +52,7 @@ function SortingVisualizationContent({ onClose }: { onClose: () => void }) {
   const [quizQuestion, setQuizQuestion] = useState({ algorithm: 'bubble', array: [3, 1, 4, 2] });
   const [userAnswer, setUserAnswer] = useState<string>('');
   
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<ReturnType<typeof setTimeout>>();
 
   // ソートアルゴリズム
   const algorithms = {
@@ -594,7 +594,7 @@ function SortingVisualizationContent({ onClose }: { onClose: () => void }) {
         <Chip 
           label={quizMode ? `クイズ: どのアルゴリズム？` : `アルゴリズム: ${algorithms[algorithm as keyof typeof algorithms].name}`}
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`成功回数: ${successCount}`} 

@@ -9,11 +9,12 @@ import { LearningAssistant } from '../common/LearningAssistant';
 
 // 学習追跡コンテキストの型定義
 interface LearningTrackerContextType {
-  recordInteraction: (type?: 'click' | 'drag' | 'key' | 'hint') => void;
+  recordInteraction: (type?: 'click' | 'drag' | 'key' | 'hint' | 'change' | 'drag_drop' | 'slider' | 'mistake' | string | any) => void;
   recordAnswer: (isCorrect: boolean, details?: {
     problem?: string;
     userAnswer?: string;
     correctAnswer?: string;
+    [key: string]: any;
   }) => void;
   recordHintUsed: () => void;
   saveSession: () => void;
@@ -148,7 +149,7 @@ export const MaterialWrapper: React.FC<MaterialWrapperProps> = ({
         
         {/* 学習アシスタント（オプション） */}
         {showAssistant && (
-          <LearningAssistant materialId={materialId} />
+          <LearningAssistant materialId={materialId} concept="学習中" />
         )}
       </Box>
     </LearningTrackerContext.Provider>

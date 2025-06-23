@@ -15,11 +15,11 @@ interface ButtonProps extends Omit<MuiButtonProps, 'component'> {
   children: React.ReactNode;
 }
 
-// MotionコンポーネントとMUIボタンの型を結合
-type MotionButtonProps = HTMLMotionProps<'button'> & MuiButtonProps;
+// MotionコンポーネントとMUIボタンの型を結合（競合するプロパティを除外）
+type MotionButtonProps = HTMLMotionProps<'button'> & Omit<MuiButtonProps, 'onDrag' | 'onDragStart' | 'onDragEnd'>;
 
 // Framer MotionとMUIを統合したボタンコンポーネント
-const MotionButton = motion<MotionButtonProps>(MuiButton);
+const MotionButton = motion(MuiButton as any) as any;
 
 export const Button = ({ 
   children, 

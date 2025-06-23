@@ -625,7 +625,7 @@ function ElectricCircuitSimulatorContent({ onClose }: { onClose: () => void }) {
               <>
                 {/* 部品追加ボタン */}
                 <Grid container spacing={1} sx={{ mb: 2 }}>
-                  <Grid size={6}>
+                  <Grid item xs={6}>
                     <Button
                       variant="outlined"
                       fullWidth
@@ -635,7 +635,7 @@ function ElectricCircuitSimulatorContent({ onClose }: { onClose: () => void }) {
                       電池
                     </Button>
                   </Grid>
-                  <Grid size={6}>
+                  <Grid item xs={6}>
                     <Button
                       variant="outlined"
                       fullWidth
@@ -645,7 +645,7 @@ function ElectricCircuitSimulatorContent({ onClose }: { onClose: () => void }) {
                       豆電球
                     </Button>
                   </Grid>
-                  <Grid size={6}>
+                  <Grid item xs={6}>
                     <Button
                       variant="outlined"
                       fullWidth
@@ -655,7 +655,7 @@ function ElectricCircuitSimulatorContent({ onClose }: { onClose: () => void }) {
                       スイッチ
                     </Button>
                   </Grid>
-                  <Grid size={6}>
+                  <Grid item xs={6}>
                     <Button
                       variant="outlined"
                       fullWidth

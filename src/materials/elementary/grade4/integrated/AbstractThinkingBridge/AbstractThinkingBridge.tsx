@@ -142,7 +142,7 @@ const AbstractThinkingBridgeContent: React.FC = () => {
           {modules.map((module, index) => (
             <Tab
               key={module.id}
-              icon={module.icon}
+              {...(module.icon && React.isValidElement(module.icon) && { icon: module.icon })}
               label={module.title}
               id={`module-tab-${index}`}
               aria-controls={`module-tabpanel-${index}`}

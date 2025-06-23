@@ -308,7 +308,7 @@ const FractionPizzaCutterContent: React.FC<FractionPizzaCutterProps> = ({ onClos
           onChange={(_, value) => {
             if (value) {
               setMode(value);
-              recordInteraction('change');
+              recordInteraction('click');
             }
           }}
           fullWidth

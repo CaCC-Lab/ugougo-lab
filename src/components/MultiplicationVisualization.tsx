@@ -158,7 +158,7 @@ function MultiplicationVisualizationContent({ onClose }: { onClose: () => void }
         <Chip 
           label={`問題: ${currentProblem.a} × ${currentProblem.b}`} 
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`成功回数: ${successCount}`} 
@@ -202,7 +202,7 @@ function MultiplicationVisualizationContent({ onClose }: { onClose: () => void }
           {!showAnimation ? (
             <Button 
               variant="contained" 
-              size="large" 
+              size="medium" 
               onClick={startVisualization}
               sx={{ fontSize: '1.2rem', px: 4, py: 2 }}
             >

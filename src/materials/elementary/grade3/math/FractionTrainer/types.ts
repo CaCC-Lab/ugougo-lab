@@ -238,6 +238,18 @@ export interface FractionProgress {
     overall: number;              // 総合（0-100）
   };
   
+  // 追加プロパティ
+  achievements: Achievement[];
+  studyTime: {
+    total: number;
+    today: number;
+    streak: number;
+  };
+  recommendations: string[];
+  adaptiveDifficulty: 'easy' | 'normal' | 'hard';
+  hintsUsed: number;
+  lastUpdated: number;
+  
   timeSpent: number;
   lastAccessed: string;
 }

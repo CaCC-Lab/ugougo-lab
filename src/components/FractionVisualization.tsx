@@ -263,7 +263,7 @@ function FractionVisualizationContent({ onClose }: { onClose: () => void }) {
         <Chip 
           label={quizMode ? `クイズ問題: ${quizQuestion.num}/${quizQuestion.den}` : `分数: ${numerator}/${denominator}`}
           color="primary" 
-          size="large"
+          size="medium"
         />
         <Chip 
           label={`成功回数: ${successCount}`} 

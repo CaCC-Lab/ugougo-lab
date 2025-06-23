@@ -187,7 +187,7 @@ export const DecimalGrid: React.FC<DecimalGridProps> = ({
                     whileTap={interactive ? { scale: 0.95 } : {}}
                   >
                     {/* セルの値表示（デバッグ用、通常は非表示） */}
-                    {process.env.NODE_ENV === 'development' && (
+                    {import.meta.env.DEV && (
                       <Box
                         sx={{
                           position: 'absolute',
