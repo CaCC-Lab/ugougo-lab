@@ -1,6 +1,7 @@
-# 動く教材プロジェクト
+# ウゴウゴラボ - 動く教材の実験室
 
 小学生から高校生を対象とした、インタラクティブな学習教材プラットフォームです。
+さわって、動かして、楽しく学べる実験室！
 
 ## 概要
 
@@ -31,8 +32,8 @@
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/CaCC-Lab/InteractiveLearningMaterialsForStudents.git
-cd InteractiveLearningMaterialsForStudents
+git clone https://github.com/CaCC-Lab/ugougo-lab.git
+cd ugougo-lab
 
 # 依存関係のインストール
 pnpm install

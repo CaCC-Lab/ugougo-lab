@@ -1,7 +1,8 @@
 {
-  "name": "interactive-learning-materials",
+  "name": "ugougo-lab",
   "private": true,
   "version": "0.1.0",
+  "description": "ウゴウゴラボ - 動く教材の実験室",
   "type": "module",
   "scripts": {
     "dev": "vite",
