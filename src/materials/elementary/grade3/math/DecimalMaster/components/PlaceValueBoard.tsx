@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { Box, Paper, Typography, IconButton, Divider, Chip, useTheme } from '@mui/material';
-import { Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { PlaceValueState } from '../types';
 

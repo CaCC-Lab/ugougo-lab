@@ -10,7 +10,8 @@ import {
   Slider,
   ButtonGroup
 } from '@mui/material';
-import { Close as CloseIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import CloseIcon from '@mui/icons-material/Close';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 interface NumberLineIntegersProps {

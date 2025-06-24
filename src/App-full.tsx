@@ -23,7 +23,9 @@ import {
   Alert,
   Paper
 } from '@mui/material';
-import { Close as CloseIcon, Dashboard as DashboardIcon, Settings as SettingsIcon } from '@mui/icons-material';
+import CloseIcon from '@mui/icons-material/Close';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import SettingsIcon from '@mui/icons-material/Settings';
 import MultiplicationVisualization from './components/MultiplicationVisualization';
 import NumberLineIntegers from './components/NumberLineIntegers';
 import FractionVisualization from './components/FractionVisualization';
@@ -50,10 +52,10 @@ import AlgebraicExpressionTool from './components/AlgebraicExpressionTool';
 import WaterStateAnimation from './components/WaterStateAnimation';
 import SpeedTimeDistanceSimulator from './components/SpeedTimeDistanceSimulator';
 import PendulumExperiment from './components/PendulumExperiment';
-import ProportionGraphTool from './components/ProportionGraphTool';
-import LeverPrincipleExperiment from './components/LeverPrincipleExperiment';
+import ProportionGraphToolLazy from './components/ProportionGraphToolLazy';
+import LeverPrincipleExperimentLazy from './components/LeverPrincipleExperimentLazy';
 import QuadraticFunctionGraph from './components/QuadraticFunctionGraph';
-import CelestialMotionSimulator from './components/CelestialMotionSimulator';
+import CelestialMotionSimulatorLazy from './components/CelestialMotionSimulatorLazy';
 import TrigonometricFunctionGraph from './components/TrigonometricFunctionGraph';
 import CalculusVisualizer from './components/CalculusVisualizer';
 import PictureWordMatching from './components/PictureWordMatching';
@@ -825,13 +827,13 @@ function AppFull() {
             }} />
           )}
           {selectedMaterial === 'proportion-graph' && (
-            <ProportionGraphTool onClose={() => {
+            <ProportionGraphToolLazy onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
           )}
           {selectedMaterial === 'lever-principle' && (
-            <LeverPrincipleExperiment onClose={() => {
+            <LeverPrincipleExperimentLazy onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
@@ -843,7 +845,7 @@ function AppFull() {
             }} />
           )}
           {selectedMaterial === 'celestial-motion' && (
-            <CelestialMotionSimulator onClose={() => {
+            <CelestialMotionSimulatorLazy onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />

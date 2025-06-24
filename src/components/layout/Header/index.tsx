@@ -1,5 +1,6 @@
 import { AppBar, Toolbar, Typography, Box, IconButton } from '@mui/material';
-import { Menu as MenuIcon, School as SchoolIcon } from '@mui/icons-material';
+import MenuIcon from '@mui/icons-material/Menu';
+import SchoolIcon from '@mui/icons-material/School';
 import { GradeSelector } from '../../common/GradeSelector';
 import { Button } from '../../common/Button';
 import type { GradeLevel } from '../../../types';

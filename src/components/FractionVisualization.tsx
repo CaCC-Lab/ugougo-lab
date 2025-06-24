@@ -15,7 +15,8 @@ import {
   Select,
   MenuItem
 } from '@mui/material';
-import { Close as CloseIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import CloseIcon from '@mui/icons-material/Close';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { MaterialWrapper, useLearningTrackerContext } from '../components/wrappers/MaterialWrapper';
 
 // 分数の視覚化教材（内部コンポーネント）

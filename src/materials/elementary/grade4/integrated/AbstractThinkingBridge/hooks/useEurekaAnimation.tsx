@@ -1,7 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Box, Typography } from '@mui/material';
-import { Celebration, AutoAwesome, Stars } from '@mui/icons-material';
+import CelebrationIcon from '@mui/icons-material/Celebration';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import StarsIcon from '@mui/icons-material/Stars';
 import confetti from 'canvas-confetti';
 
 export const useEurekaAnimation = () => {
@@ -78,7 +80,7 @@ export const useEurekaAnimation = () => {
                   ease: "easeInOut"
                 }}
               >
-                <Celebration sx={{ fontSize: 60, color: 'white', mb: 2 }} />
+                <CelebrationIcon sx={{ fontSize: 60, color: 'white', mb: 2 }} />
               </motion.div>
               
               <Typography variant="h3" sx={{ color: 'white', fontWeight: 'bold', mb: 1 }}>
@@ -97,7 +99,7 @@ export const useEurekaAnimation = () => {
                     repeatDelay: 0.2
                   }}
                 >
-                  <AutoAwesome sx={{ color: 'white', fontSize: 30 }} />
+                  <AutoAwesomeIcon sx={{ color: 'white', fontSize: 30 }} />
                 </motion.div>
                 <motion.div
                   animate={{ 
@@ -110,7 +112,7 @@ export const useEurekaAnimation = () => {
                     repeatDelay: 0.4
                   }}
                 >
-                  <Stars sx={{ color: 'white', fontSize: 30 }} />
+                  <StarsIcon sx={{ color: 'white', fontSize: 30 }} />
                 </motion.div>
               </Box>
             </Box>

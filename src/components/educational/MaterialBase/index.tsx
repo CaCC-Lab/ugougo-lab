@@ -1,6 +1,7 @@
 import { type ReactNode, useState, useEffect } from 'react';
 import { Box, Paper, Typography, LinearProgress, IconButton, Alert } from '@mui/material';
-import { Refresh as RefreshIcon, Help as HelpIcon } from '@mui/icons-material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import HelpIcon from '@mui/icons-material/Help';
 import { Button } from '../../common/Button';
 import type { MaterialComponentProps } from '../../../types';
 

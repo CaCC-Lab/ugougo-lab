@@ -14,7 +14,11 @@ import {
   useTheme
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Psychology, Functions, Square, BoltOutlined, Celebration } from '@mui/icons-material';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import FunctionsIcon from '@mui/icons-material/Functions';
+import SquareIcon from '@mui/icons-material/Square';
+import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined';
+import CelebrationIcon from '@mui/icons-material/Celebration';
 import { MaterialWrapper, useLearningTrackerContext } from '../../../../../components/wrappers/MaterialWrapper';
 import { ConceptBridge } from './components/ConceptBridge';
 import { ProportionVisualizer } from './components/ProportionVisualizer';
@@ -38,28 +42,28 @@ const AbstractThinkingBridgeContent: React.FC = () => {
     {
       id: 'concept-bridge',
       title: '具体から抽象へ',
-      icon: <Psychology />,
+      icon: <PsychologyIcon />,
       component: ConceptBridge,
       description: '身近な例から抽象的な考え方を学ぼう'
     },
     {
       id: 'proportion',
       title: '比例と反比例',
-      icon: <Functions />,
+      icon: <FunctionsIcon />,
       component: ProportionVisualizer,
       description: '変化の関係を目で見て理解しよう'
     },
     {
       id: 'area-volume',
       title: '面積と体積',
-      icon: <Square />,
+      icon: <SquareIcon />,
       component: AreaVolumeExplorer,
       description: '公式がなぜそうなるのかを体験しよう'
     },
     {
       id: 'invisible-phenomena',
       title: '見えない力',
-      icon: <BoltOutlined />,
+      icon: <BoltOutlinedIcon />,
       component: InvisiblePhenomenaVisualizer,
       description: '電気や磁気の不思議を見てみよう'
     }
@@ -212,7 +216,7 @@ const AbstractThinkingBridgeContent: React.FC = () => {
             }
           }}
         >
-          <Psychology sx={{ mr: 1 }} />
+          <PsychologyIcon sx={{ mr: 1 }} />
           次のおすすめ
         </Fab>
       </Zoom>
@@ -252,7 +256,7 @@ const AbstractThinkingBridgeContent: React.FC = () => {
                 <Typography variant="h6">
                   {Math.round(percentage)}%
                 </Typography>
-                {percentage === 100 && <Celebration sx={{ mt: 1 }} />}
+                {percentage === 100 && <CelebrationIcon sx={{ mt: 1 }} />}
               </Paper>
             );
           })}

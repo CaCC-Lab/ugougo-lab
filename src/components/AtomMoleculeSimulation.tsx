@@ -16,7 +16,10 @@ import {
   Card,
   CardContent
 } from '@mui/material';
-import { Close as CloseIcon, Refresh as RefreshIcon, PlayArrow as PlayIcon, Pause as PauseIcon } from '@mui/icons-material';
+import CloseIcon from '@mui/icons-material/Close';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
 import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // 原子・分子の構造シミュレーション（内部コンポーネント）
@@ -433,7 +436,7 @@ function AtomMoleculeSimulationContent({ onClose }: { onClose: () => void }) {
                 <Button
                   variant="contained"
                   fullWidth
-                  startIcon={isAnimating ? <PauseIcon /> : <PlayIcon />}
+                  startIcon={isAnimating ? <PauseIcon /> : <PlayArrowIcon />}
                   onClick={toggleAnimation}
                   sx={{ mb: 2 }}
                 >

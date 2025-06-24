@@ -9,7 +9,8 @@ import {
   LinearProgress,
   IconButton 
 } from '@mui/material';
-import { Close as CloseIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import CloseIcon from '@mui/icons-material/Close';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
 
 // かけ算九九の視覚化教材（内部コンポーネント）
