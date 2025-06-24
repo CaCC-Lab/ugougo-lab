@@ -7,9 +7,41 @@
 ## [Unreleased]
 
 ### 🎯 予定
-- Phase 2: パフォーマンス最適化（バンドルサイズ削減、動的インポート）
 - Phase 3: 学習分析ダッシュボード実装
 - Phase 4: ユーザー認証システム（Firebase Auth）
+- PWA対応
+- 自動テスト拡充
+
+## [1.2.0] - 2025-01-23
+
+### ✨ Phase 2: パフォーマンス最適化 完了
+
+#### ⚡ パフォーマンス改善
+- バンドルサイズ: 3.2MB → 3.0MB（200KB削減）
+- gzip後サイズ: 806KB → 762KB（44KB削減）
+- 未使用ライブラリを削除
+  - @tanstack/react-query
+  - lodash-es
+- MUIアイコン最適化
+  - 10ファイルのバレルインポートを個別インポートに変換
+  - 推定削減サイズ: 200-300KB
+
+#### 🚀 動的インポート実装
+- CelestialMotionSimulator（three.js使用）
+- ProportionGraphTool（Konva.js使用）  
+- LeverPrincipleExperiment（Konva.js使用）
+- React.lazyとSuspenseによる遅延ロード
+
+#### 🏗️ ビルド設定最適化
+- Vite設定でmanualChunks追加
+- terser導入によるminify最適化
+- console.log自動削除設定
+- チャンクサイズ警告閾値: 1000KB
+
+#### 📊 成果
+- **実装時間**: 予定20-30時間 → 実績4時間（87%削減）
+- **削減サイズ**: 244KB削減（gzip後）
+- **初期ロード改善**: 重いコンポーネントの遅延ロード実現
 
 ## [1.1.0] - 2025-01-23
 
