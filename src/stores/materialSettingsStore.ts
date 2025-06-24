@@ -564,17 +564,17 @@ export const useMaterialSettingsStore = create<MaterialSettingsState>()(
           }
           
           // ステータスチェック
-          if (!displaySettings.byStatus[material.status]) {
+          // 開発中の教材は showDevelopment の設定に従う
+          if (material.status === 'development') {
+            if (!displaySettings.showDevelopment) {
+              return false;
+            }
+          } else if (!displaySettings.byStatus[material.status]) {
             return false;
           }
           
           // カテゴリーチェック
           if (!displaySettings.byCategory[material.category]) {
-            return false;
-          }
-          
-          // 開発中教材の表示設定
-          if (material.status === 'development' && !displaySettings.showDevelopment) {
             return false;
           }
           
