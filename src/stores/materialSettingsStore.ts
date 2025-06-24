@@ -547,7 +547,42 @@ export const useMaterialSettingsStore = create<MaterialSettingsState>()(
           return [];
         }
         
-        return materials.filter(material => {
+        // 学年の並び順
+        const gradeOrder: Record<string, number> = {
+          '小学1年生': 1,
+          '小学2年生': 2,
+          '小学3年生': 3,
+          '小学4年生': 4,
+          '小学5年生': 5,
+          '小学6年生': 6,
+          '中学1年生': 7,
+          '中学2年生': 8,
+          '中学3年生': 9,
+          '高校1年生': 10,
+          '高校2年生': 11,
+          '高校3年生': 12,
+        };
+        
+        // 教科の並び順
+        const subjectOrder: Record<string, number> = {
+          '算数': 1,
+          '数学': 1,  // 算数と数学は同じ扱い
+          '国語': 2,
+          '理科': 3,
+          '社会': 4,
+          '英語': 5,
+          '生活科': 6,
+          '物理': 7,
+          '化学': 8,
+          '生物': 9,
+          '地理': 10,
+          '歴史': 11,
+          '公民': 12,
+          '情報': 13,
+          '総合': 14,
+        };
+        
+        const filteredMaterials = materials.filter(material => {
           // 個別の有効/無効チェック
           if (!displaySettings.byMaterial[material.id]) {
             return false;
@@ -637,6 +672,30 @@ export const useMaterialSettingsStore = create<MaterialSettingsState>()(
           
           return true;
         });
+        
+        // 学年順→教科順でソート
+        const sortedMaterials = filteredMaterials.sort((a, b) => {
+          // まず学年で比較
+          const gradeA = gradeOrder[a.gradeJapanese] || 999;
+          const gradeB = gradeOrder[b.gradeJapanese] || 999;
+          
+          if (gradeA !== gradeB) {
+            return gradeA - gradeB;
+          }
+          
+          // 学年が同じ場合は教科で比較
+          const subjectA = subjectOrder[a.subjectJapanese] || 999;
+          const subjectB = subjectOrder[b.subjectJapanese] || 999;
+          
+          if (subjectA !== subjectB) {
+            return subjectA - subjectB;
+          }
+          
+          // 学年も教科も同じ場合はタイトルで比較
+          return a.title.localeCompare(b.title, 'ja');
+        });
+        
+        return sortedMaterials;
       },
 
       toggleGlobalEnabled: () => {
