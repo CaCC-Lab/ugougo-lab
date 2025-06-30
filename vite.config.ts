@@ -64,9 +64,21 @@ export default defineConfig({
   },
   // 開発サーバーの設定
   server: {
-    port: 5173,
+    port: parseInt(process.env.PORT || '5173'),
+    host: true, // ネットワークアクセスを許可
     strictPort: false,
-    open: true
+    open: true,
+    hmr: {
+      port: 24678, // WebSocket専用ポート（固定）
+      host: 'localhost'
+    },
+    // WebSocket接続の最適化
+    cors: true,
+    // ファイル監視の設定
+    watch: {
+      usePolling: false,
+      interval: 100
+    }
   },
   // プレビューサーバーの設定
   preview: {
