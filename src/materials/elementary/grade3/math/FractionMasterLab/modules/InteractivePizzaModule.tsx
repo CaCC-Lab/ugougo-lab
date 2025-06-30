@@ -26,8 +26,8 @@ import {
   PlayArrow as PlayIcon,
   Refresh as RefreshIcon,
   CheckCircle as CheckIcon,
-  Pizza as PizzaIcon,
-  Cake as CakeIcon,
+  LocalPizza as PizzaIcon,
+  RestaurantMenu as CakeIcon,
   Help as HelpIcon,
   Star as StarIcon
 } from '@mui/icons-material';
