@@ -48,7 +48,8 @@ import {
   RestartAlt as RestartIcon,
   Help as HelpIcon,
   Settings as SettingsIcon,
-  CheckCircle as CheckIcon
+  CheckCircle as CheckIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -71,6 +72,14 @@ import {
 
 // 型のインポート
 import type { LearningMode, PercentageTrainerConfig } from './types';
+
+// MaterialWrapperのインポート
+import { MaterialWrapper } from '../../../../../components/wrappers/MaterialWrapper';
+
+// Props定義
+interface PercentageTrainerProps {
+  onClose?: () => void;
+}
 
 // 学習モードの定義
 const learningModes = [
@@ -111,7 +120,7 @@ const learningModes = [
   }
 ];
 
-export const PercentageTrainer: React.FC = () => {
+export const PercentageTrainer: React.FC<PercentageTrainerProps> = ({ onClose }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
@@ -499,8 +508,14 @@ export const PercentageTrainer: React.FC = () => {
   );
   
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* ウェルカムメッセージ */}
+    <MaterialWrapper
+      materialId="percentage-trainer"
+      materialName="割合・百分率トレーナー"
+      showMetricsButton={true}
+      showAssistant={true}
+    >
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* ウェルカムメッセージ */}
       <AnimatePresence>
         {showWelcome && (
           <motion.div
@@ -536,19 +551,33 @@ export const PercentageTrainer: React.FC = () => {
               割合の概念から実生活での応用まで、段階的に学習できます
             </Typography>
           </Box>
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h6" color="primary">
-              {progress.mastery.overall}%
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              習熟度
-            </Typography>
-            <Chip
-              label={getMasteryLevel().level}
-              color={getMasteryLevel().color as any}
-              size="small"
-              sx={{ mt: 1 }}
-            />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h6" color="primary">
+                {progress.mastery.overall}%
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                習熟度
+              </Typography>
+              <Chip
+                label={getMasteryLevel().level}
+                color={getMasteryLevel().color as any}
+                size="small"
+                sx={{ mt: 1 }}
+              />
+            </Box>
+            {onClose && (
+              <IconButton
+                onClick={onClose}
+                sx={{
+                  ml: 2,
+                  backgroundColor: 'grey.100',
+                  '&:hover': { backgroundColor: 'grey.200' }
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            )}
           </Box>
         </Box>
         
@@ -633,9 +662,10 @@ export const PercentageTrainer: React.FC = () => {
       </Fade>
       
       {/* フィードバック表示 */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {feedback && (
           <motion.div
+            key={`feedback-${feedback.type}-${feedback.title}`}
             initial={{ opacity: 0, scale: 0.8, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
@@ -690,5 +720,6 @@ export const PercentageTrainer: React.FC = () => {
       {/* ヘルプダイアログ */}
       <HelpDialog />
     </Container>
+    </MaterialWrapper>
   );
 };
