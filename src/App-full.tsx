@@ -26,6 +26,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SettingsIcon from '@mui/icons-material/Settings';
+import MouseIcon from '@mui/icons-material/Mouse';
 import MultiplicationVisualization from './components/MultiplicationVisualization';
 import NumberLineIntegers from './components/NumberLineIntegers';
 import FractionVisualization from './components/FractionVisualization';
@@ -78,6 +79,7 @@ import { EnglishSpeakingPractice, PronunciationPractice } from './materials/juni
 import { AlgebraIntroductionSystem } from './materials/junior-high/grade1/math/AlgebraIntroductionSystem';
 // import { EquationBuilder } from './materials/junior-high/grade1/math/EquationBuilder';
 import { FractionTrainer } from './materials/elementary/grade3/math/FractionTrainer';
+import { FractionMasterLab } from './materials/elementary/grade3/math/FractionMasterLab';
 import { ErrorBoundary } from './components/ErrorBoundary';
 // import { EarthquakeWaveSimulator } from './materials/junior-high/grade1/science';
 import { TimeZoneCalculator } from './materials/junior-high/grade1/social';
@@ -87,6 +89,8 @@ import { ProgressDashboard } from './components/dashboard/ProgressDashboard';
 import { MaterialWrapper, useLearningTrackerContext } from './components/wrappers/MaterialWrapper';
 import MaterialSettingsPanel from './components/admin/MaterialSettingsPanel';
 import { useMaterialSettingsStore } from './stores/materialSettingsStore';
+import { MouseSkillDashboard } from './components/mouse-practice/MouseSkillDashboard';
+import { PrefecturePuzzleWithPractice } from './components/mouse-practice';
 
 // TODO: MaterialComponentPropsの問題を解決後に有効化
 // import { NumberBlocks } from './materials/elementary/grade1/math';
@@ -477,6 +481,7 @@ function AppFull() {
   const [selectedMaterial, setSelectedMaterial] = useState<string>('');
   const [showDashboard, setShowDashboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showMouseSkills, setShowMouseSkills] = useState(false);
   
   // 教材表示設定ストアから取得
   const getVisibleMaterials = useMaterialSettingsStore(state => state.getVisibleMaterials);
@@ -508,10 +513,25 @@ function AppFull() {
           <Button 
             color="inherit" 
             startIcon={<DashboardIcon />}
-            onClick={() => setShowDashboard(!showDashboard)}
+            onClick={() => {
+              setShowDashboard(!showDashboard);
+              setShowMouseSkills(false);
+            }}
             sx={{ mr: 2 }}
           >
             {showDashboard ? '教材一覧' : 'ダッシュボード'}
+          </Button>
+          
+          <Button
+            color="inherit"
+            startIcon={<MouseIcon />}
+            onClick={() => {
+              setShowMouseSkills(!showMouseSkills);
+              setShowDashboard(false);
+            }}
+            sx={{ mr: 2 }}
+          >
+            {showMouseSkills ? '教材一覧' : 'マウススキル'}
           </Button>
           
           <Button
@@ -541,6 +561,8 @@ function AppFull() {
       {/* メインコンテンツ */}
       {showDashboard ? (
         <ProgressDashboard />
+      ) : showMouseSkills ? (
+        <MouseSkillDashboard />
       ) : (
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Typography variant="h3" component="h1" gutterBottom>
@@ -888,7 +910,7 @@ function AppFull() {
             }} />
           )}
           {selectedMaterial === 'prefecture-puzzle' && (
-            <PrefecturePuzzle onClose={() => {
+            <PrefecturePuzzleWithPractice onClose={() => {
               setMaterialOpen(false);
               setSelectedMaterial('');
             }} />
@@ -944,6 +966,11 @@ function AppFull() {
               <FractionTrainer />
             </ErrorBoundary>
           )}
+          {selectedMaterial === 'fraction-master-lab' && (
+            <ErrorBoundary onError={(error, info) => console.error('FractionMasterLab Error:', error, info)}>
+              <FractionMasterLab />
+            </ErrorBoundary>
+          )}
           {selectedMaterial === 'english-speaking-practice' && (
             <EnglishSpeakingPractice />
           )}
@@ -983,7 +1010,7 @@ function AppFull() {
             <AngleMeasurementTool />
           )}
           {selectedMaterial === 'prefecture-puzzle' && (
-            <PrefecturePuzzle />
+            <PrefecturePuzzleWithPractice />
           )}
           {selectedMaterial === 'weather-change-simulator' && (
             <WeatherChangeSimulator />

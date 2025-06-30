@@ -1,0 +1,806 @@
+{
+  "timestamp": "2025-06-29T23:02:39.690Z",
+  "stats": {
+    "total": 56,
+    "byStatus": {
+      "published": 23,
+      "testing": 32,
+      "MaterialStatus": 1
+    },
+    "byGrade": {
+      "小学1年生": 5,
+      "小学2年生": 4,
+      "小学3年生": 8,
+      "小学4年生": 6,
+      "小学5年生": 5,
+      "小学6年生": 4,
+      "中学1年生": 10,
+      "中学2年生": 6,
+      "中学3年生": 4,
+      "高校1年生": 3,
+      "高校2年生": 1
+    },
+    "bySubject": {
+      "算数": 16,
+      "国語": 2,
+      "生活科": 2,
+      "理科": 16,
+      "社会": 4,
+      "総合": 1,
+      "数学": 11,
+      "英語": 2,
+      "情報": 2
+    },
+    "byCategory": {
+      "visualization": 14,
+      "practice": 9,
+      "game": 4,
+      "tool": 8,
+      "interactive": 5,
+      "simulation": 16
+    },
+    "byModuleType": {
+      "component": 47,
+      "material": 9
+    }
+  },
+  "duplicateGroups": {
+    "fraction": [
+      {
+        "id": "fraction-visualization",
+        "title": "分数の視覚化",
+        "grade": "小学3年生"
+      },
+      {
+        "id": "fraction-pizza",
+        "title": "分数ピザカッター",
+        "grade": "小学3年生"
+      },
+      {
+        "id": "fraction-master",
+        "title": "分数マスターツール",
+        "grade": "小学3年生"
+      },
+      {
+        "id": "light-refraction",
+        "title": "光の屈折実験器",
+        "grade": "中学1年生"
+      },
+      {
+        "id": "string",
+        "title": "分数計算トレーナー",
+        "grade": "小学3年生"
+      }
+    ],
+    "graph": [
+      {
+        "id": "proportion-graph",
+        "title": "比例・反比例グラフツール",
+        "grade": "小学6年生"
+      },
+      {
+        "id": "linear-function",
+        "title": "一次関数グラフ描画ツール",
+        "grade": "中学2年生"
+      },
+      {
+        "id": "quadratic-function",
+        "title": "二次関数グラフ変形ツール",
+        "grade": "中学3年生"
+      },
+      {
+        "id": "function-graph",
+        "title": "関数グラフ動的描画ツール",
+        "grade": "高校1年生"
+      },
+      {
+        "id": "trigonometric-function",
+        "title": "三角関数グラフ描画ツール",
+        "grade": "高校1年生"
+      }
+    ],
+    "electric": [
+      {
+        "id": "electric-circuit",
+        "title": "電気回路シミュレーター",
+        "grade": "小学4年生"
+      },
+      {
+        "id": "electricity-experiment",
+        "title": "電流・電圧・抵抗の関係実験器",
+        "grade": "中学2年生"
+      }
+    ],
+    "english": [
+      {
+        "id": "english-speaking-practice",
+        "title": "英語スピーキング練習システム",
+        "grade": "中学1年生"
+      },
+      {
+        "id": "pronunciation-practice",
+        "title": "発音練習ツール",
+        "grade": "中学1年生"
+      }
+    ],
+    "calculation": [
+      {
+        "id": "addition-subtraction",
+        "title": "たし算・ひき算ビジュアライザー",
+        "grade": "小学1年生"
+      },
+      {
+        "id": "number-blocks",
+        "title": "数の合成・分解ブロック",
+        "grade": "小学1年生"
+      },
+      {
+        "id": "multiplication",
+        "title": "かけ算九九の視覚化",
+        "grade": "小学2年生"
+      },
+      {
+        "id": "area-calculator",
+        "title": "面積計算ツール",
+        "grade": "小学4年生"
+      },
+      {
+        "id": "number-line",
+        "title": "正負の数の数直線",
+        "grade": "中学1年生"
+      },
+      {
+        "id": "time-zone-calculator",
+        "title": "時差計算ツール",
+        "grade": "中学1年生"
+      },
+      {
+        "id": "string",
+        "title": "分数計算トレーナー",
+        "grade": "小学3年生"
+      }
+    ],
+    "science": [
+      {
+        "id": "plant-growth",
+        "title": "植物の成長シミュレーター",
+        "grade": "小学2年生"
+      },
+      {
+        "id": "magnet-experiment",
+        "title": "磁石の実験シミュレーター",
+        "grade": "小学3年生"
+      },
+      {
+        "id": "insect-metamorphosis",
+        "title": "昆虫の変態シミュレーター",
+        "grade": "小学3年生"
+      },
+      {
+        "id": "compass-simulator",
+        "title": "方位磁針シミュレーター",
+        "grade": "小学3年生"
+      },
+      {
+        "id": "electric-circuit",
+        "title": "電気回路シミュレーター",
+        "grade": "小学4年生"
+      },
+      {
+        "id": "speed-time-distance",
+        "title": "速さ・時間・距離の関係シミュレーター",
+        "grade": "小学5年生"
+      },
+      {
+        "id": "pendulum-experiment",
+        "title": "振り子の実験装置",
+        "grade": "小学5年生"
+      },
+      {
+        "id": "weather-change-simulator",
+        "title": "天気の変化シミュレーター",
+        "grade": "小学5年生"
+      },
+      {
+        "id": "lever-principle",
+        "title": "てこの原理実験器",
+        "grade": "小学6年生"
+      },
+      {
+        "id": "combination-simulator",
+        "title": "場合の数シミュレーター",
+        "grade": "小学6年生"
+      },
+      {
+        "id": "light-refraction",
+        "title": "光の屈折実験器",
+        "grade": "中学1年生"
+      },
+      {
+        "id": "earthquake-wave-simulator",
+        "title": "地震波シミュレーター",
+        "grade": "中学1年生"
+      },
+      {
+        "id": "atom-molecule",
+        "title": "原子・分子構造シミュレーション",
+        "grade": "中学2年生"
+      },
+      {
+        "id": "chemical-reaction",
+        "title": "化学反応シミュレーター",
+        "grade": "中学2年生"
+      },
+      {
+        "id": "electricity-experiment",
+        "title": "電流・電圧・抵抗の関係実験器",
+        "grade": "中学2年生"
+      },
+      {
+        "id": "inertia-simulation",
+        "title": "慣性の法則シミュレーション",
+        "grade": "中学3年生"
+      },
+      {
+        "id": "celestial-motion",
+        "title": "天体の動きシミュレーター",
+        "grade": "中学3年生"
+      }
+    ],
+    "chemistry": [
+      {
+        "id": "atom-molecule",
+        "title": "原子・分子構造シミュレーション",
+        "grade": "中学2年生"
+      },
+      {
+        "id": "chemical-reaction",
+        "title": "化学反応シミュレーター",
+        "grade": "中学2年生"
+      },
+      {
+        "id": "element-puzzle",
+        "title": "元素記号パズルゲーム",
+        "grade": "中学2年生"
+      }
+    ],
+    "geography": [
+      {
+        "id": "plant-growth",
+        "title": "植物の成長シミュレーター",
+        "grade": "小学2年生"
+      },
+      {
+        "id": "town-exploration-map",
+        "title": "町たんけんマップ",
+        "grade": "小学2年生"
+      },
+      {
+        "id": "compass-simulator",
+        "title": "方位磁針シミュレーター",
+        "grade": "小学3年生"
+      },
+      {
+        "id": "prefecture-puzzle",
+        "title": "都道府県パズル",
+        "grade": "小学4年生"
+      },
+      {
+        "id": "industrial-zone-map",
+        "title": "工業地帯マップ",
+        "grade": "小学5年生"
+      },
+      {
+        "id": "time-zone-calculator",
+        "title": "時差計算ツール",
+        "grade": "中学1年生"
+      }
+    ]
+  },
+  "materials": [
+    {
+      "id": "addition-subtraction",
+      "title": "たし算・ひき算ビジュアライザー",
+      "grade": "小学1年生",
+      "subject": "算数",
+      "category": "visualization",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "hiragana-stroke",
+      "title": "ひらがな書き順アニメーション",
+      "grade": "小学1年生",
+      "subject": "国語",
+      "category": "practice",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "picture-word-matching",
+      "title": "絵と言葉のマッチングゲーム",
+      "grade": "小学1年生",
+      "subject": "国語",
+      "category": "game",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "clock-learning",
+      "title": "時計の読み方学習ツール",
+      "grade": "小学1年生",
+      "subject": "算数",
+      "category": "tool",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "number-blocks",
+      "title": "数の合成・分解ブロック",
+      "grade": "小学1年生",
+      "subject": "算数",
+      "category": "interactive",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "multiplication",
+      "title": "かけ算九九の視覚化",
+      "grade": "小学2年生",
+      "subject": "算数",
+      "category": "visualization",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "unit-conversion",
+      "title": "長さ・かさの単位変換ツール",
+      "grade": "小学2年生",
+      "subject": "算数",
+      "category": "tool",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "plant-growth",
+      "title": "植物の成長シミュレーター",
+      "grade": "小学2年生",
+      "subject": "生活科",
+      "category": "simulation",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "town-exploration-map",
+      "title": "町たんけんマップ",
+      "grade": "小学2年生",
+      "subject": "生活科",
+      "category": "interactive",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "fraction-visualization",
+      "title": "分数の視覚化",
+      "grade": "小学3年生",
+      "subject": "算数",
+      "category": "visualization",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "fraction-pizza",
+      "title": "分数ピザカッター",
+      "grade": "小学3年生",
+      "subject": "算数",
+      "category": "interactive",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "magnet-experiment",
+      "title": "磁石の実験シミュレーター",
+      "grade": "小学3年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "fraction-master",
+      "title": "分数マスターツール",
+      "grade": "小学3年生",
+      "subject": "算数",
+      "category": "practice",
+      "status": "testing",
+      "moduleType": "material"
+    },
+    {
+      "id": "insect-metamorphosis",
+      "title": "昆虫の変態シミュレーター",
+      "grade": "小学3年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "compass-simulator",
+      "title": "方位磁針シミュレーター",
+      "grade": "小学3年生",
+      "subject": "社会",
+      "category": "simulation",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "area-calculator",
+      "title": "面積計算ツール",
+      "grade": "小学4年生",
+      "subject": "算数",
+      "category": "tool",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "water-state",
+      "title": "水の三態変化アニメーション",
+      "grade": "小学4年生",
+      "subject": "理科",
+      "category": "visualization",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "electric-circuit",
+      "title": "電気回路シミュレーター",
+      "grade": "小学4年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "abstract-thinking-bridge",
+      "title": "抽象的思考への橋",
+      "grade": "小学4年生",
+      "subject": "総合",
+      "category": "practice",
+      "status": "published",
+      "moduleType": "material"
+    },
+    {
+      "id": "angle-measurement",
+      "title": "角度測定器",
+      "grade": "小学4年生",
+      "subject": "算数",
+      "category": "tool",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "prefecture-puzzle",
+      "title": "都道府県パズル",
+      "grade": "小学4年生",
+      "subject": "社会",
+      "category": "game",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "speed-time-distance",
+      "title": "速さ・時間・距離の関係シミュレーター",
+      "grade": "小学5年生",
+      "subject": "算数",
+      "category": "simulation",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "pendulum-experiment",
+      "title": "振り子の実験装置",
+      "grade": "小学5年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "weather-change-simulator",
+      "title": "天気の変化シミュレーター",
+      "grade": "小学5年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "industrial-zone-map",
+      "title": "工業地帯マップ",
+      "grade": "小学5年生",
+      "subject": "社会",
+      "category": "interactive",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "proportion-graph",
+      "title": "比例・反比例グラフツール",
+      "grade": "小学6年生",
+      "subject": "算数",
+      "category": "visualization",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "lever-principle",
+      "title": "てこの原理実験器",
+      "grade": "小学6年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "combination-simulator",
+      "title": "場合の数シミュレーター",
+      "grade": "小学6年生",
+      "subject": "算数",
+      "category": "visualization",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "human-body-animation",
+      "title": "人体の仕組みアニメーション",
+      "grade": "小学6年生",
+      "subject": "理科",
+      "category": "visualization",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "number-line",
+      "title": "正負の数の数直線",
+      "grade": "中学1年生",
+      "subject": "数学",
+      "category": "visualization",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "algebraic-expression",
+      "title": "文字式変形ツール",
+      "grade": "中学1年生",
+      "subject": "数学",
+      "category": "tool",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "light-refraction",
+      "title": "光の屈折実験器",
+      "grade": "中学1年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "moving-point-p",
+      "title": "動く点P - 三角形の面積変化",
+      "grade": "中学1年生",
+      "subject": "数学",
+      "category": "interactive",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "english-speaking-practice",
+      "title": "英語スピーキング練習システム",
+      "grade": "中学1年生",
+      "subject": "英語",
+      "category": "practice",
+      "status": "testing",
+      "moduleType": "material"
+    },
+    {
+      "id": "pronunciation-practice",
+      "title": "発音練習ツール",
+      "grade": "中学1年生",
+      "subject": "英語",
+      "category": "practice",
+      "status": "published",
+      "moduleType": "material"
+    },
+    {
+      "id": "algebra-introduction",
+      "title": "代数入門システム",
+      "grade": "中学1年生",
+      "subject": "数学",
+      "category": "practice",
+      "status": "testing",
+      "moduleType": "material"
+    },
+    {
+      "id": "earthquake-wave-simulator",
+      "title": "地震波シミュレーター",
+      "grade": "中学1年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "published",
+      "moduleType": "material"
+    },
+    {
+      "id": "time-zone-calculator",
+      "title": "時差計算ツール",
+      "grade": "中学1年生",
+      "subject": "社会",
+      "category": "tool",
+      "status": "published",
+      "moduleType": "material"
+    },
+    {
+      "id": "linear-function",
+      "title": "一次関数グラフ描画ツール",
+      "grade": "中学2年生",
+      "subject": "数学",
+      "category": "visualization",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "atom-molecule",
+      "title": "原子・分子構造シミュレーション",
+      "grade": "中学2年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "chemical-reaction",
+      "title": "化学反応シミュレーター",
+      "grade": "中学2年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "element-puzzle",
+      "title": "元素記号パズルゲーム",
+      "grade": "中学2年生",
+      "subject": "理科",
+      "category": "game",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "proof-step-builder",
+      "title": "証明ステップビルダー",
+      "grade": "中学2年生",
+      "subject": "数学",
+      "category": "tool",
+      "status": "testing",
+      "moduleType": "material"
+    },
+    {
+      "id": "electricity-experiment",
+      "title": "電流・電圧・抵抗の関係実験器",
+      "grade": "中学2年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "testing",
+      "moduleType": "material"
+    },
+    {
+      "id": "sorting-algorithm",
+      "title": "ソートアルゴリズム可視化",
+      "grade": "中学3年生",
+      "subject": "情報",
+      "category": "visualization",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "inertia-simulation",
+      "title": "慣性の法則シミュレーション",
+      "grade": "中学3年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "quadratic-function",
+      "title": "二次関数グラフ変形ツール",
+      "grade": "中学3年生",
+      "subject": "数学",
+      "category": "visualization",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "celestial-motion",
+      "title": "天体の動きシミュレーター",
+      "grade": "中学3年生",
+      "subject": "理科",
+      "category": "simulation",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "function-graph",
+      "title": "関数グラフ動的描画ツール",
+      "grade": "高校1年生",
+      "subject": "数学",
+      "category": "visualization",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "typing-puyo",
+      "title": "ぷよぷよ風タイピングゲーム",
+      "grade": "高校1年生",
+      "subject": "情報",
+      "category": "game",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "trigonometric-function",
+      "title": "三角関数グラフ描画ツール",
+      "grade": "高校1年生",
+      "subject": "数学",
+      "category": "visualization",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "calculus-visualizer",
+      "title": "微分積分ビジュアライザー",
+      "grade": "高校2年生",
+      "subject": "数学",
+      "category": "visualization",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "decimal-master",
+      "title": "小数マスター",
+      "grade": "小学3年生",
+      "subject": "算数",
+      "category": "practice",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "percentage-trainer",
+      "title": "割合・百分率トレーナー",
+      "grade": "小学5年生",
+      "subject": "算数",
+      "category": "practice",
+      "status": "testing",
+      "moduleType": "component"
+    },
+    {
+      "id": "equation-builder",
+      "title": "一次方程式ビルダー",
+      "grade": "中学1年生",
+      "subject": "数学",
+      "category": "tool",
+      "status": "published",
+      "moduleType": "component"
+    },
+    {
+      "id": "string",
+      "title": "分数計算トレーナー",
+      "grade": "小学3年生",
+      "subject": "算数",
+      "category": "practice",
+      "status": "MaterialStatus",
+      "moduleType": "component"
+    }
+  ]
+}
