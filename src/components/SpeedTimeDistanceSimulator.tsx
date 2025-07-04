@@ -289,14 +289,17 @@ const SpeedTimeDistanceSimulatorContent: React.FC<SpeedTimeDistanceSimulatorProp
             }}
             width="calc(100% - 60px)"
             height="calc(100% - 80px)"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="none"
           >
             <polyline
               points={graphData.map((point, index) => 
-                `${(point.time / maxTime) * 100}%,${100 - (point.distance / maxDistance) * 100}%`
+                `${(point.time / maxTime) * 100},${100 - (point.distance / maxDistance) * 100}`
               ).join(' ')}
               fill="none"
               stroke={theme.palette.primary.main}
-              strokeWidth="2"
+              strokeWidth="0.5"
+              vectorEffect="non-scaling-stroke"
             />
           </svg>
         )}

@@ -335,8 +335,8 @@ const MaterialSettingsPanel: React.FC<MaterialSettingsPanelProps> = ({ open, onC
                         </Box>
                       }
                       secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
+                        <>
+                          <Typography variant="body2" color="text.secondary" component="div">
                             {material.description}
                           </Typography>
                           <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5 }}>
@@ -344,7 +344,7 @@ const MaterialSettingsPanel: React.FC<MaterialSettingsPanelProps> = ({ open, onC
                               <Chip key={tag} label={tag} size="small" variant="outlined" />
                             ))}
                           </Box>
-                        </Box>
+                        </>
                       }
                     />
                     <ListItemSecondaryAction>
@@ -406,7 +406,7 @@ const MaterialSettingsPanel: React.FC<MaterialSettingsPanelProps> = ({ open, onC
                             />
                           }
                           label={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <span>{grade}</span>
                               <Chip 
                                 label={statistics.byGrade[grade] || 0} 
@@ -443,7 +443,7 @@ const MaterialSettingsPanel: React.FC<MaterialSettingsPanelProps> = ({ open, onC
                             />
                           }
                           label={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <span>{subject}</span>
                               <Chip 
                                 label={statistics.bySubject[subject] || 0} 
@@ -480,7 +480,7 @@ const MaterialSettingsPanel: React.FC<MaterialSettingsPanelProps> = ({ open, onC
                             />
                           }
                           label={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <span>{category}</span>
                               <Chip 
                                 label={statistics.byCategory[category as MaterialCategory] || 0} 
@@ -517,7 +517,7 @@ const MaterialSettingsPanel: React.FC<MaterialSettingsPanelProps> = ({ open, onC
                             />
                           }
                           label={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                               <span>
                                 {status === 'published' ? '公開中' :
                                  status === 'testing' ? 'テスト中' : '開発中'}

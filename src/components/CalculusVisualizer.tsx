@@ -21,6 +21,13 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { MaterialWrapper, useLearningTrackerContext } from './wrappers/MaterialWrapper';
+import { evaluate, parse } from 'mathjs';
+import { 
+  createSafeMathFunction, 
+  validateMathExpression, 
+  getEducationalErrorMessage,
+  calculateComplexity 
+} from '../utils/mathSecurity';
 
 interface CriticalPoint {
   x: number;
@@ -41,6 +48,8 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = () => {
   
   // 関数設定
   const [functionStr, setFunctionStr] = useState<string>('x^2');
+  const [functionError, setFunctionError] = useState<string>('');
+  const [functionComplexity, setFunctionComplexity] = useState<'basic' | 'intermediate' | 'advanced'>('basic');
   const [mode, setMode] = useState<'derivative' | 'integral' | 'both'>('derivative');
   const [tangentPoint, setTangentPoint] = useState<number>(0);
   const [integralBounds, setIntegralBounds] = useState<{ a: number; b: number }>({ a: -2, b: 2 });
@@ -64,28 +73,26 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = () => {
   const centerX = canvasWidth / 2;
   const centerY = canvasHeight / 2;
   
-  // 関数パーサー
+  // 安全な関数パーサー（セキュリティ強化版）
   const parseFunction = (expr: string) => {
-    return (x: number): number => {
-      try {
-        // 簡単な関数パーサー
-        const processedExpr = expr
-          .replace(/\^/g, '**')
-          .replace(/sin/g, 'Math.sin')
-          .replace(/cos/g, 'Math.cos')
-          .replace(/tan/g, 'Math.tan')
-          .replace(/exp/g, 'Math.exp')
-          .replace(/log/g, 'Math.log')
-          .replace(/sqrt/g, 'Math.sqrt')
-          .replace(/pi/g, 'Math.PI')
-          .replace(/e/g, 'Math.E')
-          .replace(/x/g, `(${x})`);
-        
-        return eval(processedExpr);
-      } catch (e) {
-        return 0;
-      }
-    };
+    // セキュリティチェックを含む安全な関数生成
+    const safeFunctionResult = createSafeMathFunction(expr);
+    
+    if (!safeFunctionResult.isValid) {
+      // エラーメッセージを設定
+      setFunctionError(getEducationalErrorMessage(safeFunctionResult.error || ''));
+      // デフォルト関数を返す
+      return (x: number) => 0;
+    }
+    
+    // エラーをクリア
+    setFunctionError('');
+    
+    // 複雑度を計算
+    const complexity = calculateComplexity(expr);
+    setFunctionComplexity(complexity.level);
+    
+    return safeFunctionResult.evaluate;
   };
   
   // 数値微分
@@ -484,7 +491,13 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = () => {
       {showExplanation && (
         <Alert severity="info" sx={{ mb: 3 }}>
           関数の微分と積分を視覚的に理解できます。接線の傾きで微分を、
-          面積の近似で積分を体験しましょう。関数式にはx, sin, cos, exp, log等が使えます。
+          面積の近似で積分を体験しましょう。
+          <br /><br />
+          <strong>使える関数:</strong> x, sin, cos, tan, exp, log, sqrt, abs, max, min など
+          <br />
+          <strong>使える演算子:</strong> +, -, *, /, ^ (べき乗)
+          <br />
+          <strong>定数:</strong> pi (π), e (自然対数の底)
         </Alert>
       )}
 
@@ -511,8 +524,32 @@ const CalculusVisualizerContent: React.FC<CalculusVisualizerProps> = () => {
               }
             }}
             placeholder="例: x^2, sin(x), exp(x)"
+            error={!!functionError}
+            helperText={functionError}
             sx={{ mb: 2 }}
           />
+
+          {/* 複雑度表示 */}
+          {!functionError && functionStr && (
+            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                数式の複雑さ:
+              </Typography>
+              <Chip
+                size="small"
+                label={
+                  functionComplexity === 'basic' ? '基本' :
+                  functionComplexity === 'intermediate' ? '中級' :
+                  '上級'
+                }
+                color={
+                  functionComplexity === 'basic' ? 'success' :
+                  functionComplexity === 'intermediate' ? 'warning' :
+                  'error'
+                }
+              />
+            </Box>
+          )}
 
           {/* モード選択 */}
           <ToggleButtonGroup

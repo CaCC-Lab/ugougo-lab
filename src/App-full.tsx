@@ -91,6 +91,7 @@ import MaterialSettingsPanel from './components/admin/MaterialSettingsPanel';
 import { useMaterialSettingsStore } from './stores/materialSettingsStore';
 import { MouseSkillDashboard } from './components/mouse-practice/MouseSkillDashboard';
 import { PrefecturePuzzleWithPractice } from './components/mouse-practice';
+import MathCalculationMaster from './materials/elementary/grade1/math/MathCalculationMaster';
 
 // TODO: MaterialComponentPropsの問題を解決後に有効化
 // import { NumberBlocks } from './materials/elementary/grade1/math';
@@ -949,7 +950,9 @@ function AppFull() {
             <DecimalMaster />
           )}
           {selectedMaterial === 'percentage-trainer' && (
-            <PercentageTrainer />
+            <ErrorBoundary onError={(error, info) => console.error('PercentageTrainer Error:', error, info)}>
+              <PercentageTrainer onClose={() => setSelectedMaterial('')} />
+            </ErrorBoundary>
           )}
           {selectedMaterial === 'equation-builder' && (
             <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -995,6 +998,12 @@ function AppFull() {
           )}
           {selectedMaterial === 'proof-step-builder' && (
             <ProofStepBuilder />
+          )}
+          {selectedMaterial === 'math-calculation-master' && (
+            <MathCalculationMaster onClose={() => {
+              setMaterialOpen(false);
+              setSelectedMaterial('');
+            }} />
           )}
           {/* 新しい教材 - TODO: MaterialComponentPropsの問題を解決後に有効化 */}
           {/* {selectedMaterial === 'town-exploration-map' && (

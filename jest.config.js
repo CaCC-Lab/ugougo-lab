@@ -43,9 +43,12 @@ export default {
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       useESM: true,
+      isolatedModules: true,
       tsconfig: {
         jsx: 'react-jsx',
         esModuleInterop: true,
+        target: 'ES2020',
+        lib: ['ES2020', 'ES2017', 'ES2015', 'DOM', 'DOM.Iterable'],
       },
     }],
   },

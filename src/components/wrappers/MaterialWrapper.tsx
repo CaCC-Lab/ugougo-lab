@@ -51,6 +51,9 @@ const defaultContext: LearningTrackerContextType = {
 // 学習追跡コンテキスト
 const LearningTrackerContext = createContext<LearningTrackerContextType>(defaultContext);
 
+// コンテキストをテスト用にエクスポート
+export { LearningTrackerContext };
+
 // コンテキストを使用するためのカスタムフック
 export const useLearningTrackerContext = () => {
   const context = useContext(LearningTrackerContext);
