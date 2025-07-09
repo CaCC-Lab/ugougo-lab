@@ -27,6 +27,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SettingsIcon from '@mui/icons-material/Settings';
 import MouseIcon from '@mui/icons-material/Mouse';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 import MultiplicationVisualization from './components/MultiplicationVisualization';
 import NumberLineIntegers from './components/NumberLineIntegers';
 import FractionVisualization from './components/FractionVisualization';
@@ -92,6 +93,7 @@ import { useMaterialSettingsStore } from './stores/materialSettingsStore';
 import { MouseSkillDashboard } from './components/mouse-practice/MouseSkillDashboard';
 import { PrefecturePuzzleWithPractice } from './components/mouse-practice';
 import MathCalculationMaster from './materials/elementary/grade1/math/MathCalculationMaster';
+import { DashboardPage } from './features/dashboard/DashboardPage';
 
 // TODO: MaterialComponentPropsの問題を解決後に有効化
 // import { NumberBlocks } from './materials/elementary/grade1/math';
@@ -483,6 +485,7 @@ function AppFull() {
   const [showDashboard, setShowDashboard] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showMouseSkills, setShowMouseSkills] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   
   // 教材表示設定ストアから取得
   const getVisibleMaterials = useMaterialSettingsStore(state => state.getVisibleMaterials);
@@ -517,6 +520,7 @@ function AppFull() {
             onClick={() => {
               setShowDashboard(!showDashboard);
               setShowMouseSkills(false);
+              setShowAnalytics(false);
             }}
             sx={{ mr: 2 }}
           >
@@ -529,10 +533,24 @@ function AppFull() {
             onClick={() => {
               setShowMouseSkills(!showMouseSkills);
               setShowDashboard(false);
+              setShowAnalytics(false);
             }}
             sx={{ mr: 2 }}
           >
             {showMouseSkills ? '教材一覧' : 'マウススキル'}
+          </Button>
+          
+          <Button
+            color="inherit"
+            startIcon={<AnalyticsIcon />}
+            onClick={() => {
+              setShowAnalytics(!showAnalytics);
+              setShowDashboard(false);
+              setShowMouseSkills(false);
+            }}
+            sx={{ mr: 2 }}
+          >
+            {showAnalytics ? '教材一覧' : '学習分析'}
           </Button>
           
           <Button
@@ -564,6 +582,8 @@ function AppFull() {
         <ProgressDashboard />
       ) : showMouseSkills ? (
         <MouseSkillDashboard />
+      ) : showAnalytics ? (
+        <DashboardPage />
       ) : (
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Typography variant="h3" component="h1" gutterBottom>
